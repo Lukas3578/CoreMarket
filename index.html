@@ -11,7 +11,7 @@
 <meta name="theme-color" content="#1a1424">
 <link rel="icon" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,8 +19,9 @@
 <header class="kopf">
   <div class="breite kopf-in">
     <a class="marke" href="#"><img src="logo.png" alt="" width="40" height="40"><span id="marke">CoreMarket</span></a>
-    <nav aria-label="Seiten-Navigation"><a href="#preise">Preise</a><a href="#ablauf">So läuft's</a><a href="#clan">Clan</a><a href="#vouches">Vouches</a></nav>
-    <a class="knopf klein discord-link" href="#" target="_blank" rel="noopener">Discord</a>
+    <nav aria-label="Seiten-Navigation" id="menue"><a href="#preise">Preise</a><a href="#rechner">Rechner</a><a href="#ablauf">So läuft's</a><a href="#clan">Clan</a><a href="#vouches">Bewertungen</a><a href="#fragen">Fragen</a></nav>
+    <button class="menue-knopf" id="menue-knopf" aria-expanded="false" aria-controls="menue">Menü</button>
+    <a class="knopf klein discord-link" href="https://discord.gg/UT6dYchUB" target="_blank" rel="noopener">Discord</a>
   </div>
 </header>
 
@@ -31,7 +32,7 @@
         <p class="server" id="live" hidden><span class="punkt"></span><span id="live-text"></span></p>
         <h1>Spawner kaufen und verkaufen auf HugoSMP.</h1>
         <p class="einleitung" id="ueber">Wir sind CoreMarket – ein Clan, der sich ganz auf Spawner spezialisiert hat. Du willst einen Blaze- oder Iron-Golem-Spawner? Wir haben ihn. Du hast Spawner übrig? Wir kaufen sie dir zu festen Preisen ab. Jeder Handel läuft über ein Ticket in unserem Discord, mit einem Händler aus unserem Clan.</p>
-        <div class="aktionen"><a class="knopf discord-link" href="#" target="_blank" rel="noopener">Discord beitreten</a><a class="knopf zweit" href="#preise">Aktuelle Preise</a></div>
+        <div class="aktionen"><a class="knopf discord-link" href="https://discord.gg/UT6dYchUB" target="_blank" rel="noopener">Discord beitreten</a><a class="knopf zweit" href="#preise">Aktuelle Preise</a></div>
         <dl class="zahlen" id="zahlen" hidden></dl>
       </div>
       <figure class="kaefig" aria-label="Aktueller Spawner-Preis">
@@ -51,6 +52,19 @@
       <div class="kopfzeile"><h2>Preise</h2><p class="hinweis" id="preis-stand"></p></div>
       <p class="erklaerung"><b>Wir kaufen</b> heißt: Du verkaufst uns deinen Spawner und bekommst den Betrag. <b>Wir verkaufen</b> heißt: Du kaufst den Spawner bei uns. Ab einer bestimmten Menge gibt es oft einen besseren Preis.</p>
       <div class="tabelle-rahmen"><table class="preise" id="preis-tabelle"><thead><tr><th scope="col">Spawner</th><th scope="col">Wir kaufen</th><th scope="col">Wir verkaufen</th></tr></thead><tbody><tr><td colspan="3" class="leer">Preise werden geladen …</td></tr></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="rechner" class="abschnitt rechner-abschnitt">
+    <div class="breite">
+      <h2>Was kostet das?</h2>
+      <p class="erklaerung">Spawner und Menge wählen – der Rechner nimmt automatisch den Mengenpreis, wenn es einen gibt.</p>
+      <form class="rechner" id="rechner-form" onsubmit="return false">
+        <label><span>Ich möchte</span><select id="r-art"><option value="kaufen">kaufen</option><option value="verkaufen">verkaufen</option></select></label>
+        <label><span>Spawner</span><select id="r-spawner"></select></label>
+        <label><span>Menge</span><input id="r-menge" type="number" inputmode="numeric" min="1" max="10000" value="1"></label>
+        <output id="r-ergebnis" for="r-art r-spawner r-menge" aria-live="polite">–</output>
+      </form>
     </div>
   </section>
 
@@ -81,11 +95,23 @@
     </div>
   </section>
 
+  <section id="fragen" class="abschnitt">
+    <div class="breite schmal">
+      <h2>Häufige Fragen</h2>
+      <details><summary>Ist der Handel sicher?</summary><p>Ja, solange du über ein Ticket in unserem Discord handelst. Dort bekommst du einen Händler aus unserem Clan zugeteilt, der Preis steht schriftlich im Ticket, und jeder Handel wird protokolliert. Handle nie mit Leuten, die dich im Spiel anschreiben und behaupten, zu CoreMarket zu gehören – prüf sie vorher mit <code>/check Name</code> in unserem Discord.</p></details>
+      <details><summary>Wer übergibt zuerst – ich oder ihr?</summary><p>Das klärt der Händler mit dir im Ticket. Bei neuen Kunden und großen Mengen machen wir die Übergabe gerne in Teilen, damit niemand ein Risiko trägt.</p></details>
+      <details><summary>Warum muss ich meinen Minecraft-Account verbinden?</summary><p>So wissen wir, dass der Discord-Account wirklich zu deinem Minecraft-Namen gehört. Das schützt dich davor, dass sich jemand als du ausgibt. Es dauert 30 Sekunden: <code>/verifizieren</code> in Discord, dann eine kurze <code>/msg</code> an unseren Bot im Spiel.</p></details>
+      <details><summary>Was sind CM0 und CM1?</summary><p>Unsere beiden Clans auf HugoSMP: CoreMarket (CM0) und CoreMarket1 (CM1). Alle Mitglieder stehen oben in der Liste – wer dort nicht steht, handelt nicht in unserem Namen.</p></details>
+      <details><summary>Kauft ihr auch einzelne Spawner an?</summary><p>Ja. Ab einer bestimmten Menge bekommst du bei manchen Spawnern einen besseren Preis – das steht in der Preisliste und im Rechner.</p></details>
+      <details><summary>Wie kann ich dem Clan beitreten?</summary><p>Im Discord im Kanal <b>Clan-Bewerben</b> auf „Bewerben“ drücken. Das Team meldet sich bei dir.</p></details>
+    </div>
+  </section>
+
   <section class="abschnitt schluss">
     <div class="breite schluss-in">
       <h2>Bereit zum Handeln?</h2>
       <p>Komm in unseren Discord, öffne ein Ticket – ein Händler meldet sich meistens innerhalb weniger Minuten.</p>
-      <a class="knopf discord-link" href="#" target="_blank" rel="noopener">Discord beitreten</a>
+      <a class="knopf discord-link" href="https://discord.gg/UT6dYchUB" target="_blank" rel="noopener">Discord beitreten</a>
     </div>
   </section>
 </main>

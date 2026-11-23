@@ -12,7 +12,7 @@
 
   function discord(link) {
     const url = link || CFG.discord || '';
-    document.querySelectorAll('.discord-link').forEach(a => { if (url) a.href = url; else { a.removeAttribute('href'); a.setAttribute('aria-disabled', 'true'); a.title = 'Einladung folgt'; } });
+    document.querySelectorAll('.discord-link').forEach(a => { if (url) a.href = url; });
   }
 
   function preiseZeigen(P) {
@@ -75,15 +75,29 @@
       if (d.text) $('#ueber').textContent = d.text;
       discord(d.invite);
       if (d.live) { $('#live').hidden = false; $('#live-text').textContent = d.live.online ? `${tausend(d.live.spieler)} Spieler gerade auf ${d.server}` : `${d.server} ist gerade offline`; if (!d.live.online) $('.punkt').classList.add('aus'); }
+      if (d.preise) { SPAWNER = d.preise.spawner; $('#r-spawner').innerHTML = SPAWNER.map((x, k) => `<option value="${k}">${esc(x.name)}</option>`).join(''); rechnen(); } else $('#rechner').hidden = true;
       preiseZeigen(d.preise); CLANS = d.clans || []; clansZeigen(); vouchesZeigen(d.vouches); zahlenZeigen(d);
       $('#fuss-stand').textContent = `Daten vom ${zeit(d.stand)}`;
     } catch (e) { fehler('Die aktuellen Daten sind gerade nicht erreichbar. Schau im Discord vorbei – dort stehen die Preise immer aktuell.'); console.warn(e); }
   }
   function fehler(text) {
+    $('#rechner').hidden = true;
     $('#preis-tabelle tbody').innerHTML = `<tr><td colspan="3" class="leer">${esc(text)}</td></tr>`;
     $('#clans').innerHTML = `<p class="leer">${esc(text)}</p>`;
     $('#k-name').textContent = 'Preise'; $('#k-preis').textContent = '?'; $('#k-art').textContent = 'gerade nicht erreichbar';
   }
+  let SPAWNER = [];
+  function rechnen() {
+    const s = SPAWNER[+$('#r-spawner').value], menge = Math.max(1, Math.min(10000, Math.round(+$('#r-menge').value || 1))), kaufen = $('#r-art').value === 'kaufen', out = $('#r-ergebnis');
+    if (!s) { out.textContent = '–'; return; }
+    const basis = kaufen ? s.verkauf : s.ankauf, ab = kaufen ? s.verkaufAb : s.ankaufAb, st = kaufen ? s.verkaufStaffel : s.ankaufStaffel;
+    if (basis === null || basis === undefined) { out.innerHTML = `STOP<small>${esc(s.name)} ${kaufen ? 'verkaufen' : 'kaufen'} wir gerade nicht.</small>`; return; }
+    const stueck = ab && menge >= ab && st !== null && st !== undefined ? st : basis;
+    out.innerHTML = `${preis(Math.round(stueck * menge * 100) / 100)}<small>${menge}× ${preis(stueck)}${stueck !== basis ? ' (Mengenpreis)' : ''} · ${kaufen ? 'du zahlst' : 'du bekommst'}${ab && menge < ab && st !== null && st !== undefined && st !== basis ? ` · ab ${ab} Stück nur ${preis(st)} pro Stück` : ''}</small>`;
+  }
+  ['r-art', 'r-spawner', 'r-menge'].forEach(id => $('#' + id).addEventListener('input', rechnen));
+  const mk = $('#menue-knopf'); mk.addEventListener('click', () => { const o = $('#menue').classList.toggle('offen'); mk.setAttribute('aria-expanded', String(o)); });
+  document.querySelectorAll('#menue a').forEach(a => a.addEventListener('click', () => { $('#menue').classList.remove('offen'); mk.setAttribute('aria-expanded', 'false'); }));
   $('#suche').addEventListener('input', e => clansZeigen(e.target.value));
   laden();
 })();

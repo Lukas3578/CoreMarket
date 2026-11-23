@@ -14,7 +14,7 @@ Statische Website (HTML/CSS/JS, keine Abhängigkeiten) für Render. Die Seite ho
    - „Daten freigeben“ anhaken.
    - Die Discord-Einladung eintragen (`https://discord.gg/…`).
    - Optional: einen eigenen Text „Über uns“ schreiben und Spieler ausblenden, die nicht gezeigt werden wollen.
-2. **`config.js`:** Bei `api` die Adresse eures Bots eintragen, z. B. `https://hugo.vortexpvp.eu/api/public`.
+2. **`config.js`:** Bei `api` die Adresse eures Bots eintragen (Discord-Link ist schon drin), z. B. `https://hugo.vortexpvp.eu/api/public`.
 3. **GitHub:** Diesen Ordner in ein Repository hochladen, z. B. `coremarket-website`.
 4. **Render:** New → **Static Site** → das Repository wählen.
    - Build Command: leer lassen.

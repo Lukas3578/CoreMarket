@@ -2,5 +2,5 @@
 window.COREMARKET = {
   api: 'https://hugo.vortexpvp.eu/api/public',
   // Wird benutzt, wenn im Bot keine Einladung eingetragen ist:
-  discord: '',
+  discord: 'https://discord.gg/UT6dYchUB',
 };

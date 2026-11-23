@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoreMarket – Spawner kaufen und verkaufen auf HugoSMP</title>
+<meta name="description" content="CoreMarket ist der Spawner-Trading-Clan auf HugoSMP: faire Preise für Blaze, Iron Golem, Creeper und mehr – sicher über Discord-Tickets mit verifizierten Händlern.">
+<meta property="og:title" content="CoreMarket – Spawner-Trading auf HugoSMP">
+<meta property="og:description" content="Aktuelle Spawner-Preise, sichere Tickets, verifizierte Händler. Clans CM0 und CM1.">
+<meta property="og:image" content="logo.png">
+<meta name="theme-color" content="#1a1424">
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#preise">Zu den Preisen springen</a>
+<header class="kopf">
+  <div class="breite kopf-in">
+    <a class="marke" href="#"><img src="logo.png" alt="" width="40" height="40"><span id="marke">CoreMarket</span></a>
+    <nav aria-label="Seiten-Navigation"><a href="#preise">Preise</a><a href="#ablauf">So läuft's</a><a href="#clan">Clan</a><a href="#vouches">Vouches</a></nav>
+    <a class="knopf klein discord-link" href="#" target="_blank" rel="noopener">Discord</a>
+  </div>
+</header>
+
+<main>
+  <section class="held">
+    <div class="breite held-in">
+      <div class="held-text">
+        <p class="server" id="live" hidden><span class="punkt"></span><span id="live-text"></span></p>
+        <h1>Spawner kaufen und verkaufen auf HugoSMP.</h1>
+        <p class="einleitung" id="ueber">Wir sind CoreMarket – ein Clan, der sich ganz auf Spawner spezialisiert hat. Du willst einen Blaze- oder Iron-Golem-Spawner? Wir haben ihn. Du hast Spawner übrig? Wir kaufen sie dir zu festen Preisen ab. Jeder Handel läuft über ein Ticket in unserem Discord, mit einem Händler aus unserem Clan.</p>
+        <div class="aktionen"><a class="knopf discord-link" href="#" target="_blank" rel="noopener">Discord beitreten</a><a class="knopf zweit" href="#preise">Aktuelle Preise</a></div>
+        <dl class="zahlen" id="zahlen" hidden></dl>
+      </div>
+      <figure class="kaefig" aria-label="Aktueller Spawner-Preis">
+        <div class="gitter" aria-hidden="true"></div>
+        <div class="flamme" aria-hidden="true"></div>
+        <figcaption class="kaefig-inhalt" aria-live="polite">
+          <span class="k-name" id="k-name">Spawner</span>
+          <span class="k-preis" id="k-preis">–</span>
+          <span class="k-art" id="k-art">wird geladen</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="preise" class="abschnitt">
+    <div class="breite">
+      <div class="kopfzeile"><h2>Preise</h2><p class="hinweis" id="preis-stand"></p></div>
+      <p class="erklaerung"><b>Wir kaufen</b> heißt: Du verkaufst uns deinen Spawner und bekommst den Betrag. <b>Wir verkaufen</b> heißt: Du kaufst den Spawner bei uns. Ab einer bestimmten Menge gibt es oft einen besseren Preis.</p>
+      <div class="tabelle-rahmen"><table class="preise" id="preis-tabelle"><thead><tr><th scope="col">Spawner</th><th scope="col">Wir kaufen</th><th scope="col">Wir verkaufen</th></tr></thead><tbody><tr><td colspan="3" class="leer">Preise werden geladen …</td></tr></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="ablauf" class="abschnitt dunkel">
+    <div class="breite">
+      <h2>So läuft ein Handel</h2>
+      <ol class="schritte">
+        <li><h3>Discord beitreten</h3><p>Alles läuft über unseren Discord-Server – dort findest du die Preise immer aktuell.</p></li>
+        <li><h3>Minecraft verbinden</h3><p>Mit <code>/verifizieren</code> verbindest du deinen Minecraft-Account. Eine kurze <code>/msg</code> an unseren Bot, fertig.</p></li>
+        <li><h3>Ticket öffnen</h3><p>Unter der Preisliste auf „Ankauf“ oder „Verkauf“ drücken, Spawner und Menge wählen. Der Preis wird automatisch ausgerechnet.</p></li>
+        <li><h3>Übergabe im Spiel</h3><p>Ein Händler aus CM0 oder CM1 meldet sich im Ticket und trifft dich auf HugoSMP. Danach kannst du ihn mit <code>/vouch</code> bewerten.</p></li>
+      </ol>
+      <p class="warnung"><b>Achtung vor Scammern:</b> Wir handeln nur über Tickets in unserem Discord. Wer dich im Spiel anschreibt und sich als CoreMarket ausgibt, aber nicht in der Liste unten steht, gehört nicht zu uns. In Discord kannst du jeden Namen mit <code>/check</code> prüfen.</p>
+    </div>
+  </section>
+
+  <section id="clan" class="abschnitt">
+    <div class="breite">
+      <div class="kopfzeile"><h2>Unser Clan</h2><label class="suche"><span class="sr">Spieler suchen</span><input type="search" id="suche" placeholder="Spieler suchen …" autocomplete="off"></label></div>
+      <div class="clans" id="clans"><p class="leer">Mitglieder werden geladen …</p></div>
+    </div>
+  </section>
+
+  <section id="vouches" class="abschnitt dunkel">
+    <div class="breite">
+      <div class="kopfzeile"><h2>Was Kunden sagen</h2><p class="hinweis" id="vouch-schnitt"></p></div>
+      <div class="vouch-raster"><div class="zitate" id="zitate"><p class="leer">Noch keine Bewertungen.</p></div><aside class="rang" id="rang" hidden><h3>Händler mit den meisten Vouches</h3><ol id="rang-liste"></ol></aside></div>
+    </div>
+  </section>
+
+  <section class="abschnitt schluss">
+    <div class="breite schluss-in">
+      <h2>Bereit zum Handeln?</h2>
+      <p>Komm in unseren Discord, öffne ein Ticket – ein Händler meldet sich meistens innerhalb weniger Minuten.</p>
+      <a class="knopf discord-link" href="#" target="_blank" rel="noopener">Discord beitreten</a>
+    </div>
+  </section>
+</main>
+
+<footer class="fuss"><div class="breite fuss-in"><p><span id="marke2">CoreMarket</span> ist ein Spieler-Clan auf HugoSMP. Wir gehören nicht zu HugoSMP, Mojang oder Microsoft. Preise ohne Gewähr – maßgeblich ist der Preis im Ticket.</p><p class="hinweis" id="fuss-stand"></p></div></footer>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

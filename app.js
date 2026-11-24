@@ -3,7 +3,7 @@
   const CFG = window.COREMARKET || {};
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-  // 14.5 → "14,5M" · 0.5 → "500K" · null → STOP (wie im Discord)
+  // 14.5 ergibt "14,5M", 0.5 ergibt "500K", null ergibt STOP (wie im Discord)
   const preis = v => v === null || v === undefined ? null : v >= 1 ? `${(Math.round(v * 100) / 100).toFixed(Math.round(v * 100) % 10 ? 2 : 1).replace('.', ',')}M` : `${Math.round(v * 1000)}K`;
   const datum = t => new Date(t).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
   const zeit = t => new Date(t).toLocaleString('de-DE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
@@ -52,7 +52,7 @@
     if (!V) { $('#vouches').hidden = true; return; }
     if (V.anzahl) $('#vouch-schnitt').textContent = `${String(V.schnitt).replace('.', ',')} von 5 Sternen aus ${tausend(V.anzahl)} Bewertungen`;
     if (V.neueste.length) $('#zitate').innerHTML = V.neueste.map(v => `<figure class="zitat"><span class="sterne" aria-label="${v.sterne} von 5 Sternen">${'★'.repeat(v.sterne)}${'☆'.repeat(5 - v.sterne)}</span><blockquote>„${esc(v.text)}“</blockquote><figcaption>${esc(v.von)}${v.haendler ? ` über ${esc(v.haendler)}` : ''}${v.was ? `, ${esc(v.was)}` : ''}</figcaption></figure>`).join('');
-    if (V.haendler.length) { $('#rang').hidden = false; $('#rang-liste').innerHTML = V.haendler.map(h => `<li><span>${esc(h.name)}${h.clan ? ` <small>${esc(h.clan)}</small>` : ''}</span><span>${h.anzahl} · <span class="sterne">★</span> ${String(h.schnitt).replace('.', ',')}</span></li>`).join(''); }
+    if (V.haendler.length) { $('#rang').hidden = false; $('#rang-liste').innerHTML = V.haendler.map(h => `<li><span>${esc(h.name)}${h.clan ? ` <small>${esc(h.clan)}</small>` : ''}</span><span>${h.anzahl} Vouches, Ø ${String(h.schnitt).replace('.', ',')} <span class="sterne">★</span></span></li>`).join(''); }
   }
 
   function zahlenZeigen(d) {
@@ -74,7 +74,7 @@
       $('#marke').textContent = d.marke; $('#marke2').textContent = d.marke;
       if (d.text) $('#ueber').textContent = d.text;
       discord(d.invite);
-      if (d.live) { $('#live').hidden = false; $('#live-text').textContent = d.live.online ? `${tausend(d.live.spieler)} Spieler gerade auf ${d.server}` : `${d.server} ist gerade offline`; if (!d.live.online) $('.punkt').classList.add('aus'); }
+      if (d.live) { $('#live').hidden = false; $('#live').textContent = d.live.online ? `Gerade sind ${tausend(d.live.spieler)} Spieler auf ${d.server}.` : `${d.server} ist gerade nicht erreichbar.`; }
       if (d.preise) { SPAWNER = d.preise.spawner; $('#r-spawner').innerHTML = SPAWNER.map((x, k) => `<option value="${k}">${esc(x.name)}</option>`).join(''); rechnen(); } else $('#rechner').hidden = true;
       preiseZeigen(d.preise); CLANS = d.clans || []; clansZeigen(); vouchesZeigen(d.vouches); zahlenZeigen(d);
       $('#fuss-stand').textContent = `Daten vom ${zeit(d.stand)}`;
@@ -93,7 +93,7 @@
     const basis = kaufen ? s.verkauf : s.ankauf, ab = kaufen ? s.verkaufAb : s.ankaufAb, st = kaufen ? s.verkaufStaffel : s.ankaufStaffel;
     if (basis === null || basis === undefined) { out.innerHTML = `STOP<small>${esc(s.name)} ${kaufen ? 'verkaufen' : 'kaufen'} wir gerade nicht.</small>`; return; }
     const stueck = ab && menge >= ab && st !== null && st !== undefined ? st : basis;
-    out.innerHTML = `${preis(Math.round(stueck * menge * 100) / 100)}<small>${menge}× ${preis(stueck)}${stueck !== basis ? ' (Mengenpreis)' : ''} · ${kaufen ? 'du zahlst' : 'du bekommst'}${ab && menge < ab && st !== null && st !== undefined && st !== basis ? ` · ab ${ab} Stück nur ${preis(st)} pro Stück` : ''}</small>`;
+    out.innerHTML = `${preis(Math.round(stueck * menge * 100) / 100)}<small>${menge}× ${preis(stueck)}${stueck !== basis ? ' (Mengenpreis)' : ''}, ${kaufen ? 'du zahlst' : 'du bekommst'}${ab && menge < ab && st !== null && st !== undefined && st !== basis ? `. Ab ${ab} Stück nur ${preis(st)} pro Stück` : ''}</small>`;
   }
   ['r-art', 'r-spawner', 'r-menge'].forEach(id => $('#' + id).addEventListener('input', rechnen));
   const mk = $('#menue-knopf'); mk.addEventListener('click', () => { const o = $('#menue').classList.toggle('offen'); mk.setAttribute('aria-expanded', String(o)); });

@@ -42,30 +42,26 @@ code { font: 500 .92em/1 var(--text); background: var(--obsidian-3); color: var(
 .knopf.klein { padding: 8px 14px; font-size: 15px; }
 
 /* Held */
-.held { padding: 72px 0 88px; background: radial-gradient(900px 420px at 78% 40%, rgba(255, 122, 26, .10), transparent 70%); }
+.held { padding: 72px 0 88px; }
 .held-in { display: grid; grid-template-columns: 1.15fr .85fr; gap: 56px; align-items: center; }
 .held h1 { font: 800 clamp(38px, 5.6vw, 64px)/1.04 var(--text); margin: 14px 0 22px; letter-spacing: -.025em; max-width: 15ch; }
 .einleitung { color: var(--papier-2); font-size: 19px; max-width: 58ch; margin: 0 0 30px; }
 .aktionen { display: flex; gap: 14px; flex-wrap: wrap; }
-.server { display: inline-flex; align-items: center; gap: 10px; margin: 0; color: var(--papier-2); font-size: 15px; }
-.punkt { width: 10px; height: 10px; border-radius: 2px; background: var(--gruen); box-shadow: 0 0 0 4px rgba(111, 220, 140, .15); }
-.punkt.aus { background: var(--eisen); box-shadow: none; }
+.server { margin: 22px 0 0; color: var(--papier-2); font-size: 15px; }
 .zahlen { display: flex; gap: 36px; margin: 40px 0 0; flex-wrap: wrap; }
 .zahlen div { display: flex; flex-direction: column-reverse; }
 .zahlen dt { color: var(--papier-2); font-size: 14px; }
 .zahlen dd { margin: 0; font: 700 30px/1.1 var(--text); color: var(--papier); }
 
 /* Der Spawner-Käfig */
-.kaefig { position: relative; margin: 0; aspect-ratio: 1; width: min(100%, 420px); justify-self: center; background: #120d1a; border: 10px solid #3a3f4a; box-shadow: inset 0 0 0 4px #23272f, 0 30px 60px rgba(0, 0, 0, .45); image-rendering: pixelated; }
+.kaefig { position: relative; margin: 0; aspect-ratio: 1; width: min(100%, 420px); justify-self: center; background: #241a12; border: 10px solid #3a3f4a; box-shadow: inset 0 0 0 4px #23272f, 0 30px 60px rgba(0, 0, 0, .45); image-rendering: pixelated; }
 .gitter { position: absolute; inset: 0; z-index: 2; pointer-events: none;
   background:
     repeating-linear-gradient(90deg, transparent 0 calc(25% - 7px), #4b515d calc(25% - 7px) calc(25% - 3px), #2b2f37 calc(25% - 3px) 25%),
     repeating-linear-gradient(0deg, transparent 0 calc(25% - 7px), #4b515d calc(25% - 7px) calc(25% - 3px), #2b2f37 calc(25% - 3px) 25%); }
-.flamme { position: absolute; inset: 18%; z-index: 1; border-radius: 50%; background: radial-gradient(circle, rgba(255, 140, 40, .55), rgba(255, 90, 20, .18) 45%, transparent 70%); filter: blur(6px); animation: glut 3.2s ease-in-out infinite; }
-@keyframes glut { 50% { opacity: .55; transform: scale(.92); } }
 .kaefig-inhalt { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 6px; padding: 20px 26px; min-width: 62%; background: rgba(18, 13, 26, .82); border: 2px solid #3a3f4a; border-radius: 6px; box-shadow: 0 10px 30px rgba(0, 0, 0, .5); }
 .k-name { font: 700 clamp(22px, 3vw, 30px)/1.1 var(--text); color: var(--papier); text-shadow: 0 3px 0 #000; }
-.k-preis { font: 800 clamp(42px, 5.6vw, 60px)/1 var(--text); letter-spacing: -.02em; color: var(--gold); text-shadow: 0 4px 0 #3d2400, 0 0 24px rgba(242, 178, 59, .35); }
+.k-preis { font: 800 clamp(42px, 5.6vw, 60px)/1 var(--text); letter-spacing: -.02em; color: var(--gold); text-shadow: 0 3px 0 #3d2400; }
 .k-art { color: var(--papier-2); font-size: 15px; text-shadow: 0 2px 0 #000; }
 .kaefig-inhalt.wechsel > * { animation: wechsel .45s ease; }
 @keyframes wechsel { from { opacity: 0; transform: translateY(5px); } }
@@ -91,14 +87,12 @@ code { font: 500 .92em/1 var(--text); background: var(--obsidian-3); color: var(
 .staffel { display: block; color: var(--papier-2); font-size: 14px; margin-top: 2px; }
 .stop { display: inline-block; font: 700 15px/1 var(--text); color: var(--rot); border: 2px solid currentColor; padding: 4px 8px; border-radius: 4px; }
 
-/* Ablauf */
-.schritte { list-style: none; padding: 0; margin: 34px 0 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; counter-reset: s; }
-.schritte li { counter-increment: s; padding: 0 24px 0 0; position: relative; }
-.schritte li::before { content: counter(s); display: grid; place-items: center; width: 46px; height: 46px; font: 700 24px/1 var(--text); background: var(--gold); color: #2a1700; border-radius: 6px; box-shadow: 0 4px 0 var(--gold-tief); margin-bottom: 18px; }
-.schritte li:not(:last-child)::after { content: ''; position: absolute; top: 23px; left: 58px; right: 12px; border-top: 3px dashed var(--obsidian-3); }
-.schritte h3 { font: 700 20px/1.2 var(--text); margin: 0 0 8px; }
+/* Ablauf: vier Spalten, ohne Nummern-Kreise */
+.schritte { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 32px; margin: 30px 0 0; }
+.schritt { border-top: 2px solid var(--gold); padding-top: 16px; }
+.schritte h3 { font: 700 19px/1.25 var(--text); margin: 0 0 8px; }
 .schritte p { color: var(--papier-2); margin: 0; font-size: 16px; }
-.warnung { margin: 48px 0 0; padding: 18px 20px; border-left: 4px solid var(--lava); background: rgba(255, 122, 26, .08); max-width: 78ch; color: var(--papier-2); }
+.warnung { margin: 48px 0 0; padding: 18px 20px; border: 1px solid rgba(255, 122, 26, .45); border-radius: 6px; max-width: 78ch; color: var(--papier-2); }
 .warnung b { color: var(--papier); }
 
 /* Clan */
@@ -107,15 +101,15 @@ code { font: 500 .92em/1 var(--text); background: var(--obsidian-3); color: var(
 .clan h3 { display: flex; align-items: baseline; gap: 12px; font: 700 26px/1 var(--text); margin: 0 0 18px; }
 .clan h3 .kuerzel { color: var(--gold); }
 .clan h3 .anz { color: var(--papier-2); font: 400 15px/1 var(--text); margin-left: auto; }
-.spieler { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
-.spieler li { display: flex; align-items: center; gap: 10px; background: var(--obsidian-2); border-radius: 6px; padding: 8px 10px; min-width: 0; }
+.spieler { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 0 24px; }
+.spieler li { display: flex; align-items: center; gap: 10px; padding: 6px 0; min-width: 0; border-bottom: 1px solid var(--obsidian-3); }
 .spieler img { width: 32px; height: 32px; image-rendering: pixelated; border-radius: 3px; background: var(--obsidian-3); flex: none; }
 .spieler span { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Vouches */
 .vouch-raster { display: grid; grid-template-columns: 1fr 320px; gap: 40px; margin-top: 24px; align-items: start; }
-.zitate { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
-.zitat { margin: 0; padding: 20px; background: var(--obsidian); border-radius: 8px; border-top: 3px solid var(--gold); }
+.zitate { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0 36px; }
+.zitat { margin: 0; padding: 18px 0; border-top: 1px solid var(--obsidian-3); }
 .zitat blockquote { margin: 10px 0 14px; font-size: 16px; }
 .zitat figcaption { color: var(--papier-2); font-size: 14px; }
 .sterne { color: var(--gold); letter-spacing: 2px; font-size: 15px; }
@@ -135,8 +129,7 @@ code { font: 500 .92em/1 var(--text); background: var(--obsidian-3); color: var(
 @media (max-width: 900px) {
   .held-in { grid-template-columns: 1fr; gap: 40px; }
   .kaefig { width: min(100%, 340px); }
-  .schritte { grid-template-columns: 1fr 1fr; gap: 36px 24px; }
-  .schritte li::after { display: none; }
+  .schritte { grid-template-columns: 1fr 1fr; gap: 32px 24px; }
   .vouch-raster { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
@@ -145,7 +138,7 @@ code { font: 500 .92em/1 var(--text); background: var(--obsidian-3); color: var(
   .kopf-in { justify-content: space-between; }
   .held { padding: 40px 0 64px; }
   .abschnitt { padding: 64px 0; }
-  .schritte { grid-template-columns: 1fr; }
+  .schritte { grid-template-columns: 1fr; gap: 26px; }
   .suche input { width: 100%; }
   .suche { width: 100%; }
   .clans { grid-template-columns: 1fr; }
@@ -161,7 +154,7 @@ code { font: 500 .92em/1 var(--text); background: var(--obsidian-3); color: var(
 
 /* Rechner */
 .rechner-abschnitt { padding-top: 0; }
-.rechner { display: grid; grid-template-columns: 1fr 1.4fr .8fr 1.6fr; gap: 14px; align-items: end; background: var(--obsidian-2); border: 2px solid var(--obsidian-3); border-radius: 8px; padding: 20px; }
+.rechner { display: grid; grid-template-columns: 1fr 1.4fr .8fr 1.6fr; gap: 14px; align-items: end; padding: 4px 0 0; }
 .rechner label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--papier-2); }
 .rechner select, .rechner input { font: 500 17px/1.2 var(--text); color: var(--papier); background: var(--obsidian); border: 2px solid var(--obsidian-3); border-radius: 6px; padding: 11px 12px; width: 100%; }
 .rechner output { font: 800 26px/1.2 var(--text); color: var(--gold); padding-bottom: 6px; }

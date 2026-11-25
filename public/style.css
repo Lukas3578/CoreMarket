@@ -727,7 +727,7 @@ body::after {
 .seitenkopf:has(.wiki-suche) { overflow: visible; z-index: 5; }
 .seitenkopf:has(.wiki-suche)::after { right: 0; }
 
-/* ---------- Abo und Auktionshaus ---------- */
+/* ---------- Abo ---------- */
 .konto > * { max-width: 860px; }
 .konto h2 { font: 800 30px/1.15 var(--text); margin: 0 0 10px; letter-spacing: -.02em; }
 .hinweis-text { color: var(--papier-2); max-width: 60ch; margin: 0 0 22px; }
@@ -784,38 +784,12 @@ body::after {
 .verlauf h3 { font: 700 18px/1.2 var(--text); margin: 0 0 10px; }
 .verlauf ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 
-/* Auktionshaus-Liste */
-.markt-leiste { display: flex; gap: 18px; align-items: end; flex-wrap: wrap; }
 .feld-klein { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--papier-2); }
-.feld-klein select { width: auto; height: 46px; padding-right: 36px; }
-.haken { display: inline-flex; gap: 8px; align-items: center; color: var(--papier-2); font-size: 15px; height: 46px; cursor: pointer; }
-.haken input { width: 18px; height: 18px; accent-color: var(--gold); }
-.markt-stand { color: var(--papier-2); font-size: 15px; margin: 18px 0 10px; }
-.markt-liste { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--obsidian-3); }
-.markt-zeile { display: grid; grid-template-columns: 40px minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.4fr); gap: 16px; align-items: center; padding: 14px 6px; border-bottom: 1px solid var(--obsidian-3); }
-.markt-zeile .mc-icon { width: 36px; height: 36px; }
-.markt-name { display: flex; flex-direction: column; min-width: 0; }
-.markt-name b { overflow-wrap: anywhere; }
-.markt-preis { display: flex; flex-direction: column; }
-.markt-preis .betrag { font-size: 20px; }
-.markt-wer { display: grid; grid-template-columns: 24px 1fr; gap: 2px 10px; align-items: center; font-size: 15px; }
-.markt-wer img { border-radius: 4px; image-rendering: pixelated; }
-.markt-wer .neu-seit { grid-column: 2; font-size: 13px; }
-.markt-zeile.fake { opacity: .6; }
-.fake-marke { font-size: 12px; font-weight: 700; color: var(--rot); border: 1px solid currentColor; border-radius: 4px; padding: 1px 6px; margin-left: 6px; }
-.markt-zeile.frisch { animation: markt-neu 2.4s ease-out; }
-@keyframes markt-neu { from { background: rgba(242, 178, 59, .22); } to { background: transparent; } }
-.markt-weg { margin-top: 36px; color: var(--papier-2); }
-.markt-weg summary { cursor: pointer; font-weight: 600; }
-.markt-liste.klein .markt-zeile { opacity: .7; padding: 10px 6px; }
 @media (max-width: 720px) {
   .konto-form, #k-ansehen-form { grid-template-columns: 1fr; }
-  .markt-zeile { grid-template-columns: 36px minmax(0, 1fr) auto; }
-  .markt-wer { grid-column: 2 / -1; }
   .mc-fenster { grid-template-columns: repeat(9, minmax(0, 1fr)); width: 100%; padding: 6px; gap: 3px; }
   .anzahl { font-size: 12px; }
   .suche input, .suche input:focus { width: 100%; }
-  .markt-leiste .suche { flex: 1 1 100%; }
 }
 
 /* ==========================================================

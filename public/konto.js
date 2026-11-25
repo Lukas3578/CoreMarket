@@ -27,6 +27,7 @@
     return d;
   }
 
+  function nurText(teile) { return (teile || []).map(x => x.t).join(''); }
   /* ---------- Item-Bilder: Vanilla-Textur, sonst Block-Textur, sonst Kürzel */
   const wurzel = $('#markt') || $('#konto');
   const BILDER = wurzel?.dataset.bilder || '';
@@ -34,7 +35,8 @@
   const kuerzel = n => String(n || '?').replace(/[^A-Za-zÄÖÜäöü0-9 ]/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
   function icon(it) {
     const id = String(it.id || '').replace(/^minecraft:/, '');
-    return `<span class="mc-icon${it.ench?.length ? ' glanz' : ''}" data-kurz="${esc(kuerzel(it.name || id))}">${id && BILDER ? `<img src="${esc(bildUrl(id, 'item'))}" data-id="${esc(id)}" alt="" width="32" height="32" loading="lazy">` : ''}</span>`;
+    const maske = it.ench?.length && id && BILDER ? ` style="--maske:url('${esc(bildUrl(id, 'item'))}')"` : '';
+    return `<span class="mc-icon${maske ? ' glanz' : ''}"${maske} data-kurz="${esc(kuerzel(nurText(it.nameF) || it.name || id))}">${id && BILDER ? `<img src="${esc(bildUrl(id, 'item'))}" data-id="${esc(id)}" alt="" width="32" height="32" loading="lazy">` : ''}</span>`;
   }
   // Bild-Fehler: einmal Block-Textur probieren, dann Kürzel zeigen
   document.addEventListener('error', e => {
@@ -46,6 +48,12 @@
   const VZ = { protection: 'Schutz', fire_protection: 'Feuerschutz', feather_falling: 'Federfall', blast_protection: 'Explosionsschutz', projectile_protection: 'Schusssicher', respiration: 'Atmung', aqua_affinity: 'Wasseraffinität', thorns: 'Dornen', depth_strider: 'Wasserläufer', frost_walker: 'Eisläufer', binding_curse: 'Fluch der Bindung', soul_speed: 'Seelenläufer', swift_sneak: 'Huschen', sharpness: 'Schärfe', smite: 'Bann', bane_of_arthropods: 'Nemesis der Gliederfüßer', knockback: 'Rückstoß', fire_aspect: 'Verbrennung', looting: 'Plünderung', sweeping_edge: 'Schwungkraft', sweeping: 'Schwungkraft', efficiency: 'Effizienz', silk_touch: 'Behutsamkeit', unbreaking: 'Haltbarkeit', fortune: 'Glück', power: 'Stärke', punch: 'Schlag', flame: 'Flamme', infinity: 'Unendlichkeit', luck_of_the_sea: 'Glück des Meeres', lure: 'Köder', loyalty: 'Treue', impaling: 'Harpune', riptide: 'Sog', channeling: 'Entladung', multishot: 'Mehrfachschuss', quick_charge: 'Schnellladen', piercing: 'Durchschuss', mending: 'Reparatur', vanishing_curse: 'Fluch des Verschwindens', density: 'Dichte', breach: 'Bresche', wind_burst: 'Windstoß' };
   const ROEM = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
   const verz = e => `${VZ[e.n] || e.n.replace(/_/g, ' ')}${e.l > 1 || !['mending', 'silk_touch', 'infinity', 'aqua_affinity', 'channeling', 'multishot', 'flame', 'binding_curse', 'vanishing_curse'].includes(e.n) ? ' ' + (ROEM[e.l] || e.l) : ''}`;
+
+  /* ---------- Text genau wie im Spiel (Farben und Formatierung aus dem Item) */
+  const FARBE = { black: '#000000', dark_blue: '#0000AA', dark_green: '#00AA00', dark_aqua: '#00AAAA', dark_red: '#AA0000', dark_purple: '#AA00AA', gold: '#FFAA00', gray: '#AAAAAA', dark_gray: '#555555', blue: '#5555FF', green: '#55FF55', aqua: '#55FFFF', red: '#FF5555', light_purple: '#FF55FF', yellow: '#FFFF55', white: '#FFFFFF' };
+  const farbe = c => /^#[0-9a-f]{6}$/i.test(c || '') ? c : FARBE[c] || '#FFFFFF';
+  const mcText = teile => (teile || []).map(x => `<span style="color:${farbe(x.c)}${x.b ? ';font-weight:700' : ''}${x.i ? ';font-style:italic' : ''}${x.u || x.s ? `;text-decoration:${[x.u && 'underline', x.s && 'line-through'].filter(Boolean).join(' ')}` : ''}"${x.o ? ' class="verschleiert"' : ''}>${esc(x.t)}</span>`).join('');
+  
 
   /* ======================================================== Abo-Seite */
   const K = $('#konto');
@@ -143,11 +151,10 @@
       const zellen = Array.from({ length: n }, (_, i) => {
         const s = bySlot.get(i);
         if (!s) return '<li class="slot"></li>';
-        if (s.deko) return '<li class="slot deko"></li>';
         const d = s.dura && s.dura.max ? s.dura.rest / s.dura.max : null;
-        return `<li class="slot voll"><button type="button" data-slot="${i}" aria-label="${esc(s.menge > 1 ? `${s.menge}× ` : '')}${esc(s.name)}">${icon(s)}${s.menge > 1 ? `<span class="anzahl">${s.menge}</span>` : ''}${d !== null && d < 1 ? `<span class="haltbar"><i style="width:${Math.round(d * 100)}%;background:hsl(${Math.round(d * 120)} 80% 50%)"></i></span>` : ''}</button></li>`;
+        return `<li class="slot voll"><button type="button" data-slot="${i}" aria-label="${esc(s.menge > 1 ? `${s.menge}× ` : '')}${esc(nurText(s.nameF) || s.name)}">${icon(s)}${s.menge > 1 ? `<span class="anzahl">${s.menge}</span>` : ''}${d !== null && d < 1 ? `<span class="haltbar"><i style="width:${Math.round(d * 100)}%;background:hsl(${Math.round(d * 120)} 80% 50%)"></i></span>` : ''}</button></li>`;
       }).join('');
-      const gesamt = r.slots.filter(s => !s.deko).length;
+      const gesamt = r.slots.length;
       return `<div class="fenster-kopf"><h3>${esc(ART[r.art])} von ${esc(r.name)}</h3><p class="hinweis">${gesamt} Item${gesamt === 1 ? '' : 's'}, gelesen um ${esc(uhr(r.at))}${r.cache ? ' (eben schon abgefragt)' : ''}. Tipp auf ein Item für Details.</p></div>
         <ol class="mc-fenster">${zellen}</ol><div class="item-info" id="item-info" hidden></div>`;
     }
@@ -156,10 +163,13 @@
       erg.querySelectorAll('[data-slot]').forEach(b => b.addEventListener('click', () => {
         erg.querySelectorAll('.slot.an').forEach(x => x.classList.remove('an')); b.parentElement.classList.add('an');
         const s = bySlot.get(+b.dataset.slot), box = $('#item-info'); box.hidden = false;
-        box.innerHTML = `<div class="item-info-kopf">${icon(s)}<div><b>${esc(s.name)}</b>${s.menge > 1 ? ` <span class="hinweis">× ${s.menge}</span>` : ''}<div class="hinweis">${esc(s.id)}</div></div></div>
-          ${s.ench?.length ? `<p class="verz">${s.ench.map(e => esc(verz(e))).join(', ')}</p>` : ''}
-          ${s.dura?.max ? `<p class="hinweis">Haltbarkeit ${s.dura.rest} von ${s.dura.max}</p>` : ''}
-          ${s.lore?.length ? `<ul class="lore">${s.lore.map(l => `<li>${esc(l)}</li>`).join('')}</ul>` : ''}`;
+        // Aufbau wie der Tooltip im Spiel (mit F3+H): Name, Verzauberungen, Lore, Haltbarkeit, Item-ID
+        const zeilen = [`<div class="tt-name">${mcText(s.nameF?.length ? s.nameF : [{ t: s.name, c: 'white' }])}</div>`];
+        for (const e of s.ench || []) zeilen.push(`<div style="color:${e.n.endsWith('_curse') ? '#FF5555' : '#AAAAAA'}">${esc(verz(e))}</div>`);
+        for (const l of s.loreF?.length ? s.loreF : (s.lore || []).map(t => [{ t, c: 'dark_purple', i: true }])) zeilen.push(`<div>${mcText(l) || '&nbsp;'}</div>`);
+        if (s.dura?.max) zeilen.push(`<div style="color:#FFFFFF">Haltbarkeit: ${s.dura.rest} / ${s.dura.max}</div>`);
+        zeilen.push(`<div style="color:#555555">minecraft:${esc(s.id)}${s.menge > 1 ? ` (${s.menge} Stück)` : ''}</div>`);
+        box.innerHTML = `<div class="mc-tooltip">${zeilen.join('')}</div>`;
       }));
     }
     function verlaufZeigen() {

@@ -1,0 +1,40 @@
+  <section class="seitenkopf">
+    <div class="breite">
+      <nav class="brotkrumen auftritt" aria-label="Pfad"><a href="/">Start</a><span>Preise</span></nav>
+      <h1 class="auftritt" style="--i:1">Spawner-<span class="gold">Preise</span></h1>
+      <p class="einleitung auftritt" style="--i:2"><b>Wir kaufen</b> heißt: Du verkaufst uns deinen Spawner und bekommst den Betrag. <b>Wir verkaufen</b> heißt: Du kaufst den Spawner bei uns. Ab einer bestimmten Menge gibt es oft einen besseren Preis.</p>
+    </div>
+  </section>
+
+  <section id="preise" class="abschnitt kurz-oben">
+    <div class="breite">
+      <div class="kopfzeile zeigen"><p class="marker">Preisliste</p><p class="hinweis" id="preis-stand"></p></div>
+      <div class="tabelle-rahmen zeigen">
+        <table class="preise" id="preis-tabelle">
+          <thead><tr><th scope="col">Spawner</th><th scope="col">Wir kaufen</th><th scope="col">Wir verkaufen</th></tr></thead>
+          <tbody><tr class="lade"><td><i></i></td><td><i></i></td><td><i></i></td></tr><tr class="lade"><td><i></i></td><td><i></i></td><td><i></i></td></tr><tr class="lade"><td><i></i></td><td><i></i></td><td><i></i></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="rechner" class="abschnitt rechner-abschnitt">
+    <div class="breite">
+      <div class="rechner-karte zeigen">
+        <div class="rechner-kopf"><p class="marker">Rechner</p><h2>Was kostet das?</h2><p class="erklaerung">Spawner und Menge wählen – der Mengenpreis wird automatisch genommen, wenn es einen gibt.</p></div>
+        <form class="rechner" id="rechner-form">
+          <div class="umschalter" role="radiogroup" aria-label="Ich möchte">
+            <label><input type="radio" name="r-art" value="kaufen" checked><span>kaufen</span></label>
+            <label><input type="radio" name="r-art" value="verkaufen"><span>verkaufen</span></label>
+            <i class="umschalter-zeiger" aria-hidden="true"></i>
+          </div>
+          <label class="feld"><span>Spawner</span><select id="r-spawner"></select></label>
+          <label class="feld"><span>Menge</span>
+            <span class="menge"><button type="button" data-schritt="-1" aria-label="Eins weniger">−</button><input id="r-menge" type="number" inputmode="numeric" min="1" max="10000" value="1"><button type="button" data-schritt="1" aria-label="Eins mehr">+</button></span>
+          </label>
+          <output id="r-ergebnis" for="r-spawner r-menge" aria-live="polite"><span class="r-summe">–</span><small></small></output>
+        </form>
+      </div>
+      <p class="weiter zeigen">Preis passt? <a href="/ablauf">So läuft der Handel ab <span aria-hidden="true">→</span></a></p>
+    </div>
+  </section>

@@ -58,7 +58,28 @@
       || '<tr><td colspan="3" class="leer">Gerade keine Preise eingetragen.</td></tr>';
     if (body.dataset.stand === html) return;
     body.innerHTML = html; body.dataset.stand = html;
+    preiseFiltern();
   }
+  const preisSuche = $('#preis-suche');
+  function preiseFiltern() {
+    if (!preisSuche) return;
+    const q = preisSuche.value.trim().toLowerCase();
+    const body = $('#preis-tabelle tbody');
+    let treffer = 0;
+    body.querySelectorAll('tr:not(.lade):not(.kein-treffer)').forEach(tr => {
+      const zelle = tr.cells[0];
+      if (!zelle || tr.cells.length < 3) return;
+      const name = zelle.dataset.name ?? (zelle.dataset.name = zelle.textContent);
+      const p = name.toLowerCase().indexOf(q);
+      const passt = !q || p >= 0;
+      tr.classList.toggle('weg-gefiltert', !passt);
+      zelle.innerHTML = q && passt ? esc(name.slice(0, p)) + '<mark>' + esc(name.slice(p, p + q.length)) + '</mark>' + esc(name.slice(p + q.length)) : esc(name);
+      if (passt) treffer++;
+    });
+    body.querySelector('.kein-treffer')?.remove();
+    if (q && !treffer) body.insertAdjacentHTML('beforeend', `<tr class="kein-treffer"><td colspan="3" class="leer">Kein Spawner mit „${esc(preisSuche.value)}“ in der Liste.</td></tr>`);
+  }
+  if (preisSuche) preisSuche.addEventListener('input', preiseFiltern);
 
   /* ---------- Vorschau-Karten (Start) ---------- */
   function vorschauZeigen(P) {
@@ -311,6 +332,39 @@
     mk.setAttribute('aria-expanded', String(o)); mk.setAttribute('aria-label', o ? 'Menü schließen' : 'Menü öffnen');
   });
   addEventListener('keydown', e => { if (e.key === 'Escape') menueZu(); });
+
+  /* ---------- Überschrift Wort für Wort ---------- */
+  const h1 = $('.held h1, .seitenkopf h1');
+  if (h1 && !ruhig) {
+    let w = 0;
+    const wort = (txt, klasse) => {
+      const aussen = document.createElement('span'); aussen.className = 'wort';
+      const innen = document.createElement('span'); innen.textContent = txt; innen.style.setProperty('--w', w++);
+      if (klasse) innen.className = klasse;
+      aussen.append(innen); return aussen;
+    };
+    const teile = [];
+    h1.childNodes.forEach(n => {
+      if (n.nodeType === 3) n.textContent.split(/(\s+)/).forEach(t => teile.push(/^\s+$/.test(t) ? document.createTextNode(t) : t ? wort(t) : null));
+      else if (n.nodeName === 'BR') teile.push(n.cloneNode());
+      else n.textContent.split(/(\s+)/).forEach(t => teile.push(/^\s+$/.test(t) ? document.createTextNode(t) : t ? wort(t, n.className) : null));
+    });
+    h1.setAttribute('aria-label', h1.textContent.replace(/\s+/g, ' ').trim());
+    h1.replaceChildren(...teile.filter(Boolean));
+    h1.classList.remove('auftritt');
+  }
+
+  /* ---------- Lichtschein unter der Maus ---------- */
+  if (!ruhig && matchMedia('(hover: hover)').matches) {
+    const LICHT = '.vorschau-karte, .weg, .zitat, .schritt, .clan, .warum-punkt, .rang, .regeln li, .tabelle-rahmen';
+    addEventListener('pointermove', e => {
+      const el = e.target.closest?.(LICHT);
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', `${e.clientX - r.left}px`);
+      el.style.setProperty('--my', `${e.clientY - r.top}px`);
+    }, { passive: true });
+  }
 
   /* ---------- Käfig folgt leicht der Maus ---------- */
   const kaefig = $('#kaefig');

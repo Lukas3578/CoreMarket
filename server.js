@@ -89,6 +89,19 @@ const SEITEN = [
   { pfad: '/fragen', datei: 'fragen', name: 'Fragen', titel: 'Häufige Fragen – CoreMarket',
     beschreibung: 'Antworten auf die häufigsten Fragen zum Spawner-Handel mit CoreMarket auf HugoSMP.' },
 ];
+
+// Wiki: jede .md-Datei in wiki/ wird eine eigene Seite unter /wiki/<dateiname>
+const wiki = require('./wiki');
+const WIKI = wiki.laden(path.join(__dirname, 'wiki'));
+if (WIKI.length) {
+  SEITEN.push({ pfad: '/wiki', datei: 'wiki', name: 'Wiki', inhalt: wiki.uebersicht(WIKI), titel: 'Wiki – CoreMarket',
+    beschreibung: 'Anleitungen und Erklärungen rund um den Spawner-Handel mit CoreMarket: Verifizierung, Tickets, Preisliste, Sicherheit und mehr.' });
+  for (const a of WIKI) {
+    SEITEN.push({ pfad: `/wiki/${a.slug}`, datei: 'wiki', menue: false, aktiv: '/wiki', inhalt: wiki.artikelSeite(WIKI, a),
+      titel: `${a.titel} – CoreMarket Wiki`, beschreibung: a.beschreibung || `${a.titel} – CoreMarket Wiki` });
+  }
+}
+
 const SEITEN_DIR = path.join(__dirname, 'seiten');
 function baueSeiten() {
   const v = name => (dateien.get(name)?.etag || '').replace(/"/g, '').slice(0, 8);
@@ -98,9 +111,10 @@ function baueSeiten() {
   const fertig = new Map();
   for (const s of SEITEN) {
     const nav = SEITEN.filter(x => x.menue !== false)
-      .map(x => `<a href="${x.pfad}"${x.pfad === s.pfad ? ' class="aktiv" aria-current="page"' : ''}>${escAttr(x.name)}</a>`).join('');
+      .map(x => `<a href="${x.pfad}"${x.pfad === (s.aktiv || s.pfad) ? ` class="aktiv"${x.pfad === s.pfad ? ' aria-current="page"' : ''}` : ''}>${escAttr(x.name)}</a>`).join('');
+    const inhalt = s.inhalt ?? fs.readFileSync(path.join(SEITEN_DIR, s.datei + '.html'), 'utf8');
     const html = layout
-      .replace('{{INHALT}}', fs.readFileSync(path.join(SEITEN_DIR, s.datei + '.html'), 'utf8'))
+      .replace('{{INHALT}}', () => inhalt)
       .replace('{{NAV}}', nav)
       .replaceAll('{{TITEL}}', escAttr(s.titel))
       .replaceAll('{{BESCHREIBUNG}}', escAttr(s.beschreibung))
@@ -168,7 +182,7 @@ async function seite(req, res, vorlage) {
   const d = await daten();
   // Daten direkt in die Seite legen: kein zweiter Request, Inhalte sofort da
   const roh = JSON.stringify({ daten: d, discord: DISCORD }).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
-  const html = Buffer.from(vorlage.replace('<!--START-DATEN-->', `<script id="start-daten" type="application/json">${roh}</script>`));
+  const html = Buffer.from(vorlage.replace('<!--START-DATEN-->', () => `<script id="start-daten" type="application/json">${roh}</script>`));
   senden(req, res, 200, html, { 'Content-Type': TYPEN['.html'], 'Cache-Control': 'no-cache', _gzip: zlib.gzipSync(html) });
 }
 

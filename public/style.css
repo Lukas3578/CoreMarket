@@ -465,7 +465,7 @@ code { font: 500 .9em/1 var(--text); background: var(--obsidian-3); color: var(-
   .umschalter { grid-column: 1 / -1; }
   .rechner output { grid-column: 1 / -1; }
 }
-@media (max-width: 780px) {
+@media (max-width: 900px) {
   .menue-knopf { display: block; order: 3; flex: none; }
   .kopf-in { gap: 10px; }
   .kopf .discord-link { margin-left: auto; }
@@ -577,7 +577,7 @@ body::after {
 .pixel-icon { display: block; width: 52px; height: 52px; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .45)); }
 
 /* Lichtschein, der der Maus über Karten folgt (JS setzt --mx/--my) */
-.vorschau-karte:not(.lade), .weg, .zitat, .schritt, .clan, .warum-punkt, .rang, .regeln li, .tabelle-rahmen {
+.vorschau-karte:not(.lade), .weg, .zitat, .schritt, .clan, .warum-punkt, .rang, .regeln li, .tabelle-rahmen, .wiki-karte {
   background-image: radial-gradient(420px circle at var(--mx, -999px) var(--my, -999px), rgba(242, 178, 59, .09), transparent 45%);
 }
 
@@ -616,3 +616,112 @@ body::after {
   .kaefig-kern img, .kaefig-inhalt { animation: none !important; }
   .kaefig-inhalt { transform: translateX(-50%); }
 }
+
+/* ==========================================================
+   Wiki
+   ========================================================== */
+.wiki-suche { position: relative; max-width: 640px; margin-top: 30px; }
+.suche-gross input, .suche-gross input:focus { width: 100%; padding: 15px 18px 15px 46px; font-size: 17px; border-radius: 10px; }
+.suche-gross::before { left: 18px; }
+.suche-gross::after { left: 29px; }
+.wiki-treffer { position: absolute; z-index: 10; left: 0; right: 0; top: calc(100% + 8px); max-height: 420px; overflow-y: auto; padding: 6px; border-radius: 10px; background: var(--obsidian-2); border: 1px solid var(--obsidian-4); box-shadow: 0 24px 50px rgba(0, 0, 0, .6); animation: aufklappen .25s var(--weich); }
+.wiki-treffer a { display: block; padding: 12px 14px; border-radius: 7px; color: var(--papier); text-decoration: none; }
+.wiki-treffer a:hover, .wiki-treffer a.markiert { background: var(--obsidian-3); }
+.wiki-treffer small { display: block; color: var(--papier-2); font-size: 13px; margin-top: 2px; }
+.wiki-treffer .kat { font: 700 11px/1 var(--pixel); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin-right: 8px; }
+.wiki-treffer mark { background: rgba(242, 178, 59, .25); color: var(--gold-hell); border-radius: 2px; }
+.wiki-treffer .nichts { padding: 14px; color: var(--papier-2); margin: 0; }
+
+.wiki-gruppe + .wiki-gruppe { margin-top: 52px; }
+.wiki-gruppe h2 { font-size: clamp(24px, 2.6vw, 30px); margin-bottom: 18px; }
+.wiki-karten { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.wiki-karte { position: relative; display: block; padding: 24px 24px 64px; border-radius: 12px; background: rgba(28, 22, 39, .55); border: 1px solid var(--obsidian-3); color: var(--papier); text-decoration: none; transition: transform .35s var(--weich), border-color .3s, box-shadow .35s; }
+.wiki-karte h3 { margin: 0 0 8px; font: 700 19px/1.25 var(--text); }
+.wiki-karte p { margin: 0; color: var(--papier-2); font-size: 15px; }
+.wiki-karte .weg-pfeil { left: 24px; }
+.wiki-karte:hover { transform: translateY(-5px); border-color: rgba(242, 178, 59, .45); box-shadow: 0 22px 44px -20px rgba(0, 0, 0, .8); }
+.wiki-karte:hover .weg-pfeil { transform: translateX(6px); background: var(--gold); color: #2a1700; border-color: var(--gold); }
+
+.wiki-kopf { padding-bottom: 36px; }
+.wiki-kopf h1 { font-size: clamp(34px, 4.6vw, 56px); margin-top: 10px; }
+.wiki-kopf .marker { margin: 22px 0 0; }
+.wiki-raster { display: grid; grid-template-columns: 230px minmax(0, 1fr) 210px; gap: 48px; align-items: start; }
+.wiki-leiste, .wiki-toc { position: sticky; top: calc(var(--kopf-h) + 24px); }
+.wiki-leiste summary { display: none; }
+.wiki-kat { font: 700 11px/1 var(--pixel); text-transform: uppercase; letter-spacing: .14em; color: var(--papier-2); margin: 22px 0 10px; }
+.wiki-leiste ul, .wiki-toc ul { list-style: none; margin: 0; padding: 0; }
+.wiki-leiste a, .wiki-toc a { display: block; padding: 6px 12px; margin-left: -12px; border-radius: 6px; color: var(--papier-2); text-decoration: none; font-size: 15px; transition: color .2s, background .2s; }
+.wiki-leiste a:hover, .wiki-toc a:hover { color: var(--papier); background: rgba(255, 255, 255, .04); }
+.wiki-leiste a.aktiv { color: var(--gold); background: rgba(242, 178, 59, .08); box-shadow: inset 2px 0 0 var(--gold); }
+.wiki-start { font-weight: 600; }
+.wiki-toc { border-left: 1px solid var(--obsidian-3); padding-left: 18px; }
+.wiki-toc .wiki-kat { margin-top: 0; }
+.wiki-toc a { font-size: 14px; padding: 5px 10px; margin-left: -10px; }
+.wiki-toc a.aktiv { color: var(--gold); }
+
+.wiki-text { font-size: 17px; line-height: 1.75; max-width: 72ch; }
+.wiki-text > :first-child { margin-top: 0; }
+.wiki-text p, .wiki-text ul, .wiki-text ol { color: #d6cfe2; margin: 0 0 18px; }
+.wiki-text b { color: var(--papier); }
+.wiki-text h2 { position: relative; font: 800 26px/1.2 var(--text); letter-spacing: -.02em; margin: 44px 0 14px; padding-top: 22px; border-top: 1px solid var(--obsidian-3); }
+.wiki-text h3 { position: relative; font: 700 20px/1.3 var(--text); margin: 30px 0 10px; }
+.wiki-text .anker { position: absolute; left: -26px; color: var(--obsidian-4); text-decoration: none; opacity: 0; transition: opacity .2s, color .2s; }
+.wiki-text h2:hover .anker, .wiki-text h3:hover .anker { opacity: 1; }
+.wiki-text .anker:hover { color: var(--gold); }
+.wiki-text a:not(.anker) { color: var(--gold); text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat; transition: color .2s; }
+.wiki-text a:not(.anker):hover { color: var(--gold-hell); }
+.wiki-text ul { padding-left: 0; list-style: none; }
+.wiki-text ul li { position: relative; padding-left: 22px; margin: 6px 0; }
+.wiki-text ul li::before { content: ''; position: absolute; left: 2px; top: .7em; width: 7px; height: 7px; background: var(--gold); }
+.wiki-schritte { list-style: none; padding: 0; counter-reset: s; }
+.wiki-schritte li { counter-increment: s; position: relative; padding: 2px 0 14px 50px; margin: 0; }
+.wiki-schritte li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 7px; background: var(--obsidian-3); border: 1px solid var(--obsidian-4); color: var(--gold); font: 800 15px/1 var(--text); }
+.wiki-schritte li:not(:last-child)::after { content: ''; position: absolute; left: 16px; top: 36px; bottom: 2px; width: 1px; background: var(--obsidian-4); }
+.wiki-text pre { background: var(--obsidian); border: 1px solid var(--obsidian-3); border-radius: 10px; padding: 16px 18px; overflow-x: auto; }
+.wiki-text pre code { background: none; padding: 0; color: var(--papier); white-space: pre; }
+.wiki-text hr { border: 0; border-top: 1px solid var(--obsidian-3); margin: 36px 0; }
+.wiki-tabelle { overflow-x: auto; margin: 0 0 22px; border: 1px solid var(--obsidian-3); border-radius: 10px; }
+.wiki-tabelle table { width: 100%; border-collapse: collapse; font-size: 15px; line-height: 1.5; }
+.wiki-tabelle th { text-align: left; font: 700 11px/1 var(--pixel); text-transform: uppercase; letter-spacing: .12em; color: var(--papier-2); background: var(--obsidian-2); padding: 13px 16px; }
+.wiki-tabelle td { padding: 12px 16px; border-top: 1px solid var(--obsidian-3); color: #d6cfe2; vertical-align: top; }
+.wiki-tabelle tr:hover td { background: rgba(242, 178, 59, .04); }
+.box { margin: 0 0 22px; padding: 16px 18px 16px 20px; border-radius: 10px; border: 1px solid; border-left-width: 4px; }
+.box p { margin: 0 !important; }
+.box .box-titel { font: 700 12px/1 var(--pixel); text-transform: uppercase; letter-spacing: .12em; margin-bottom: 8px !important; }
+.box-tipp { border-color: rgba(111, 220, 140, .35); background: rgba(111, 220, 140, .06); }
+.box-tipp .box-titel { color: var(--gruen); }
+.box-achtung { border-color: rgba(255, 122, 26, .45); background: rgba(255, 122, 26, .07); }
+.box-achtung .box-titel { color: var(--lava); }
+.box-info { border-color: rgba(242, 178, 59, .3); background: rgba(242, 178, 59, .05); }
+.box-info .box-titel { color: var(--gold); }
+.wiki-blaettern { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 48px; padding-top: 28px; border-top: 1px solid var(--obsidian-3); }
+.wiki-blaettern a { display: block; padding: 16px 18px; border-radius: 10px; border: 1px solid var(--obsidian-3); color: var(--papier); text-decoration: none; font-weight: 600; background: none !important; transition: border-color .3s, transform .35s var(--weich); }
+.wiki-blaettern a:hover { border-color: rgba(242, 178, 59, .45); transform: translateY(-3px); }
+.wiki-blaettern small { display: block; color: var(--papier-2); font-weight: 400; font-size: 13px; margin-bottom: 2px; }
+.wiki-blaettern .zurueck small::before { content: '← '; }
+.wiki-blaettern .weiter-link { text-align: right; grid-column: 2; }
+.wiki-blaettern .weiter-link small::after { content: ' →'; }
+
+@media (max-width: 1100px) {
+  .wiki-raster { grid-template-columns: 220px minmax(0, 1fr); }
+  .wiki-toc { display: none; }
+}
+@media (max-width: 900px) {
+  .wiki-karten { grid-template-columns: 1fr 1fr; }
+  .wiki-raster { grid-template-columns: 1fr; gap: 28px; }
+  .wiki-leiste { position: static; }
+  .wiki-leiste summary { display: flex; justify-content: space-between; align-items: center; cursor: pointer; list-style: none; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--obsidian-3); background: var(--obsidian-2); font-weight: 600; }
+  .wiki-leiste summary::-webkit-details-marker { display: none; }
+  .wiki-leiste summary::after { content: '+'; color: var(--gold); font-weight: 700; font-size: 20px; line-height: 1; transition: transform .3s var(--feder); }
+  .wiki-leiste details[open] summary::after { transform: rotate(45deg); }
+  .wiki-leiste-inhalt { padding: 6px 16px 4px; }
+  .wiki-text .anker { display: none; }
+}
+@media (max-width: 640px) {
+  .wiki-karten { grid-template-columns: 1fr; }
+  .wiki-text { font-size: 16px; }
+  .wiki-blaettern { grid-template-columns: 1fr; }
+  .wiki-blaettern .weiter-link { grid-column: 1; }
+}
+.seitenkopf:has(.wiki-suche) { overflow: visible; z-index: 5; }
+.seitenkopf:has(.wiki-suche)::after { right: 0; }

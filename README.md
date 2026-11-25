@@ -12,6 +12,8 @@
 ```
 server.js            Webserver: Seiten bauen, Bot-Daten cachen, /health
 seiten/              die einzelnen Seiten (_layout.html = Kopf, Menü, Fuß)
+wiki/                Wiki-Artikel als Markdown, eine Datei = ein Artikel
+wiki.js              macht aus den Markdown-Dateien die Wiki-Seiten
 public/              CSS, JS, Logo und andere Dateien für den Browser
 keepalive/           Script, das die Seite auf Render wach hält
 render.yaml          Render-Blueprint
@@ -27,10 +29,35 @@ Der Server holt die Daten alle 30 Sekunden vom Bot und legt sie direkt in die Se
 | `/clan`       | Mitglieder mit Namenssuche (`/clan?name=Steve`)  |
 | `/bewertungen`| Vouches und Händler-Rangliste                    |
 | `/fragen`     | Häufige Fragen                                   |
+| `/wiki`       | Wiki-Übersicht mit Suche                         |
+| `/wiki/<name>`| ein Wiki-Artikel, z. B. `/wiki/preisliste-lesen` |
 | `/api/daten`  | die Bot-Daten als JSON (gecacht)                 |
 | `/health`     | `{"ok":true,...}` – für Render und das Keep-Alive |
 
 Neue Seite anlegen: Datei in `seiten/` erstellen und in `server.js` bei `SEITEN` eintragen. Menü, Titel und Sitemap kommen dann automatisch.
+
+## Wiki-Artikel schreiben
+
+Jeder Artikel ist eine Datei in `wiki/`. Der Dateiname wird zur Adresse: `wiki/tipps.md` → `/wiki/tipps`. Oben steht ein kurzer Kopf:
+
+```markdown
+---
+titel: Tipps für Anfänger
+beschreibung: Ein Satz, der in der Übersicht und bei Google erscheint.
+kategorie: Erste Schritte
+reihenfolge: 3
+---
+Hier beginnt der Text.
+
+## Eine Zwischenüberschrift
+
+- Listenpunkt mit **fett** und `Befehl`
+- [Link zu den Preisen](/preise)
+
+> [!tipp] Grüne Box. Gibt es auch als [!achtung] (orange) und [!info] (gold).
+```
+
+Kategorien: `Erste Schritte`, `Handel`, `Sicherheit`, `Clan`, `Nachschlagen`. Außerdem gehen Tabellen (`| a | b |`), nummerierte Listen (`1.`), Codeblöcke und `---` als Trennlinie. Nach dem Push baut Render neu, dann ist der Artikel online – mit Eintrag in der Seitenleiste, Suche und Sitemap.
 
 ## Lokal starten
 

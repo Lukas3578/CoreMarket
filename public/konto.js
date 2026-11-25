@@ -1,5 +1,5 @@
 'use strict';
-/* CoreMarket: Abo (Login per /msg, Abo kaufen, Endertruhe/Inventar ansehen) und Auktionshaus live.
+/* CoreMarket: Abo (Login per /msg, Abo kaufen, Endertruhe/Inventar ansehen).
  * Alle Anfragen gehen an /api/konto/* auf dieser Website, der Server reicht sie an den Bot weiter. */
 (() => {
   const $ = s => document.querySelector(s);
@@ -29,7 +29,7 @@
 
   function nurText(teile) { return (teile || []).map(x => x.t).join(''); }
   /* ---------- Item-Bilder: Vanilla-Textur, sonst Block-Textur, sonst Kürzel */
-  const wurzel = $('#markt') || $('#konto');
+  const wurzel = $('#konto');
   const BILDER = wurzel?.dataset.bilder || '';
   const bildUrl = (id, art) => BILDER.replace('{art}', art).replace('{id}', encodeURIComponent(id));
   const kuerzel = n => String(n || '?').replace(/[^A-Za-zÄÖÜäöü0-9 ]/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
@@ -68,7 +68,7 @@
 
     async function start() {
       try { INFO = await api('info'); } catch { INFO = {}; }
-      if (INFO.preis) $('#abo-einleitung').innerHTML = `Für <b>${esc(preis(INFO.preis))}</b> pro ${INFO.tage === 30 ? 'Monat' : `${INFO.tage} Tage`} siehst du die Endertruhe und das Inventar anderer Spieler${INFO.markt ? ' und das ganze Auktionshaus live' : ''}. Bezahlt wird im Spiel an unseren Bank-Account <b>${esc(INFO.bank || '')}</b>, ein Passwort brauchst du nicht.`;
+      if (INFO.preis) $('#abo-einleitung').innerHTML = `Für <b>${esc(preis(INFO.preis))}</b> pro ${INFO.tage === 30 ? 'Monat' : `${INFO.tage} Tage`} siehst du die Endertruhe und das Inventar anderer Spieler. Bezahlt wird im Spiel an unseren Bank-Account <b>${esc(INFO.bank || '')}</b>, ein Passwort brauchst du nicht.`;
       $('#k-server').textContent = INFO.server || 'HugoSMP';
       if (!INFO.an) { $('#konto-lade').textContent = 'Das Abo gibt es gerade nicht. Schau später wieder vorbei oder frag im Discord.'; return; }
       if (token.get()) { try { ICH = await api('ich'); } catch { ICH = null; } }
@@ -182,60 +182,5 @@
     }
     $('#k-abmelden').addEventListener('click', async () => { try { await api('logout', {}); } catch { /* egal */ } token.set(''); ICH = null; weiter(); });
     start();
-  }
-
-  /* ======================================================== Auktionshaus */
-  const M = $('#markt');
-  if (M) {
-    let DATEN = null, version = 0, timer = null, ersteRunde = true;
-    const gesehen = new Set();
-    const zugang = (html) => { $('#markt-lade').hidden = true; $('#markt-inhalt').hidden = true; const z = $('#markt-zugang'); z.hidden = false; z.innerHTML = html; };
-    async function laden() {
-      clearTimeout(timer);
-      try {
-        const d = await api('markt' + (version ? `?v=${version}` : ''));
-        if (!d.gleich) { DATEN = d; version = d.version; malen(); } else if (DATEN) { Object.assign(DATEN, { voll: d.voll, schnell: d.schnell, laeuft: d.laeuft }); standMalen(); }
-        timer = setTimeout(laden, document.hidden ? 30000 : 4000);
-      } catch (x) {
-        if (x.status === 401 || x.status === 402) return zugang(`<div class="hinweis-box"><div><h3>Nur mit Abo</h3><p>${x.status === 401 ? 'Melde dich an und hol dir das Abo, dann siehst du hier alle Angebote live.' : 'Dein Abo ist abgelaufen. Verlänger es, dann geht es hier weiter.'}</p></div><a class="knopf" href="/abo">Zum Abo</a></div>`);
-        if (x.status === 404) return zugang(`<p class="leer">${esc(x.message)}</p>`);
-        $('#markt-lade').textContent = x.message; timer = setTimeout(laden, 15000);
-      }
-    }
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) laden(); });
-    const filtern = () => {
-      const q = $('#markt-suche').value.trim().toLowerCase(), ohneFake = $('#markt-fake').checked, sort = $('#markt-sort').value;
-      let l = DATEN.items.filter(i => (!ohneFake || i.echt !== 'nein') && (!q || `${i.name} ${i.id} ${i.verkaeufer}`.toLowerCase().replace(/_/g, ' ').includes(q)));
-      const st = i => i.proStueck ?? 1e12;
-      l = sort === 'billig' ? l.sort((a, b) => st(a) - st(b)) : sort === 'teuer' ? l.sort((a, b) => st(b) - st(a)) : sort === 'name' ? l.sort((a, b) => a.name.localeCompare(b.name, 'de')) : l.sort((a, b) => (b.seit || 0) - (a.seit || 0) || st(a) - st(b));
-      return l;
-    };
-    const zeile = (i, neu) => `<li class="markt-zeile${neu ? ' frisch' : ''}${i.echt === 'nein' ? ' fake' : ''}">
-        ${icon(i)}
-        <div class="markt-name"><b>${i.menge > 1 ? `${i.menge}× ` : ''}${esc(i.name)}${i.echt === 'nein' ? ' <span class="fake-marke" title="Im Amboss umbenannt, wahrscheinlich nicht das echte Item">Fake?</span>' : ''}</b>
-          <span class="hinweis">${i.ench?.length ? esc(i.ench.map(verz).join(', ')) : esc(String(i.id).replace(/_/g, ' '))}</span></div>
-        <div class="markt-preis"><span class="betrag">${preis(i.preis)}</span>${i.menge > 1 ? `<span class="hinweis">${preis(i.proStueck)} pro Stück</span>` : ''}</div>
-        <div class="markt-wer">${i.verkaeufer ? `<img src="${kopf(i.verkaeufer)}" alt="" width="24" height="24" loading="lazy"><span>${esc(i.verkaeufer)}</span>` : '<span class="hinweis">Verkäufer unbekannt</span>'}${i.seit ? `<span class="hinweis neu-seit">${esc(vor(i.seit))} dazugekommen</span>` : ''}</div>
-      </li>`;
-    function standMalen() {
-      const d = DATEN;
-      $('#markt-stand').textContent = `${d.anzahl} Angebote. ${d.voll ? `Komplett gelesen ${vor(d.voll)}` : 'Wird gerade zum ersten Mal gelesen'}${d.schnell && d.schnell > d.voll ? `, nach neuen geschaut ${vor(d.schnell)}` : ''}.${d.laeuft ? ' Liest gerade …' : ''}`;
-    }
-    function malen() {
-      $('#markt-lade').hidden = true; $('#markt-zugang').hidden = true; $('#markt-inhalt').hidden = false;
-      standMalen();
-      const l = filtern();
-      $('#markt-liste').innerHTML = l.length ? l.slice(0, 400).map(i => { const neu = !ersteRunde && !gesehen.has(i.k) && !ruhig; return zeile(i, neu); }).join('') : `<li class="leer">${DATEN.items.length ? 'Dazu gibt es gerade kein Angebot.' : 'Noch keine Angebote gelesen. Das dauert nach dem Start ein paar Minuten.'}</li>`;
-      DATEN.items.forEach(i => gesehen.add(i.k)); ersteRunde = false;
-      const w = DATEN.weg || [];
-      $('#markt-weg').hidden = !w.length;
-      $('#markt-weg-liste').innerHTML = w.slice(0, 15).map(i => `<li class="markt-zeile weg">${icon(i)}<div class="markt-name"><b>${i.menge > 1 ? `${i.menge}× ` : ''}${esc(i.name)}</b><span class="hinweis">${esc(i.verkaeufer || '')}</span></div><div class="markt-preis"><span class="betrag">${preis(i.preis)}</span></div><div class="markt-wer"><span class="hinweis">${esc(vor(i.wegAt))}</span></div></li>`).join('');
-    }
-    let suchT;
-    $('#markt-suche').addEventListener('input', () => { clearTimeout(suchT); suchT = setTimeout(() => DATEN && malen(), 120); });
-    $('#markt-sort').addEventListener('change', () => DATEN && malen());
-    $('#markt-fake').addEventListener('change', () => DATEN && malen());
-    setInterval(() => { if (DATEN && !document.hidden) standMalen(); }, 15000);
-    laden();
   }
 })();

@@ -18,7 +18,7 @@ const API = process.env.COREMARKET_API || 'https://hugo.vortexpvp.eu/api/public'
 const DISCORD = process.env.DISCORD_INVITE || 'https://discord.gg/UT6dYchUB';
 const CACHE_MS = Math.max(5, Number(process.env.CACHE_SEKUNDEN) || 30) * 1000;
 const TIMEOUT_MS = 8000;
-// Abo-Funktionen (Login, Endertruhe/Inventar, Auktionshaus) laufen über den Bot. Die Website reicht die Anfragen nur durch.
+// Abo-Funktionen (Login, Endertruhe/Inventar) laufen über den Bot. Die Website reicht die Anfragen nur durch.
 const BOT = (process.env.BOT_URL || new URL(API).origin).replace(/\/+$/, '');
 // Item-Bilder (Vanilla-Texturen). Eigene Quelle per ITEM_BILDER, {art} = item oder block, {id} = z. B. diamond_sword
 const BILDER = process.env.ITEM_BILDER || 'https://assets.mcasset.cloud/1.21.4/assets/minecraft/textures/{art}/{id}.png';
@@ -94,12 +94,10 @@ const SEITEN = [
     beschreibung: 'Alle Mitglieder von CoreMarket (CM0) und CoreMarket1 (CM1). Prüf hier, ob ein Händler wirklich zu uns gehört.' },
   { pfad: '/bewertungen', datei: 'bewertungen', name: 'Bewertungen', titel: 'Bewertungen – CoreMarket',
     beschreibung: 'Was Kunden über ihren Handel mit CoreMarket sagen, und welche Händler die meisten Vouches haben.' },
-  { pfad: '/auktionshaus', datei: 'auktionshaus', name: 'Auktionshaus', skript: true, titel: 'Auktionshaus live – CoreMarket',
-    beschreibung: 'Alle Angebote aus dem HugoSMP-Auktionshaus, live gelesen. Neue Angebote erscheinen sofort.' },
   { pfad: '/auction-orders', datei: 'auction-orders', name: 'Auction-Orders', js: 'preise.js', titel: 'Auction-Orders: Item-Preise und Preistrend – CoreMarket',
     beschreibung: 'Was ist ein Item auf HugoSMP gerade wert? Billigster Preis im Auktionshaus, beste Order und der Preistrend der letzten Tage – jede Nacht neu gescannt.' },
-  { pfad: '/abo', datei: 'abo', name: 'Abo', skript: true, titel: 'Abo: Endertruhe, Inventar und Auktionshaus – CoreMarket',
-    beschreibung: 'Mit dem CoreMarket-Abo siehst du Endertruhen und Inventare anderer Spieler auf HugoSMP und das Auktionshaus live.' },
+  { pfad: '/abo', datei: 'abo', name: 'Abo', skript: true, titel: 'Abo: Endertruhe und Inventar ansehen – CoreMarket',
+    beschreibung: 'Mit dem CoreMarket-Abo siehst du Endertruhen und Inventare anderer Spieler auf HugoSMP.' },
   { pfad: '/fragen', datei: 'fragen', name: 'Fragen', titel: 'Häufige Fragen – CoreMarket',
     beschreibung: 'Antworten auf die häufigsten Fragen zum Spawner-Handel mit CoreMarket auf HugoSMP.' },
 ];
@@ -179,7 +177,7 @@ async function daten() {
 /* ---------- Abo: Anfragen an den Bot durchreichen ---------- */
 async function konto(req, res, url) {
   const rest = url.slice('/api/konto/'.length);
-  if (!/^(info|login|login\/status|ich|logout|abo|abo\/abbrechen|ansehen|markt)$/.test(rest)) return json(req, res, 404, { error: 'Gibt es nicht.' });
+  if (!/^(info|login|login\/status|ich|logout|abo|abo\/abbrechen|ansehen)$/.test(rest)) return json(req, res, 404, { error: 'Gibt es nicht.' });
   let body;
   if (req.method === 'POST') {
     body = await new Promise((ok, nein) => { let b = ''; req.on('data', c => { b += c; if (b.length > 4000) { nein(new Error('zu groß')); req.destroy(); } }); req.on('end', () => ok(b)); req.on('error', nein); }).catch(() => null);
@@ -306,6 +304,7 @@ const server = http.createServer(async (req, res) => {
       return d ? json(req, res, 200, d) : json(req, res, 503, { fehler: cache.fehler || 'Keine Daten' }, { 'Retry-After': '30' });
     }
     if (url === '/index.html') return umleiten(req, res, '/');
+    if (url === '/auktionshaus') return umleiten(req, res, '/auction-orders'); // alte Seite, gibt es nicht mehr
     if (url.length > 1 && url.endsWith('/') && SEITEN_HTML.has(url.slice(0, -1))) return umleiten(req, res, url.slice(0, -1));
     if (SEITEN_HTML.has(url)) return await seite(req, res, SEITEN_HTML.get(url));
     if (url === '/sitemap.xml') return sitemap(req, res);

@@ -31,7 +31,6 @@ Der Server holt die Daten alle 30 Sekunden vom Bot und legt sie direkt in die Se
 | `/ablauf`     | So läuft ein Handel, Schutz vor Scammern         |
 | `/clan`       | Mitglieder mit Namenssuche (`/clan?name=Steve`)  |
 | `/bewertungen`| Vouches und Händler-Rangliste                    |
-| `/auktionshaus` | Auktionshaus live (mit Abo, oder für alle, wenn im Bot so eingestellt) |
 | `/auction-orders` | Item suchen: billigster AH-Preis, beste Order, Preistrend (`/auction-orders?item=ancient_debris`) |
 | `/abo`        | Login per `/msg`, Abo kaufen, Endertruhe und Inventar ansehen |
 | `/fragen`     | Häufige Fragen                                   |

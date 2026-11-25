@@ -1,0 +1,53 @@
+  <section class="seitenkopf ao-kopf">
+    <div class="breite">
+      <nav class="brotkrumen auftritt" aria-label="Pfad"><a href="/">Start</a><span>Auction-Orders</span></nav>
+      <h1 class="auftritt" style="--i:1">Auction-<span class="gold">Orders</span></h1>
+      <p class="einleitung auftritt" style="--i:2">Was ist ein Item gerade wert? Jede Nacht um <b>0 Uhr</b> sucht unser Bot jedes Item im Auktionshaus und in den Orders und merkt sich die Preise. Hier siehst du den billigsten Preis, die beste Order und wie sich der Preis entwickelt.</p>
+      <form class="ao-suche auftritt" style="--i:3" id="ao-form" role="search" autocomplete="off">
+        <label class="suche suche-gross"><span class="sr">Item suchen</span><input type="search" id="ao-suche" placeholder="Item suchen, z. B. Ancient Debris …" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="ao-treffer" aria-autocomplete="list"></label>
+        <div class="wiki-treffer ao-treffer" id="ao-treffer" role="listbox" aria-label="Treffer" hidden></div>
+      </form>
+      <p class="ao-chips auftritt" style="--i:4" id="ao-chips" hidden></p>
+    </div>
+  </section>
+
+  <section class="abschnitt kurz-oben">
+    <div class="breite" id="ao" data-bilder="{{BILDER}}">
+      <div class="ao-status" id="ao-status" aria-live="polite"><span class="ao-status-text">Preise werden geladen …</span></div>
+      <div class="box box-achtung ao-demo" id="ao-demo" hidden>
+        <p class="box-titel">Demo-Daten</p>
+        <p>Der Bot liefert noch keine Preise. Alle Zahlen auf dieser Seite sind ausgedacht, damit man sieht, wie es später aussieht. Sobald der Preis-Scanner im Bot läuft, stehen hier die echten Preise.</p>
+      </div>
+
+      <article class="ao-item" id="ao-item" hidden aria-live="polite"></article>
+
+      <div class="ao-liste" id="ao-liste">
+        <div class="kopfzeile">
+          <div><p class="marker">Marktübersicht</p><h2 id="ao-liste-titel">Gerade gefragt</h2></div>
+          <div class="ao-tabs" role="tablist" aria-label="Sortierung">
+            <button type="button" role="tab" data-tab="beliebt" aria-selected="true">Beliebt</button>
+            <button type="button" role="tab" data-tab="steigt" aria-selected="false">Steigt</button>
+            <button type="button" role="tab" data-tab="faellt" aria-selected="false">Fällt</button>
+            <button type="button" role="tab" data-tab="flip" aria-selected="false">Flip-Chancen</button>
+            <button type="button" role="tab" data-tab="az" aria-selected="false">A–Z</button>
+          </div>
+        </div>
+        <p class="hinweis ao-tab-info" id="ao-tab-info"></p>
+        <ol class="ao-karten" id="ao-karten"><li class="ao-karte lade"></li><li class="ao-karte lade"></li><li class="ao-karte lade"></li><li class="ao-karte lade"></li><li class="ao-karte lade"></li><li class="ao-karte lade"></li></ol>
+        <p class="ao-mehr"><button type="button" class="knopf zweit klein" id="ao-mehr" hidden>Mehr zeigen</button></p>
+      </div>
+
+      <details class="ao-wie">
+        <summary>Wie kommen die Preise zustande?</summary>
+        <ul>
+          <li><b>Großer Scan um 0 Uhr:</b> Der Bot sucht jedes Item mit <code>/ah</code> und <code>/orders</code> und blättert ein paar Seiten durch.</li>
+          <li><b>Billigster Preis:</b> das günstigste Angebot pro Stück. Umbenannte Fakes (anderes Item mit falschem Namen) zählen nicht.</li>
+          <li><b>Ø erste Seite:</b> Durchschnitt der 10 billigsten Angebote. Troll-Preise, die weit daneben liegen, fliegen raus.</li>
+          <li><b>Beste Order:</b> der höchste Preis pro Stück, den gerade jemand für das Item zahlt.</li>
+          <li><b>Beliebte Items</b> werden zusätzlich alle 2 Stunden gescannt. Dazu kommen die Live-Daten vom <a href="/auktionshaus">Auktionshaus</a>.</li>
+          <li><b>Flip-Chance:</b> Eine Order zahlt mehr als das billigste Angebot im AH. Wer schnell ist, kauft im AH und verkauft an die Order.</li>
+        </ul>
+        <p class="hinweis">Alle Preise ohne Gewähr. Was wirklich gilt, steht im Spiel.</p>
+      </details>
+    </div>
+  </section>

@@ -28,10 +28,13 @@ Der Server holt die Daten alle 30 Sekunden vom Bot und legt sie direkt in die Se
 | `/ablauf`     | So läuft ein Handel, Schutz vor Scammern         |
 | `/clan`       | Mitglieder mit Namenssuche (`/clan?name=Steve`)  |
 | `/bewertungen`| Vouches und Händler-Rangliste                    |
+| `/auktionshaus` | Auktionshaus live (mit Abo, oder für alle, wenn im Bot so eingestellt) |
+| `/abo`        | Login per `/msg`, Abo kaufen, Endertruhe und Inventar ansehen |
 | `/fragen`     | Häufige Fragen                                   |
 | `/wiki`       | Wiki-Übersicht mit Suche                         |
 | `/wiki/<name>`| ein Wiki-Artikel, z. B. `/wiki/preisliste-lesen` |
 | `/api/daten`  | die Bot-Daten als JSON (gecacht)                 |
+| `/api/konto/…`| Abo-Anfragen, werden an den Bot durchgereicht    |
 | `/health`     | `{"ok":true,...}` – für Render und das Keep-Alive |
 
 Neue Seite anlegen: Datei in `seiten/` erstellen und in `server.js` bei `SEITEN` eintragen. Menü, Titel und Sitemap kommen dann automatisch.
@@ -77,6 +80,8 @@ Dann `http://localhost:3000` öffnen. Mit `npm run dev` startet der Server bei j
 | `DISCORD_INVITE`  | `https://discord.gg/UT6dYchUB`             |
 | `CACHE_SEKUNDEN`  | `30`                                       |
 | `PORT`            | wird von Render gesetzt, lokal `3000`      |
+| `BOT_URL`         | Adresse des Bots, Standard: aus `COREMARKET_API` (`https://hugo.vortexpvp.eu`) |
+| `ITEM_BILDER`     | Quelle der Item-Bilder, Standard: `https://assets.mcasset.cloud/1.21.4/assets/minecraft/textures/{art}/{id}.png` |
 
 Eine Einladung, die im Bot eingetragen ist, hat Vorrang vor `DISCORD_INVITE`.
 

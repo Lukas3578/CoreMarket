@@ -69,16 +69,49 @@ function ladeDateien() {
     }
   };
   lauf(PUBLIC);
-  // Versionsnummer an CSS/JS hängen, damit Browser nach einem Deploy sofort die neue Version holen
-  const v = name => (dateien.get(name)?.etag || '').replace(/"/g, '').slice(0, 8);
-  const vorlage = dateien.get('/index.html').inhalt.toString('utf8')
-    .replace('style.css"', `style.css?v=${v('/style.css')}"`)
-    .replace('app.js"', `app.js?v=${v('/app.js')}"`)
-    .replaceAll('{{DISCORD}}', escAttr(DISCORD));
-  return vorlage;
 }
 const escAttr = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-const INDEX = ladeDateien();
+ladeDateien();
+
+/* ---------- Seiten ---------- */
+// Reihenfolge = Reihenfolge im Menü. "menue: false" -> nicht im Hauptmenü.
+const SEITEN = [
+  { pfad: '/', datei: 'start', menue: false, titel: 'CoreMarket – Spawner kaufen und verkaufen auf HugoSMP',
+    beschreibung: 'CoreMarket ist der Spawner-Trading-Clan auf HugoSMP: faire Preise für Blaze, Iron Golem, Creeper und mehr – sicher über Discord-Tickets mit verifizierten Händlern.' },
+  { pfad: '/preise', datei: 'preise', name: 'Preise', titel: 'Spawner-Preise & Rechner – CoreMarket',
+    beschreibung: 'Aktuelle An- und Verkaufspreise für Spawner auf HugoSMP, mit Mengenrabatten und Preisrechner.' },
+  { pfad: '/ablauf', datei: 'ablauf', name: "So läuft's", titel: 'So läuft ein Handel – CoreMarket',
+    beschreibung: 'In vier Schritten zum Spawner: Discord beitreten, Minecraft verbinden, Ticket öffnen, Übergabe im Spiel.' },
+  { pfad: '/clan', datei: 'clan', name: 'Clan', titel: 'Unser Clan – CoreMarket',
+    beschreibung: 'Alle Mitglieder von CoreMarket (CM0) und CoreMarket1 (CM1). Prüf hier, ob ein Händler wirklich zu uns gehört.' },
+  { pfad: '/bewertungen', datei: 'bewertungen', name: 'Bewertungen', titel: 'Bewertungen – CoreMarket',
+    beschreibung: 'Was Kunden über ihren Handel mit CoreMarket sagen, und welche Händler die meisten Vouches haben.' },
+  { pfad: '/fragen', datei: 'fragen', name: 'Fragen', titel: 'Häufige Fragen – CoreMarket',
+    beschreibung: 'Antworten auf die häufigsten Fragen zum Spawner-Handel mit CoreMarket auf HugoSMP.' },
+];
+const SEITEN_DIR = path.join(__dirname, 'seiten');
+function baueSeiten() {
+  const v = name => (dateien.get(name)?.etag || '').replace(/"/g, '').slice(0, 8);
+  const layout = fs.readFileSync(path.join(SEITEN_DIR, '_layout.html'), 'utf8')
+    .replace('/style.css"', `/style.css?v=${v('/style.css')}"`)
+    .replace('/app.js"', `/app.js?v=${v('/app.js')}"`);
+  const fertig = new Map();
+  for (const s of SEITEN) {
+    const nav = SEITEN.filter(x => x.menue !== false)
+      .map(x => `<a href="${x.pfad}"${x.pfad === s.pfad ? ' class="aktiv" aria-current="page"' : ''}>${escAttr(x.name)}</a>`).join('');
+    const html = layout
+      .replace('{{INHALT}}', fs.readFileSync(path.join(SEITEN_DIR, s.datei + '.html'), 'utf8'))
+      .replace('{{NAV}}', nav)
+      .replaceAll('{{TITEL}}', escAttr(s.titel))
+      .replaceAll('{{BESCHREIBUNG}}', escAttr(s.beschreibung))
+      .replaceAll('{{PFAD}}', s.pfad)
+      .replaceAll('{{SEITE}}', s.datei)
+      .replaceAll('{{DISCORD}}', escAttr(DISCORD));
+    fertig.set(s.pfad, html);
+  }
+  return fertig;
+}
+const SEITEN_HTML = baueSeiten();
 
 /* ---------- Bot-Daten mit Cache ---------- */
 const cache = { daten: null, zeit: 0, fehler: null, laeuft: null };
@@ -131,11 +164,11 @@ function json(req, res, status, obj, extra = {}) {
   senden(req, res, status, body, { 'Content-Type': TYPEN['.json'], 'Cache-Control': 'no-store', _gzip: body.length > 512 ? zlib.gzipSync(body) : null, ...extra });
 }
 
-async function startseite(req, res) {
+async function seite(req, res, vorlage) {
   const d = await daten();
   // Daten direkt in die Seite legen: kein zweiter Request, Inhalte sofort da
   const roh = JSON.stringify({ daten: d, discord: DISCORD }).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
-  const html = Buffer.from(INDEX.replace('<!--START-DATEN-->', `<script id="start-daten" type="application/json">${roh}</script>`));
+  const html = Buffer.from(vorlage.replace('<!--START-DATEN-->', `<script id="start-daten" type="application/json">${roh}</script>`));
   senden(req, res, 200, html, { 'Content-Type': TYPEN['.html'], 'Cache-Control': 'no-cache', _gzip: zlib.gzipSync(html) });
 }
 
@@ -146,6 +179,17 @@ function datei(req, res, url) {
   const lange = /\?v=/.test(req.url) || /\.(png|ico|svg)$/.test(url);
   senden(req, res, 200, f.inhalt, { 'Content-Type': f.typ, ETag: f.etag, 'Cache-Control': lange ? 'public, max-age=31536000, immutable' : 'public, max-age=300', _gzip: f.gzip });
   return true;
+}
+
+function umleiten(req, res, ziel) {
+  res.writeHead(301, { ...SICHERHEIT, Location: ziel, 'Cache-Control': 'public, max-age=3600' });
+  res.end();
+}
+
+function sitemap(req, res) {
+  const basis = `https://${req.headers.host || 'coremarket.onrender.com'}`;
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${SEITEN.map(s => `  <url><loc>${basis}${s.pfad}</loc></url>`).join('\n')}\n</urlset>\n`;
+  senden(req, res, 200, xml, { 'Content-Type': TYPEN['.xml'], 'Cache-Control': 'public, max-age=3600' });
 }
 
 function nichtGefunden(req, res) {
@@ -166,7 +210,10 @@ const server = http.createServer(async (req, res) => {
       const d = await daten();
       return d ? json(req, res, 200, d) : json(req, res, 503, { fehler: cache.fehler || 'Keine Daten' }, { 'Retry-After': '30' });
     }
-    if (url === '/' || url === '/index.html') return await startseite(req, res);
+    if (url === '/index.html') return umleiten(req, res, '/');
+    if (url.length > 1 && url.endsWith('/') && SEITEN_HTML.has(url.slice(0, -1))) return umleiten(req, res, url.slice(0, -1));
+    if (SEITEN_HTML.has(url)) return await seite(req, res, SEITEN_HTML.get(url));
+    if (url === '/sitemap.xml') return sitemap(req, res);
     if (url === '/404.html') return nichtGefunden(req, res);
     if (datei(req, res, url)) return;
     nichtGefunden(req, res);

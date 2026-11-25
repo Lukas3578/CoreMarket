@@ -10,8 +10,9 @@
 ## Aufbau
 
 ```
-server.js            Webserver: Seite ausliefern, Bot-Daten cachen, /health
-public/              alles, was der Browser bekommt (HTML, CSS, JS, Logo)
+server.js            Webserver: Seiten bauen, Bot-Daten cachen, /health
+seiten/              die einzelnen Seiten (_layout.html = Kopf, Menü, Fuß)
+public/              CSS, JS, Logo und andere Dateien für den Browser
 keepalive/           Script, das die Seite auf Render wach hält
 render.yaml          Render-Blueprint
 ```
@@ -20,9 +21,16 @@ Der Server holt die Daten alle 30 Sekunden vom Bot und legt sie direkt in die Se
 
 | Pfad          | Inhalt                                           |
 |---------------|--------------------------------------------------|
-| `/`           | die Seite, mit den aktuellen Daten eingebettet   |
+| `/`           | Startseite                                       |
+| `/preise`     | Preisliste und Rechner                           |
+| `/ablauf`     | So läuft ein Handel, Schutz vor Scammern         |
+| `/clan`       | Mitglieder mit Namenssuche (`/clan?name=Steve`)  |
+| `/bewertungen`| Vouches und Händler-Rangliste                    |
+| `/fragen`     | Häufige Fragen                                   |
 | `/api/daten`  | die Bot-Daten als JSON (gecacht)                 |
 | `/health`     | `{"ok":true,...}` – für Render und das Keep-Alive |
+
+Neue Seite anlegen: Datei in `seiten/` erstellen und in `server.js` bei `SEITEN` eintragen. Menü, Titel und Sitemap kommen dann automatisch.
 
 ## Lokal starten
 

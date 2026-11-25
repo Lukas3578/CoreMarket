@@ -356,7 +356,7 @@
 
   /* ---------- Lichtschein unter der Maus ---------- */
   if (!ruhig && matchMedia('(hover: hover)').matches) {
-    const LICHT = '.vorschau-karte, .weg, .zitat, .schritt, .clan, .warum-punkt, .rang, .regeln li, .tabelle-rahmen';
+    const LICHT = '.vorschau-karte, .weg, .zitat, .schritt, .clan, .warum-punkt, .rang, .regeln li, .tabelle-rahmen, .wiki-karte';
     addEventListener('pointermove', e => {
       const el = e.target.closest?.(LICHT);
       if (!el) return;
@@ -364,6 +364,61 @@
       el.style.setProperty('--mx', `${e.clientX - r.left}px`);
       el.style.setProperty('--my', `${e.clientY - r.top}px`);
     }, { passive: true });
+  }
+
+  /* ---------- Wiki: Suche ---------- */
+  const wikiSuche = $('#wiki-suche'), wikiTreffer = $('#wiki-treffer');
+  if (wikiSuche && wikiTreffer) {
+    let index = [];
+    try { index = JSON.parse($('#wiki-index').textContent); } catch { /* leer */ }
+    const hervor = (t, q) => { const p = t.toLowerCase().indexOf(q); return p < 0 ? esc(t) : esc(t.slice(0, p)) + '<mark>' + esc(t.slice(p, p + q.length)) + '</mark>' + esc(t.slice(p + q.length)); };
+    let auswahl = -1;
+    const zeigen = () => {
+      const q = wikiSuche.value.trim().toLowerCase();
+      auswahl = -1;
+      if (!q) { wikiTreffer.hidden = true; return; }
+      const woerter = q.split(/\s+/);
+      const liste = index
+        .map(a => {
+          const titel = a.t.toLowerCase(), beschr = a.b.toLowerCase();
+          if (!woerter.every(w => titel.includes(w) || beschr.includes(w) || a.x.includes(w))) return null;
+          return { a, punkte: (titel.includes(q) ? 10 : 0) + (beschr.includes(q) ? 4 : 0) + woerter.filter(w => titel.includes(w)).length * 2 };
+        })
+        .filter(Boolean).sort((x, y) => y.punkte - x.punkte).slice(0, 8);
+      wikiTreffer.innerHTML = liste.length
+        ? liste.map(({ a }) => `<a href="/wiki/${esc(a.s)}"><span class="kat">${esc(a.k)}</span>${hervor(a.t, q)}<small>${hervor(a.b, q)}</small></a>`).join('')
+        : `<p class="nichts">Nichts gefunden zu „${esc(wikiSuche.value)}“. Frag im Discord – wir helfen dir.</p>`;
+      wikiTreffer.hidden = false;
+    };
+    wikiSuche.addEventListener('input', zeigen);
+    wikiSuche.addEventListener('focus', zeigen);
+    wikiSuche.addEventListener('keydown', e => {
+      const links = [...wikiTreffer.querySelectorAll('a')];
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!links.length) return;
+        auswahl = (auswahl + (e.key === 'ArrowDown' ? 1 : -1) + links.length) % links.length;
+        links.forEach((l, k) => l.classList.toggle('markiert', k === auswahl));
+        links[auswahl].scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'Enter' && links.length) {
+        location.href = links[Math.max(0, auswahl)].href;
+      } else if (e.key === 'Escape') { wikiTreffer.hidden = true; }
+    });
+    document.addEventListener('click', e => { if (!e.target.closest('.wiki-suche')) wikiTreffer.hidden = true; });
+    // Taste "/" springt in die Suche
+    addEventListener('keydown', e => { if (e.key === '/' && document.activeElement !== wikiSuche && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); wikiSuche.focus(); } });
+  }
+
+  /* ---------- Wiki: Seitenleiste am Handy zu, Inhaltsverzeichnis folgt ---------- */
+  const klapp = $('.wiki-leiste-klapp');
+  if (klapp && matchMedia('(max-width: 900px)').matches) klapp.open = false;
+  const tocLinks = [...$$('.wiki-toc a')];
+  if (tocLinks.length && 'IntersectionObserver' in window) {
+    const ziele = tocLinks.map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) tocLinks.forEach(a => a.classList.toggle('aktiv', a.getAttribute('href') === '#' + e.target.id));
+    }), { rootMargin: '-20% 0px -70% 0px' });
+    ziele.forEach(z => io.observe(z));
   }
 
   /* ---------- Käfig folgt leicht der Maus ---------- */

@@ -725,3 +725,94 @@ body::after {
 }
 .seitenkopf:has(.wiki-suche) { overflow: visible; z-index: 5; }
 .seitenkopf:has(.wiki-suche)::after { right: 0; }
+
+/* ---------- Abo und Auktionshaus ---------- */
+.konto > * { max-width: 860px; }
+.konto h2 { font: 800 30px/1.15 var(--text); margin: 0 0 10px; letter-spacing: -.02em; }
+.hinweis-text { color: var(--papier-2); max-width: 60ch; margin: 0 0 22px; }
+.hinweis-text b { color: var(--papier); }
+.konto-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: end; max-width: 560px; }
+#k-ansehen-form { grid-template-columns: auto minmax(0, 1fr) auto; max-width: none; }
+.konto-form input, .konto-form select, .feld-klein select {
+  font: 500 17px/1.2 var(--text); color: var(--papier); background: var(--obsidian); border: 2px solid var(--obsidian-3); border-radius: 8px; height: 50px; padding: 0 14px; width: 100%;
+  transition: border-color .2s, box-shadow .2s;
+}
+.konto-form input:focus, .konto-form select:focus, .feld-klein select:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 4px rgba(242, 178, 59, .15); }
+.konto-form .knopf { height: 50px; display: inline-flex; align-items: center; }
+.befehl-box { margin-top: 26px; padding: 22px 24px; border-radius: 10px; border: 1px solid var(--obsidian-3); background: var(--obsidian-2); max-width: 640px; }
+.befehl-box > p:first-child { margin: 0 0 12px; }
+.befehl { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.befehl code { font: 600 20px/1.3 ui-monospace, 'Cascadia Mono', Consolas, monospace; color: var(--gold-hell); background: var(--obsidian); border: 1px solid var(--obsidian-4); border-radius: 6px; padding: 10px 14px; user-select: all; word-break: break-all; }
+.text-knopf { background: none; border: 0; padding: 0; color: var(--gold); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.text-knopf:hover { color: var(--gold-hell); }
+.konto-kopf { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+.konto-fuss { margin-top: 48px; color: var(--papier-2); font-size: 15px; }
+#k-art-hinweis { margin-top: 10px; }
+.fehler-text { color: var(--rot); margin: 22px 0 0; }
+.ergebnis { margin-top: 26px; }
+.fenster-kopf h3 { margin: 0 0 4px; font: 700 22px/1.2 var(--text); }
+.fenster-kopf { margin-bottom: 14px; }
+
+/* Inventar-Raster wie im Spiel */
+.mc-fenster { list-style: none; margin: 0; padding: 10px; display: grid; grid-template-columns: repeat(9, minmax(0, 52px)); gap: 4px; background: #c6c6c6; border-radius: 6px; width: max-content; max-width: 100%; box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #555; }
+.slot { aspect-ratio: 1; background: #8b8b8b; box-shadow: inset 2px 2px 0 #373737, inset -2px -2px 0 #fff; position: relative; }
+.slot.deko { background: #6f6f6f; }
+.slot button { position: absolute; inset: 0; width: 100%; height: 100%; background: none; border: 0; padding: 0; cursor: pointer; display: grid; place-items: center; }
+.slot button:hover, .slot.an button { background: rgba(255, 255, 255, .35); }
+.slot button:focus-visible { outline: 3px solid var(--gold); outline-offset: -3px; }
+.slot .mc-icon { width: 70%; height: 70%; }
+.anzahl { position: absolute; right: 3px; bottom: 1px; font: 700 15px/1 var(--pixel); color: #fff; text-shadow: 2px 2px 0 #3f3f3f; }
+.haltbar { position: absolute; left: 12%; right: 12%; bottom: 7%; height: 3px; background: #000; }
+.haltbar i { display: block; height: 100%; }
+.mc-icon { display: inline-grid; place-items: center; width: 32px; height: 32px; flex: none; position: relative; image-rendering: pixelated; }
+.mc-icon img { width: 100%; height: 100%; image-rendering: pixelated; }
+.mc-icon:not(:has(img))::after { content: attr(data-kurz); font: 700 12px/1 var(--pixel); color: var(--papier); background: var(--obsidian-3); border-radius: 4px; width: 100%; height: 100%; display: grid; place-items: center; }
+.slot .mc-icon:not(:has(img))::after { color: #fff; background: #555; }
+.mc-icon.glanz::before { content: ''; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen; background: linear-gradient(115deg, transparent 30%, rgba(170, 90, 255, .55) 45%, transparent 60%) 0 0 / 300% 100%; -webkit-mask: var(--maske) center / 100% 100% no-repeat; mask: var(--maske) center / 100% 100% no-repeat; animation: verzaubert 3s linear infinite; }
+@keyframes verzaubert { to { background-position: -300% 0; } }
+@media (prefers-reduced-motion: reduce) { .mc-icon.glanz::before { animation: none; background-position: 50% 0; } }
+.item-info { margin-top: 16px; max-width: 520px; }
+/* Tooltip wie in Minecraft */
+.mc-tooltip { display: inline-block; max-width: 100%; padding: 8px 10px; background: rgba(16, 0, 16, .94); border: 2px solid; border-image: linear-gradient(#5000ff, #28007f) 1; font: 500 17px/1.45 var(--pixel); color: #fff; text-shadow: 2px 2px 0 rgba(0, 0, 0, .45); overflow-wrap: anywhere; }
+.mc-tooltip .tt-name { margin-bottom: 4px; }
+.verschleiert { filter: blur(2px); }
+.item-info-kopf { display: flex; gap: 12px; align-items: center; }
+.item-info .verz { color: #b9a6ff; margin: 12px 0 0; }
+.item-info .lore { margin: 10px 0 0; padding: 0; list-style: none; color: var(--papier-2); font-size: 15px; }
+.verlauf { margin-top: 40px; }
+.verlauf h3 { font: 700 18px/1.2 var(--text); margin: 0 0 10px; }
+.verlauf ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+
+/* Auktionshaus-Liste */
+.markt-leiste { display: flex; gap: 18px; align-items: end; flex-wrap: wrap; }
+.feld-klein { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--papier-2); }
+.feld-klein select { width: auto; height: 46px; padding-right: 36px; }
+.haken { display: inline-flex; gap: 8px; align-items: center; color: var(--papier-2); font-size: 15px; height: 46px; cursor: pointer; }
+.haken input { width: 18px; height: 18px; accent-color: var(--gold); }
+.markt-stand { color: var(--papier-2); font-size: 15px; margin: 18px 0 10px; }
+.markt-liste { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--obsidian-3); }
+.markt-zeile { display: grid; grid-template-columns: 40px minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.4fr); gap: 16px; align-items: center; padding: 14px 6px; border-bottom: 1px solid var(--obsidian-3); }
+.markt-zeile .mc-icon { width: 36px; height: 36px; }
+.markt-name { display: flex; flex-direction: column; min-width: 0; }
+.markt-name b { overflow-wrap: anywhere; }
+.markt-preis { display: flex; flex-direction: column; }
+.markt-preis .betrag { font-size: 20px; }
+.markt-wer { display: grid; grid-template-columns: 24px 1fr; gap: 2px 10px; align-items: center; font-size: 15px; }
+.markt-wer img { border-radius: 4px; image-rendering: pixelated; }
+.markt-wer .neu-seit { grid-column: 2; font-size: 13px; }
+.markt-zeile.fake { opacity: .6; }
+.fake-marke { font-size: 12px; font-weight: 700; color: var(--rot); border: 1px solid currentColor; border-radius: 4px; padding: 1px 6px; margin-left: 6px; }
+.markt-zeile.frisch { animation: markt-neu 2.4s ease-out; }
+@keyframes markt-neu { from { background: rgba(242, 178, 59, .22); } to { background: transparent; } }
+.markt-weg { margin-top: 36px; color: var(--papier-2); }
+.markt-weg summary { cursor: pointer; font-weight: 600; }
+.markt-liste.klein .markt-zeile { opacity: .7; padding: 10px 6px; }
+@media (max-width: 720px) {
+  .konto-form, #k-ansehen-form { grid-template-columns: 1fr; }
+  .markt-zeile { grid-template-columns: 36px minmax(0, 1fr) auto; }
+  .markt-wer { grid-column: 2 / -1; }
+  .mc-fenster { grid-template-columns: repeat(9, minmax(0, 1fr)); width: 100%; padding: 6px; gap: 3px; }
+  .anzahl { font-size: 12px; }
+  .suche input, .suche input:focus { width: 100%; }
+  .markt-leiste .suche { flex: 1 1 100%; }
+}

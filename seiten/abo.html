@@ -1,0 +1,59 @@
+  <section class="seitenkopf">
+    <div class="breite">
+      <nav class="brotkrumen auftritt" aria-label="Pfad"><a href="/">Start</a><span>Abo</span></nav>
+      <h1 class="auftritt" style="--i:1">Mehr sehen mit dem Abo</h1>
+      <p class="einleitung auftritt" style="--i:2" id="abo-einleitung">Mit dem Abo siehst du die Endertruhe und das Inventar anderer Spieler und das ganze Auktionshaus live. Bezahlt wird im Spiel an unseren Bank-Account, ein Passwort brauchst du nicht.</p>
+    </div>
+  </section>
+
+  <section class="abschnitt kurz-oben">
+    <div class="breite konto" id="konto" data-bilder="{{BILDER}}">
+      <p class="leer" id="konto-lade">Einen Moment …</p>
+
+      <div class="konto-schritt" id="k-login" hidden>
+        <h2>Anmelden</h2>
+        <p class="hinweis-text">Gib deinen Minecraft-Namen ein. Du bekommst einen Code, den schickst du im Spiel per <b>/msg</b> an unseren Bank-Account. So wissen wir, dass der Account dir gehört.</p>
+        <form class="konto-form" id="k-login-form" novalidate>
+          <label class="feld"><span>Minecraft-Name</span><input id="k-mc" maxlength="17" autocomplete="username" spellcheck="false" placeholder="z. B. Steve123" required></label>
+          <button class="knopf">Code holen</button>
+        </form>
+        <div class="befehl-box" id="k-code" hidden>
+          <p>Schreib das im Spiel auf <b id="k-server">HugoSMP</b> in den Chat:</p>
+          <div class="befehl"><code id="k-code-text"></code><button type="button" class="knopf zweit klein" data-kopie="k-code-text">Kopieren</button></div>
+          <p class="hinweis" id="k-code-status">Warte auf deine Nachricht … Der Code gilt 10 Minuten.</p>
+        </div>
+      </div>
+
+      <div class="konto-schritt" id="k-kaufen" hidden>
+        <h2>Abo kaufen</h2>
+        <p class="hinweis-text" id="k-preis-text"></p>
+        <form class="konto-form" id="k-kaufen-form">
+          <label class="feld"><span>Wie lange</span><select id="k-monate"><option value="1">1 Monat</option><option value="2">2 Monate</option><option value="3">3 Monate</option><option value="6">6 Monate</option><option value="12">12 Monate</option></select></label>
+          <button class="knopf">Weiter zur Zahlung</button>
+        </form>
+        <div class="befehl-box" id="k-zahlen" hidden>
+          <p>Zahl jetzt im Spiel an unseren Bank-Account. Erst danach mit <b>confirm</b> bestätigen, wenn der Server fragt:</p>
+          <div class="befehl"><code id="k-pay-text"></code><button type="button" class="knopf zweit klein" data-kopie="k-pay-text">Kopieren</button></div>
+          <p class="hinweis" id="k-zahlen-status">Warte auf deine Zahlung … Nur diese Zahlung zählt fürs Abo, andere Zahlungen an uns nicht.</p>
+          <button type="button" class="text-knopf" id="k-abbrechen">Abbrechen</button>
+        </div>
+      </div>
+
+      <div class="konto-schritt" id="k-tool" hidden>
+        <div class="konto-kopf"><h2>Ansehen</h2><p class="hinweis" id="k-abo-bis"></p></div>
+        <form class="konto-form" id="k-ansehen-form" novalidate>
+          <div class="umschalter" role="radiogroup" aria-label="Was ansehen"><span class="umschalter-zeiger" aria-hidden="true"></span>
+            <label><input type="radio" name="art" value="ec" checked><span>Endertruhe</span></label>
+            <label><input type="radio" name="art" value="inv"><span>Inventar</span></label>
+          </div>
+          <label class="feld"><span>Spieler</span><input id="k-ziel" maxlength="17" spellcheck="false" autocomplete="off" placeholder="Minecraft-Name" required></label>
+          <button class="knopf">Ansehen</button>
+        </form>
+        <p class="hinweis" id="k-art-hinweis">Das Inventar kann man nur sehen, wenn der Spieler gerade online ist.</p>
+        <div class="ergebnis" id="k-ergebnis" aria-live="polite"></div>
+        <div class="verlauf" id="k-verlauf"></div>
+      </div>
+
+      <p class="konto-fuss" id="k-fuss" hidden>Angemeldet als <b id="k-ich"></b>. <button type="button" class="text-knopf" id="k-abmelden">Abmelden</button></p>
+    </div>
+  </section>

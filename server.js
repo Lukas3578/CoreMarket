@@ -18,6 +18,11 @@ const API = process.env.COREMARKET_API || 'https://hugo.vortexpvp.eu/api/public'
 const DISCORD = process.env.DISCORD_INVITE || 'https://discord.gg/UT6dYchUB';
 const CACHE_MS = Math.max(5, Number(process.env.CACHE_SEKUNDEN) || 30) * 1000;
 const TIMEOUT_MS = 8000;
+// Abo-Funktionen (Login, Endertruhe/Inventar, Auktionshaus) laufen über den Bot. Die Website reicht die Anfragen nur durch.
+const BOT = (process.env.BOT_URL || new URL(API).origin).replace(/\/+$/, '');
+// Item-Bilder (Vanilla-Texturen). Eigene Quelle per ITEM_BILDER, {art} = item oder block, {id} = z. B. diamond_sword
+const BILDER = process.env.ITEM_BILDER || 'https://assets.mcasset.cloud/1.21.4/assets/minecraft/textures/{art}/{id}.png';
+const BILDER_HOST = (() => { try { return new URL(BILDER.replace(/[{}]/g, '')).origin; } catch { return ''; } })();
 const PUBLIC = path.join(__dirname, 'public');
 const START = Date.now();
 
@@ -42,7 +47,7 @@ const SICHERHEIT = {
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
   'Content-Security-Policy': [
     "default-src 'self'",
-    "img-src 'self' data: https://mc-heads.net",
+    `img-src 'self' data: https://mc-heads.net${BILDER_HOST ? ' ' + BILDER_HOST : ''}`,
     "style-src 'self' https://fonts.googleapis.com",
     "style-src-attr 'unsafe-inline'",
     "font-src https://fonts.gstatic.com",
@@ -86,6 +91,10 @@ const SEITEN = [
     beschreibung: 'Alle Mitglieder von CoreMarket (CM0) und CoreMarket1 (CM1). Prüf hier, ob ein Händler wirklich zu uns gehört.' },
   { pfad: '/bewertungen', datei: 'bewertungen', name: 'Bewertungen', titel: 'Bewertungen – CoreMarket',
     beschreibung: 'Was Kunden über ihren Handel mit CoreMarket sagen, und welche Händler die meisten Vouches haben.' },
+  { pfad: '/auktionshaus', datei: 'auktionshaus', name: 'Auktionshaus', skript: true, titel: 'Auktionshaus live – CoreMarket',
+    beschreibung: 'Alle Angebote aus dem HugoSMP-Auktionshaus, live gelesen. Neue Angebote erscheinen sofort.' },
+  { pfad: '/abo', datei: 'abo', name: 'Abo', skript: true, titel: 'Abo: Endertruhe, Inventar und Auktionshaus – CoreMarket',
+    beschreibung: 'Mit dem CoreMarket-Abo siehst du Endertruhen und Inventare anderer Spieler auf HugoSMP und das Auktionshaus live.' },
   { pfad: '/fragen', datei: 'fragen', name: 'Fragen', titel: 'Häufige Fragen – CoreMarket',
     beschreibung: 'Antworten auf die häufigsten Fragen zum Spawner-Handel mit CoreMarket auf HugoSMP.' },
 ];
@@ -120,7 +129,9 @@ function baueSeiten() {
       .replaceAll('{{BESCHREIBUNG}}', escAttr(s.beschreibung))
       .replaceAll('{{PFAD}}', s.pfad)
       .replaceAll('{{SEITE}}', s.datei)
-      .replaceAll('{{DISCORD}}', escAttr(DISCORD));
+      .replaceAll('{{DISCORD}}', escAttr(DISCORD))
+      .replaceAll('{{BILDER}}', escAttr(BILDER))
+      .replace('</body>', () => s.skript ? `<script src="/konto.js?v=${v('/konto.js')}" defer></script>\n</body>` : '</body>');
     fertig.set(s.pfad, html);
   }
   return fertig;
@@ -158,6 +169,28 @@ async function daten() {
     else await holeDaten();
   }
   return cache.daten ? { ...cache.daten, _alt: Date.now() - cache.zeit > CACHE_MS * 4 } : null;
+}
+
+/* ---------- Abo: Anfragen an den Bot durchreichen ---------- */
+async function konto(req, res, url) {
+  const rest = url.slice('/api/konto/'.length);
+  if (!/^(info|login|login\/status|ich|logout|abo|abo\/abbrechen|ansehen|markt)$/.test(rest)) return json(req, res, 404, { error: 'Gibt es nicht.' });
+  let body;
+  if (req.method === 'POST') {
+    body = await new Promise((ok, nein) => { let b = ''; req.on('data', c => { b += c; if (b.length > 4000) { nein(new Error('zu groß')); req.destroy(); } }); req.on('end', () => ok(b)); req.on('error', nein); }).catch(() => null);
+    if (body === null) return json(req, res, 413, { error: 'Anfrage zu groß.' });
+  }
+  const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), rest === 'ansehen' ? 45000 : 12000);
+  try {
+    const q = new URL(req.url, 'http://x').search;
+    const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+    const r = await fetch(`${BOT}/api/kunde/${rest}${q}`, { method: req.method === 'POST' ? 'POST' : 'GET', signal: ctrl.signal, body: body || undefined,
+      headers: { 'content-type': 'application/json', 'user-agent': 'CoreMarket-Website', 'x-kunde-ip': ip, ...(req.headers.authorization ? { authorization: req.headers.authorization } : {}) } });
+    const text = await r.text(); let d; try { d = JSON.parse(text); } catch { d = { error: 'Der Bot hat komisch geantwortet.' }; }
+    return json(req, res, r.status, d);
+  } catch (e) {
+    return json(req, res, 503, { error: e.name === 'AbortError' ? 'Der Bot hat zu lange gebraucht. Versuch es gleich nochmal.' : 'Der Bot ist gerade nicht erreichbar.' });
+  } finally { clearTimeout(t); }
 }
 
 /* ---------- Antworten ---------- */
@@ -215,8 +248,9 @@ const server = http.createServer(async (req, res) => {
   const t0 = Date.now();
   res.on('finish', () => { if (req.url !== '/health') console.log(`${req.method} ${req.url} ${res.statusCode} ${Date.now() - t0}ms`); });
   try {
-    if (req.method !== 'GET' && req.method !== 'HEAD') return senden(req, res, 405, 'Methode nicht erlaubt', { Allow: 'GET, HEAD', 'Content-Type': TYPEN['.txt'] });
     const url = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+    if (url.startsWith('/api/konto/') && (req.method === 'GET' || req.method === 'POST')) return await konto(req, res, url);
+    if (req.method !== 'GET' && req.method !== 'HEAD') return senden(req, res, 405, 'Methode nicht erlaubt', { Allow: 'GET, HEAD', 'Content-Type': TYPEN['.txt'] });
     if (url.includes('..') || url.includes('\0')) return nichtGefunden(req, res);
 
     if (url === '/health' || url === '/healthz') return json(req, res, 200, { ok: true, laufzeit: Math.round((Date.now() - START) / 1000), daten: cache.daten ? Math.round((Date.now() - cache.zeit) / 1000) + 's alt' : 'keine', fehler: cache.fehler });

@@ -22,6 +22,9 @@ const TIMEOUT_MS = 8000;
 const BOT = (process.env.BOT_URL || new URL(API).origin).replace(/\/+$/, '');
 // Item-Bilder (Vanilla-Texturen). Eigene Quelle per ITEM_BILDER, {art} = item oder block, {id} = z. B. diamond_sword
 const BILDER = process.env.ITEM_BILDER || 'https://assets.mcasset.cloud/1.21.4/assets/minecraft/textures/{art}/{id}.png';
+// Preise aus Auktionshaus und Orders (bot/preistracker.js). PREISE_DEMO: auto = Demo-Daten, bis der Bot echte liefert; an; aus
+const PREISE_API = (process.env.PREISE_API || `${API.replace(/\/+$/, '')}/preise`).replace(/\/+$/, '');
+const PREISE_DEMO = (process.env.PREISE_DEMO || 'auto').toLowerCase();
 const BILDER_HOST = (() => { try { return new URL(BILDER.replace(/[{}]/g, '')).origin; } catch { return ''; } })();
 const PUBLIC = path.join(__dirname, 'public');
 const START = Date.now();
@@ -93,6 +96,8 @@ const SEITEN = [
     beschreibung: 'Was Kunden über ihren Handel mit CoreMarket sagen, und welche Händler die meisten Vouches haben.' },
   { pfad: '/auktionshaus', datei: 'auktionshaus', name: 'Auktionshaus', skript: true, titel: 'Auktionshaus live – CoreMarket',
     beschreibung: 'Alle Angebote aus dem HugoSMP-Auktionshaus, live gelesen. Neue Angebote erscheinen sofort.' },
+  { pfad: '/auction-orders', datei: 'auction-orders', name: 'Auction-Orders', js: 'preise.js', titel: 'Auction-Orders: Item-Preise und Preistrend – CoreMarket',
+    beschreibung: 'Was ist ein Item auf HugoSMP gerade wert? Billigster Preis im Auktionshaus, beste Order und der Preistrend der letzten Tage – jede Nacht neu gescannt.' },
   { pfad: '/abo', datei: 'abo', name: 'Abo', skript: true, titel: 'Abo: Endertruhe, Inventar und Auktionshaus – CoreMarket',
     beschreibung: 'Mit dem CoreMarket-Abo siehst du Endertruhen und Inventare anderer Spieler auf HugoSMP und das Auktionshaus live.' },
   { pfad: '/fragen', datei: 'fragen', name: 'Fragen', titel: 'Häufige Fragen – CoreMarket',
@@ -131,7 +136,7 @@ function baueSeiten() {
       .replaceAll('{{SEITE}}', s.datei)
       .replaceAll('{{DISCORD}}', escAttr(DISCORD))
       .replaceAll('{{BILDER}}', escAttr(BILDER))
-      .replace('</body>', () => s.skript ? `<script src="/konto.js?v=${v('/konto.js')}" defer></script>\n</body>` : '</body>');
+      .replace('</body>', () => (s.skript ? `<script src="/konto.js?v=${v('/konto.js')}" defer></script>\n` : '') + (s.js ? `<script src="/${s.js}?v=${v('/' + s.js)}" defer></script>\n` : '') + '</body>');
     fertig.set(s.pfad, html);
   }
   return fertig;
@@ -191,6 +196,47 @@ async function konto(req, res, url) {
   } catch (e) {
     return json(req, res, 503, { error: e.name === 'AbortError' ? 'Der Bot hat zu lange gebraucht. Versuch es gleich nochmal.' : 'Der Bot ist gerade nicht erreichbar.' });
   } finally { clearTimeout(t); }
+}
+
+/* ---------- Preise (Auktionshaus + Orders) vom Bot, mit Cache und Demo-Fallback ---------- */
+const preisDemo = require('./preise-demo');
+const preisCache = new Map(); // schluessel -> { d, zeit, laeuft }
+let preiseEcht = false; // sobald der Bot einmal echte Preise geliefert hat, nie wieder Demo
+async function preisHolen(schluessel, url, maxAlterMs) {
+  let c = preisCache.get(schluessel);
+  if (!c) { c = { d: null, zeit: 0, laeuft: null, status: 0 }; preisCache.set(schluessel, c); if (preisCache.size > 400) preisCache.delete(preisCache.keys().next().value); }
+  if (Date.now() - c.zeit < maxAlterMs) return c;
+  if (!c.laeuft) c.laeuft = (async () => {
+    const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+    try {
+      const r = await fetch(url, { signal: ctrl.signal, headers: { accept: 'application/json', 'user-agent': 'CoreMarket-Website' } });
+      c.status = r.status;
+      if (r.status === 404) { c.d = null; c.zeit = Date.now(); return; }
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const d = await r.json();
+      if (!d || typeof d !== 'object' || (schluessel === '_alle' ? !Array.isArray(d.items) : !d.id)) throw new Error('keine gültigen Preis-Daten');
+      c.d = d; c.zeit = Date.now(); preiseEcht = true;
+    } catch (e) { c.status = 0; console.warn(`[preise] ${schluessel}: ${e.name === 'AbortError' ? 'Timeout' : e.message}`); }
+    finally { clearTimeout(t); c.laeuft = null; }
+  })();
+  if (!c.d) await c.laeuft; // ohne alte Daten warten, sonst alte sofort liefern
+  return c;
+}
+async function preise(req, res, url) {
+  const id = url === '/api/preise' ? '' : url.slice('/api/preise/'.length).toLowerCase().replace(/^minecraft:/, '');
+  if (id && !/^[a-z0-9_]{1,64}$/.test(id)) return json(req, res, 404, { error: 'Dieses Item gibt es nicht.' });
+  const demo = PREISE_DEMO === 'an' || PREISE_DEMO === 'true' || PREISE_DEMO === '1';
+  let c = null;
+  if (!demo) c = await preisHolen(id || '_alle', id ? `${PREISE_API}/${encodeURIComponent(id)}` : PREISE_API, id ? 60000 : 45000);
+  if (c?.d) return json(req, res, 200, c.d, { 'Cache-Control': 'public, max-age=30' });
+  // Bot kennt das Item (noch) nicht
+  if (id && preiseEcht && c?.status === 404) return json(req, res, 404, { error: 'Zu diesem Item gibt es noch keine Preise. Der Bot scannt jede Nacht um 0 Uhr.' });
+  const demoErlaubt = demo || (PREISE_DEMO === 'auto' && !preiseEcht);
+  if (demoErlaubt) {
+    const d = id ? preisDemo.item(id) : preisDemo.uebersicht();
+    return d ? json(req, res, 200, d, { 'Cache-Control': 'public, max-age=30' }) : json(req, res, 404, { error: 'Zu diesem Item gibt es noch keine Preise.', demo: true });
+  }
+  return json(req, res, 503, { error: 'Die Preise sind gerade nicht erreichbar. Versuch es gleich nochmal.' }, { 'Retry-After': '30' });
 }
 
 /* ---------- Antworten ---------- */
@@ -254,6 +300,7 @@ const server = http.createServer(async (req, res) => {
     if (url.includes('..') || url.includes('\0')) return nichtGefunden(req, res);
 
     if (url === '/health' || url === '/healthz') return json(req, res, 200, { ok: true, laufzeit: Math.round((Date.now() - START) / 1000), daten: cache.daten ? Math.round((Date.now() - cache.zeit) / 1000) + 's alt' : 'keine', fehler: cache.fehler });
+    if (url === '/api/preise' || url.startsWith('/api/preise/')) return await preise(req, res, url);
     if (url === '/api/daten') {
       const d = await daten();
       return d ? json(req, res, 200, d) : json(req, res, 503, { fehler: cache.fehler || 'Keine Daten' }, { 'Retry-After': '30' });

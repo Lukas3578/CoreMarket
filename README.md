@@ -6,6 +6,7 @@
 - Clan-Mitglieder (CM0/CM1) mit Namenssuche
 - Vouches und Bewertungen
 - HugoSMP-Spielerzahl
+- Auction-Orders: Preis und Preistrend jedes Items aus Auktionshaus und Orders
 
 ## Aufbau
 
@@ -14,6 +15,8 @@ server.js            Webserver: Seiten bauen, Bot-Daten cachen, /health
 seiten/              die einzelnen Seiten (_layout.html = Kopf, Menü, Fuß)
 wiki/                Wiki-Artikel als Markdown, eine Datei = ein Artikel
 wiki.js              macht aus den Markdown-Dateien die Wiki-Seiten
+preise-demo.js       Demo-Preise für /auction-orders, solange der Bot noch keine liefert
+bot/                 Preis-Tracker zum Einbauen in den Bot (siehe bot/README.md)
 public/              CSS, JS, Logo und andere Dateien für den Browser
 keepalive/           Script, das die Seite auf Render wach hält
 render.yaml          Render-Blueprint
@@ -29,11 +32,14 @@ Der Server holt die Daten alle 30 Sekunden vom Bot und legt sie direkt in die Se
 | `/clan`       | Mitglieder mit Namenssuche (`/clan?name=Steve`)  |
 | `/bewertungen`| Vouches und Händler-Rangliste                    |
 | `/auktionshaus` | Auktionshaus live (mit Abo, oder für alle, wenn im Bot so eingestellt) |
+| `/auction-orders` | Item suchen: billigster AH-Preis, beste Order, Preistrend (`/auction-orders?item=ancient_debris`) |
 | `/abo`        | Login per `/msg`, Abo kaufen, Endertruhe und Inventar ansehen |
 | `/fragen`     | Häufige Fragen                                   |
 | `/wiki`       | Wiki-Übersicht mit Suche                         |
 | `/wiki/<name>`| ein Wiki-Artikel, z. B. `/wiki/preisliste-lesen` |
 | `/api/daten`  | die Bot-Daten als JSON (gecacht)                 |
+| `/api/preise` | Preise aller Items (vom Bot, 45 s gecacht) |
+| `/api/preise/<id>` | ein Item mit Verlauf |
 | `/api/konto/…`| Abo-Anfragen, werden an den Bot durchgereicht    |
 | `/health`     | `{"ok":true,...}` – für Render und das Keep-Alive |
 
@@ -81,6 +87,8 @@ Dann `http://localhost:3000` öffnen. Mit `npm run dev` startet der Server bei j
 | `CACHE_SEKUNDEN`  | `30`                                       |
 | `PORT`            | wird von Render gesetzt, lokal `3000`      |
 | `BOT_URL`         | Adresse des Bots, Standard: aus `COREMARKET_API` (`https://hugo.vortexpvp.eu`) |
+| `PREISE_API`      | Preise vom Bot, Standard: `COREMARKET_API` + `/preise` |
+| `PREISE_DEMO`     | `auto` (Demo-Daten, bis der Bot echte liefert), `an` oder `aus` |
 | `ITEM_BILDER`     | Quelle der Item-Bilder, Standard: `https://assets.mcasset.cloud/1.21.4/assets/minecraft/textures/{art}/{id}.png` |
 
 Eine Einladung, die im Bot eingetragen ist, hat Vorrang vor `DISCORD_INVITE`.

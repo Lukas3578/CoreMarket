@@ -119,7 +119,7 @@ code { font: 500 .9em/1 var(--text); background: var(--obsidian-3); color: var(-
 .marke img { image-rendering: pixelated; transition: transform .5s var(--feder); }
 .marke:hover img { animation: logo-dreh .8s var(--weich); }
 .kopf nav { display: flex; gap: 4px; margin-left: auto; }
-.kopf nav a { position: relative; color: var(--papier-2); text-decoration: none; font-weight: 500; font-size: 15px; padding: 8px 12px; border-radius: 6px; transition: color .2s, background .2s; }
+.kopf nav a { position: relative; white-space: nowrap; color: var(--papier-2); text-decoration: none; font-weight: 500; font-size: 15px; padding: 8px 12px; border-radius: 6px; transition: color .2s, background .2s; }
 .kopf nav a::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 3px; height: 2px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform .35s var(--weich); }
 .kopf nav a:hover { color: var(--papier); background: rgba(255, 255, 255, .04); }
 .kopf nav a:hover::after, .kopf nav a.aktiv::after { transform: scaleX(1); }
@@ -447,8 +447,9 @@ code { font: 500 .9em/1 var(--text); background: var(--obsidian-3); color: var(-
 ::view-transition-group(kopf) { animation: none; }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 1000px) {
-  .kopf nav a { padding: 8px 8px; }
+@media (max-width: 1240px) {
+  .kopf nav { gap: 0; }
+  .kopf nav a { padding: 8px 8px; font-size: 14.5px; }
   .kopf nav a::after { left: 8px; right: 8px; }
 }
 @media (max-width: 900px) {
@@ -465,7 +466,7 @@ code { font: 500 .9em/1 var(--text); background: var(--obsidian-3); color: var(-
   .umschalter { grid-column: 1 / -1; }
   .rechner output { grid-column: 1 / -1; }
 }
-@media (max-width: 900px) {
+@media (max-width: 1080px) {
   .menue-knopf { display: block; order: 3; flex: none; }
   .kopf-in { gap: 10px; }
   .kopf .discord-link { margin-left: auto; }
@@ -815,4 +816,169 @@ body::after {
   .anzahl { font-size: 12px; }
   .suche input, .suche input:focus { width: 100%; }
   .markt-leiste .suche { flex: 1 1 100%; }
+}
+
+/* ==========================================================
+   Auction-Orders: Item-Preise und Preistrend
+   ========================================================== */
+.ao-kopf { overflow: visible; z-index: 5; }
+.ao-kopf::after { right: 0; }
+.ao-suche { position: relative; max-width: 680px; margin-top: 30px; }
+.ao-treffer a { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 14px; align-items: center; }
+.ao-t-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ao-t-preis { text-align: right; }
+.ao-t-preis b { color: var(--gold); font-size: 16px; }
+.ao-t-preis small, .ao-t-name small { color: var(--papier-2); font-size: 12px; display: block; }
+.ao-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 18px 0 0; }
+.ao-chips a { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 5px 6px; border-radius: 999px; background: var(--obsidian-2); border: 1px solid var(--obsidian-3); color: var(--papier); text-decoration: none; font-size: 14px; transition: border-color .2s, transform .25s var(--weich); }
+.ao-chips a:hover { border-color: var(--gold); transform: translateY(-2px); }
+.ao-chips .mc-icon { width: 22px; height: 22px; }
+.ao-chips .mc-icon:not(:has(img))::after { font-size: 9px; border-radius: 50%; }
+
+.ao-status { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin: 0 0 22px; color: var(--papier-2); font-size: 14px; }
+.ao-status-text { display: inline-flex; align-items: center; gap: 10px; }
+.ao-balken { flex: 1 1 200px; max-width: 360px; height: 8px; border-radius: 4px; background: var(--obsidian-3); overflow: hidden; }
+.ao-balken i { display: block; height: 100%; background: linear-gradient(90deg, var(--gold-tief), var(--gold)); transition: width .6s var(--weich); }
+.ao-demo { max-width: 860px; }
+
+/* ---- Ein Item */
+.ao-item { margin: 0 0 64px; padding: 28px; border-radius: 16px; border: 1px solid var(--obsidian-3); background: linear-gradient(180deg, rgba(42, 33, 56, .55), rgba(28, 22, 39, .55)); box-shadow: 0 30px 70px -30px rgba(0, 0, 0, .8); animation: auftauchen .6s var(--weich) both; scroll-margin-top: calc(var(--kopf-h) + 16px); }
+.ao-item-kopf { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.ao-item-kopf h2 { font: 800 clamp(26px, 3.2vw, 38px)/1.1 var(--text); margin: 0 0 4px; letter-spacing: -.02em; }
+.ao-item-titel { flex: 1 1 260px; min-width: 0; }
+.mc-icon.gross { width: 64px; height: 64px; padding: 8px; border-radius: 12px; background: var(--obsidian); border: 1px solid var(--obsidian-4); box-shadow: 0 0 40px -10px rgba(242, 178, 59, .5); }
+.mc-icon.gross:not(:has(img))::after { font-size: 18px; }
+.ao-trends { display: flex; gap: 8px; flex-wrap: wrap; }
+.ao-trend { font-size: 13px; color: var(--papier-2); padding: 6px 10px; border-radius: 8px; background: var(--obsidian); border: 1px solid var(--obsidian-3); white-space: nowrap; }
+.ao-trend b { color: var(--papier); margin-left: 4px; }
+.ao-trend.hoch b { color: var(--gruen); }
+.ao-trend.runter b { color: var(--rot); }
+.ao-live { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--gruen); border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; margin-left: 4px; }
+.ao-zu { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--obsidian-4); background: none; color: var(--papier-2); font-size: 24px; line-height: 1; cursor: pointer; transition: color .2s, border-color .2s; }
+.ao-zu:hover { color: var(--gold); border-color: var(--gold); }
+.ao-teilen { white-space: nowrap; }
+
+.ao-preise { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 26px; }
+.ao-preis { position: relative; padding: 20px 22px; border-radius: 12px; background: var(--obsidian); border: 1px solid var(--obsidian-3); overflow: hidden; }
+.ao-preis::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--farbe, var(--eisen)); }
+.ao-preis.ah { --farbe: var(--gold); }
+.ao-preis.order { --farbe: var(--gruen); }
+.ao-preis.spanne { --farbe: var(--obsidian-4); }
+.ao-preis.flip { --farbe: var(--lava); border-color: rgba(255, 122, 26, .45); background: linear-gradient(135deg, rgba(255, 122, 26, .1), var(--obsidian) 60%); }
+.ao-p-titel { margin: 0 0 6px; font: 700 12px/1.3 var(--pixel); text-transform: uppercase; letter-spacing: .12em; color: var(--farbe); }
+.ao-preis.spanne .ao-p-titel { color: var(--papier-2); }
+.ao-preis.flip .ao-p-titel { color: var(--lava); }
+.ao-p-titel small { display: block; font: 400 13px/1.3 var(--text); text-transform: none; letter-spacing: 0; color: var(--papier-2); margin-top: 2px; }
+.ao-p-wert { margin: 0 0 6px; font: 800 clamp(30px, 3.4vw, 42px)/1.05 var(--text); letter-spacing: -.03em; color: var(--papier); font-variant-numeric: tabular-nums; }
+.ao-preis.ah .ao-p-wert { color: var(--gold-hell); }
+.ao-preis.order .ao-p-wert { color: var(--gruen); }
+.ao-preis .hinweis b { color: var(--papier); }
+
+.ao-rechner { display: flex; flex-wrap: wrap; align-items: end; gap: 12px 18px; margin-top: 18px; padding: 16px 18px; border-radius: 12px; border: 1px dashed var(--obsidian-4); }
+.ao-menge { display: inline-flex; align-items: center; gap: 8px; }
+.ao-menge input { width: 120px; height: 42px; font: 600 17px/1 var(--text); color: var(--papier); background: var(--obsidian); border: 2px solid var(--obsidian-3); border-radius: 8px; padding: 0 12px; }
+.ao-menge input:focus { outline: none; border-color: var(--gold); }
+.ao-schnell { display: flex; gap: 6px; flex-wrap: wrap; }
+.ao-schnell button, .ao-tabs button, .ao-legende button { font: 500 14px/1 var(--text); color: var(--papier-2); background: var(--obsidian); border: 1px solid var(--obsidian-3); border-radius: 7px; padding: 0 12px; height: 34px; cursor: pointer; transition: color .2s, border-color .2s, background .2s; }
+.ao-schnell button:hover, .ao-tabs button:hover, .ao-legende button:hover { color: var(--papier); border-color: var(--obsidian-4); }
+.ao-wert { flex: 1 1 100%; margin: 0; color: var(--papier-2); font-size: 15px; }
+.ao-wert b { color: var(--papier); }
+
+.ao-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.ao-tabs button[aria-selected="true"] { color: #2a1700; background: var(--gold); border-color: var(--gold); font-weight: 700; }
+.ao-tabs.klein button { height: 30px; font-size: 13px; padding: 0 10px; }
+
+.ao-graph-karte { margin-top: 18px; padding: 20px 20px 12px; border-radius: 12px; background: var(--obsidian); border: 1px solid var(--obsidian-3); }
+.ao-graph-karte.lade { min-height: 340px; margin-top: 26px; background: linear-gradient(90deg, var(--obsidian-2) 0%, var(--obsidian-3) 50%, var(--obsidian-2) 100%); background-size: 200% 100%; animation: skelett 1.4s linear infinite; }
+.ao-graph-kopf { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ao-graph-kopf h3 { margin: 0; font: 700 20px/1.2 var(--text); }
+.ao-legende { display: flex; gap: 6px; flex-wrap: wrap; margin: 14px 0 6px; }
+.ao-legende button { display: inline-flex; align-items: center; gap: 8px; height: 30px; font-size: 13px; }
+.ao-legende button i { width: 14px; height: 3px; border-radius: 2px; background: currentColor; }
+.ao-legende .ah i { background: var(--gold); }
+.ao-legende .ah2 i { background: repeating-linear-gradient(90deg, var(--gold-hell) 0 4px, transparent 4px 7px); }
+.ao-legende .or i { background: var(--gruen); }
+.ao-legende button[aria-pressed="false"] { opacity: .45; text-decoration: line-through; }
+.ao-graph { position: relative; min-height: 230px; touch-action: pan-y; }
+.ao-graph svg { display: block; width: 100%; height: auto; overflow: visible; user-select: none; }
+.ao-graph .gitter { stroke: var(--obsidian-3); stroke-width: 1; }
+.ao-graph .achse { fill: var(--papier-2); font: 500 12px/1 var(--text); font-variant-numeric: tabular-nums; }
+.ao-graph .linie { fill: none; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.ao-graph .linie.ah { stroke: var(--gold); stroke-width: 3; filter: drop-shadow(0 0 6px rgba(242, 178, 59, .45)); }
+.ao-graph .linie.ah2 { stroke: var(--gold-hell); stroke-dasharray: .012 .008; opacity: .7; stroke-width: 1.8; }
+.ao-graph .linie.or { stroke: var(--gruen); }
+.ao-graph .linie.malen:not(.ah2) { stroke-dasharray: 1; stroke-dashoffset: 1; animation: ao-malen 1.1s var(--weich) forwards; }
+.ao-graph .linie.ah2.malen { animation: ao-blenden .9s .5s both; }
+.ao-graph .flaeche { animation: ao-blenden .9s .3s both; }
+@keyframes ao-malen { to { stroke-dashoffset: 0; } }
+@keyframes ao-blenden { from { opacity: 0; } }
+.ao-graph circle { stroke: var(--obsidian); stroke-width: 2; }
+.ao-graph circle.ah { fill: var(--gold); }
+.ao-graph circle.ah2 { fill: var(--gold-hell); }
+.ao-graph circle.or { fill: var(--gruen); }
+.ao-graph .ende { animation: ao-blenden .4s 1s both; }
+.ao-graph .zeiger-linie { stroke: var(--papier-2); stroke-width: 1; stroke-dasharray: 3 3; }
+.ao-graph .fang { cursor: crosshair; }
+.ao-tip { position: absolute; top: 8px; z-index: 2; pointer-events: none; display: grid; gap: 3px; min-width: 170px; padding: 10px 12px; border-radius: 8px; background: rgba(20, 16, 28, .96); border: 1px solid var(--obsidian-4); box-shadow: 0 14px 30px rgba(0, 0, 0, .5); font-size: 13px; }
+.ao-tip small { color: var(--papier-2); font-size: 12px; }
+.ao-tip span { display: flex; align-items: center; gap: 7px; color: var(--papier-2); }
+.ao-tip span b { color: var(--papier); margin-left: auto; padding-left: 10px; font-variant-numeric: tabular-nums; }
+.ao-tip span i { width: 8px; height: 8px; border-radius: 50%; }
+.ao-tip .ah i { background: var(--gold); } .ao-tip .ah2 i { background: var(--gold-hell); } .ao-tip .or i { background: var(--gruen); }
+.ao-graph-leer { margin: 0; padding: 70px 20px; text-align: center; color: var(--papier-2); max-width: 520px; margin-inline: auto; }
+
+.ao-angebote { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 26px; }
+.ao-angebote h3 { margin: 0 0 10px; font: 700 18px/1.2 var(--text); }
+.ao-a-liste { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--obsidian-3); }
+.ao-a-liste li { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 9px 2px; border-bottom: 1px solid var(--obsidian-3); font-size: 15px; }
+.ao-a-liste img, .kein-kopf { width: 24px; height: 24px; border-radius: 4px; image-rendering: pixelated; background: var(--obsidian-3); }
+.ao-a-wer { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ao-a-menge { color: var(--papier-2); font-size: 14px; }
+.ao-a-preis { text-align: right; min-width: 72px; }
+.ao-a-preis small { display: block; color: var(--papier-2); font-size: 12px; }
+.ao-fuss { margin-top: 18px; }
+
+/* ---- Marktübersicht */
+.ao-liste .kopfzeile { align-items: flex-end; margin-bottom: 6px; }
+.ao-tab-info { margin: 6px 0 20px; max-width: 70ch; }
+.ao-karten { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.ao-karte > a { display: flex; flex-direction: column; gap: 14px; height: 100%; padding: 16px 16px 14px; border-radius: 12px; background: rgba(28, 22, 39, .55); border: 1px solid var(--obsidian-3); color: var(--papier); text-decoration: none; transition: transform .3s var(--weich), border-color .25s, box-shadow .3s; animation: auftauchen .5s var(--weich) both; animation-delay: calc(var(--i, 0) * 30ms); }
+.ao-karte > a:hover { transform: translateY(-4px); border-color: rgba(242, 178, 59, .45); box-shadow: 0 18px 36px -18px rgba(0, 0, 0, .8); }
+.ao-karte.lade { min-height: 112px; border-radius: 12px; background: linear-gradient(90deg, var(--obsidian-2) 0%, var(--obsidian-3) 50%, var(--obsidian-2) 100%); background-size: 200% 100%; animation: skelett 1.4s linear infinite; }
+.ao-karten > .leer { grid-column: 1 / -1; }
+.ao-k-kopf { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.ao-k-name { font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ao-k-trend { font-size: 13px; font-weight: 600; color: var(--papier-2); font-variant-numeric: tabular-nums; }
+.ao-k-trend.hoch { color: var(--gruen); }
+.ao-k-trend.runter { color: var(--rot); }
+.ao-k-preise { display: flex; align-items: flex-end; gap: 18px; }
+.ao-k-preise > span { display: flex; flex-direction: column; }
+.ao-k-preise small { color: var(--papier-2); font-size: 12px; }
+.ao-k-preise b { font-size: 18px; font-variant-numeric: tabular-nums; }
+.ao-spark { margin-left: auto; fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.ao-spark.hoch { stroke: var(--gruen); }
+.ao-spark.runter { stroke: var(--rot); }
+.ao-mehr { text-align: center; margin: 26px 0 0; }
+.ao-wie { margin-top: 56px; max-width: 860px; padding: 18px 22px; border-radius: 12px; border: 1px solid var(--obsidian-3); background: rgba(28, 22, 39, .45); }
+.ao-wie summary { cursor: pointer; font-weight: 600; }
+.ao-wie ul { margin: 14px 0; padding-left: 20px; color: #d6cfe2; }
+.ao-wie li { margin: 6px 0; }
+.ao-wie b { color: var(--papier); }
+
+@media (max-width: 900px) {
+  .ao-preise { grid-template-columns: 1fr 1fr; }
+  .ao-preis.spanne { grid-column: 1 / -1; }
+  .ao-angebote { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .ao-item { padding: 18px 16px; margin-inline: -8px; }
+  .ao-preise { grid-template-columns: 1fr; }
+  .ao-item-kopf .mc-icon.gross { width: 52px; height: 52px; }
+  .ao-teilen { display: none; }
+  .ao-graph-karte { padding: 14px 10px 8px; }
+  .ao-karten { grid-template-columns: 1fr; }
+  .ao-tabs { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ao-item, .ao-karte > a { animation: none; }
 }

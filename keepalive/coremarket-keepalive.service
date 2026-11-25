@@ -1,0 +1,18 @@
+# systemd-Dienst: startet das Script automatisch und nach jedem Neustart des Servers.
+# Installation siehe README.md im Hauptordner (Abschnitt "Keep-Alive").
+[Unit]
+Description=CoreMarket Keep-Alive (Render wach halten)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/coremarket/keepalive.sh
+Environment=URL=https://coremarket.onrender.com/health
+Environment=INTERVALL=240
+Restart=always
+RestartSec=10
+User=nobody
+
+[Install]
+WantedBy=multi-user.target

@@ -527,3 +527,92 @@ code { font: 500 .9em/1 var(--text); background: var(--obsidian-3); color: var(-
 .fehlerseite .marker { animation: auftauchen .8s var(--weich) both; }
 .fehlerseite .einleitung { animation: auftauchen .8s var(--weich) .2s both; }
 .fehlerseite .knopf { animation: auftauchen .8s var(--weich) .3s backwards; }
+
+/* ==========================================================
+   Feinschliff
+   ========================================================== */
+@keyframes drehen { to { transform: rotateY(360deg); } }
+@keyframes kern-glimmen { 0%, 100% { filter: drop-shadow(0 0 14px rgba(255, 160, 50, .55)) brightness(1); } 50% { filter: drop-shadow(0 0 28px rgba(255, 160, 50, .9)) brightness(1.12); } }
+@keyframes wort-hoch { from { transform: translateY(105%); } }
+@keyframes icon-hops { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-8px); } 60% { transform: translateY(-8px) rotate(-6deg); } }
+@keyframes schild-pendeln { 0%, 100% { transform: translateX(-50%) translateZ(40px) rotate(-1.2deg); } 50% { transform: translateX(-50%) translateZ(40px) rotate(1.2deg); } }
+
+/* Körnung über allem, nimmt dem Dunkel das Glatte */
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 100; pointer-events: none; opacity: .06; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Spawner: Kristall dreht sich im Käfig, Preis hängt als Schild davor */
+.kaefig-kern { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; perspective: 600px; }
+.kaefig-kern img { width: 40%; height: auto; image-rendering: pixelated; animation: drehen 5s linear infinite, kern-glimmen 2.6s ease-in-out infinite; }
+.kaefig-inhalt {
+  top: auto; bottom: -38px; transform: translateX(-50%) translateZ(40px); transform-origin: 50% -60px;
+  min-width: 74%; padding: 14px 22px 16px; gap: 3px; border-radius: 8px;
+  background: linear-gradient(180deg, rgba(30, 23, 42, .96), rgba(16, 12, 22, .97)); border: 2px solid #4b515d;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .06);
+  animation: schild-pendeln 6s ease-in-out infinite;
+}
+.kaefig-inhalt::before, .kaefig-inhalt::after { content: ''; position: absolute; top: -12px; width: 4px; height: 12px; background: #4b515d; }
+.kaefig-inhalt::before { left: 22%; }
+.kaefig-inhalt::after { right: 22%; }
+.k-name { font-size: clamp(17px, 2vw, 21px); }
+.k-preis { font-size: clamp(36px, 4.6vw, 52px); }
+.k-art { font-size: 14px; }
+.kaefig-schatten { margin-top: 64px; }
+
+/* Überschriften steigen Wort für Wort auf */
+.wort { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .08em; margin-bottom: -.08em; }
+.wort > span { display: inline-block; animation: wort-hoch .9s var(--weich) both; animation-delay: calc(var(--w) * 70ms + 120ms); }
+.wort > .gold { animation: wort-hoch .9s var(--weich) both, goldschimmer 7s linear infinite; animation-delay: calc(var(--w) * 70ms + 120ms), 0s; }
+
+/* Warum CoreMarket */
+.warum-abschnitt { padding: 72px 0 8px; }
+.warum { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.warum-punkt { position: relative; padding: 28px 26px; border-radius: 14px; background: rgba(28, 22, 39, .55); border: 1px solid var(--obsidian-3); transition: transform .35s var(--weich), border-color .3s; }
+.warum-punkt:hover { transform: translateY(-5px); border-color: var(--obsidian-4); }
+.warum-punkt:hover .pixel-icon { animation: icon-hops .6s var(--feder); }
+.warum-punkt h3 { font: 700 20px/1.25 var(--text); margin: 18px 0 8px; }
+.warum-punkt p { margin: 0; color: var(--papier-2); font-size: 16px; }
+.pixel-icon { display: block; width: 52px; height: 52px; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .45)); }
+
+/* Lichtschein, der der Maus über Karten folgt (JS setzt --mx/--my) */
+.vorschau-karte:not(.lade), .weg, .zitat, .schritt, .clan, .warum-punkt, .rang, .regeln li, .tabelle-rahmen {
+  background-image: radial-gradient(420px circle at var(--mx, -999px) var(--my, -999px), rgba(242, 178, 59, .09), transparent 45%);
+}
+
+/* Pixel-Zinnen als Übergang in dunkle Abschnitte */
+.abschnitt.dunkel { position: relative; }
+.abschnitt.dunkel::before {
+  content: ''; position: absolute; left: 0; right: 0; top: -10px; height: 10px; pointer-events: none;
+  background: linear-gradient(90deg, var(--obsidian-2) 50%, transparent 0) 0 0 / 40px 10px repeat-x;
+}
+
+/* Großer Schriftzug im Fuß */
+.fuss { overflow: hidden; }
+.fuss-wort {
+  margin: 8px 0 -0.32em; font: 800 clamp(64px, 15vw, 210px)/1 var(--text); letter-spacing: -.05em; text-align: center; white-space: nowrap; user-select: none;
+  color: transparent; -webkit-text-stroke: 1px rgba(242, 178, 59, .22);
+  background: linear-gradient(180deg, rgba(242, 178, 59, .14), transparent 75%); -webkit-background-clip: text; background-clip: text;
+}
+
+/* Preissuche */
+.preise tr.weg-gefiltert { display: none; }
+.preise td mark { background: rgba(242, 178, 59, .25); color: var(--gold-hell); border-radius: 2px; }
+
+@media (max-width: 900px) {
+  .warum { grid-template-columns: 1fr; }
+  .warum-punkt { display: grid; grid-template-columns: 52px 1fr; column-gap: 18px; align-items: start; }
+  .warum-punkt .pixel-icon { grid-row: span 2; }
+  .warum-punkt h3 { margin-top: 2px; }
+}
+@media (max-width: 640px) {
+  .kaefig-inhalt { bottom: -30px; padding: 11px 16px 13px; }
+  .warum-abschnitt { padding-top: 52px; }
+  .aktionen { flex-wrap: nowrap; gap: 10px; }
+  .aktionen .knopf { flex: 1 1 0; justify-content: center; padding: 14px 12px; font-size: 15px; white-space: nowrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kaefig-kern img, .kaefig-inhalt { animation: none !important; }
+  .kaefig-inhalt { transform: translateX(-50%); }
+}

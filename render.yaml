@@ -1,15 +1,15 @@
 services:
   - type: web
-    name: coremarket-website
-    runtime: static
-    staticPublishPath: .
-    headers:
-      - path: /*
-        name: X-Content-Type-Options
-        value: nosniff
-      - path: /*
-        name: Referrer-Policy
-        value: strict-origin-when-cross-origin
-      - path: /config.js
-        name: Cache-Control
-        value: no-cache
+    name: coremarket
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: COREMARKET_API
+        value: https://hugo.vortexpvp.eu/api/public
+      - key: DISCORD_INVITE
+        value: https://discord.gg/UT6dYchUB

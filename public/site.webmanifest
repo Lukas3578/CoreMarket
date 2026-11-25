@@ -1,0 +1,10 @@
+{
+  "name": "CoreMarket",
+  "short_name": "CoreMarket",
+  "description": "Spawner kaufen und verkaufen auf HugoSMP",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#14101c",
+  "theme_color": "#14101c",
+  "icons": [{ "src": "/logo.png", "sizes": "512x512", "type": "image/png" }]
+}

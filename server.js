@@ -86,6 +86,8 @@ ladeDateien();
 const SEITEN = [
   { pfad: '/', datei: 'start', name: 'Startseite', icon: 'start', gruppe: 'Handel', titel: 'CoreMarket – Spawner kaufen und verkaufen auf HugoSMP',
     beschreibung: 'CoreMarket ist der Spawner-Trading-Clan auf HugoSMP: faire Preise für Blaze, Iron Golem, Creeper und mehr – sicher über Discord-Tickets mit verifizierten Händlern.' },
+  { pfad: '/live', datei: 'live', name: 'Live-Feed', icon: 'live', gruppe: 'Handel', titel: 'Live-Feed – CoreMarket',
+    beschreibung: 'Was gerade bei CoreMarket passiert: neue Bewertungen, geänderte Preise und frisch gescannte Items aus dem Auktionshaus.' },
   { pfad: '/preise', datei: 'preise', name: 'Spawner', icon: 'spawner', gruppe: 'Handel', titel: 'Spawner-Preise & Rechner – CoreMarket',
     beschreibung: 'Aktuelle An- und Verkaufspreise für Spawner auf HugoSMP, mit Mengenrabatten und Preisrechner.' },
   { pfad: '/ablauf', datei: 'ablauf', name: "So läuft's", icon: 'ablauf', gruppe: 'Hilfe', titel: 'So läuft ein Handel – CoreMarket',
@@ -96,10 +98,15 @@ const SEITEN = [
     beschreibung: 'Was Kunden über ihren Handel mit CoreMarket sagen, und welche Händler die meisten Vouches haben.' },
   { pfad: '/auction-orders', datei: 'auction-orders', name: 'Auction-Orders', icon: 'markt', gruppe: 'Handel', js: 'preise.js', titel: 'Auction-Orders: Item-Preise und Preistrend – CoreMarket',
     beschreibung: 'Was ist ein Item auf HugoSMP gerade wert? Billigster Preis im Auktionshaus, beste Order und der Preistrend der letzten Tage – rund um die Uhr neu gescannt.' },
-  { pfad: '/abo', datei: 'abo', name: 'Abo', icon: 'abo', gruppe: 'Unten', skript: true, titel: 'Abo: Endertruhe und Inventar ansehen – CoreMarket',
-    beschreibung: 'Mit dem CoreMarket-Abo siehst du Endertruhen und Inventare anderer Spieler auf HugoSMP.' },
   { pfad: '/fragen', datei: 'fragen', name: 'Fragen', icon: 'fragen', gruppe: 'Hilfe', titel: 'Häufige Fragen – CoreMarket',
     beschreibung: 'Antworten auf die häufigsten Fragen zum Spawner-Handel mit CoreMarket auf HugoSMP.' },
+  { pfad: '/merkliste', datei: 'merkliste', name: 'Merkliste', icon: 'merken', gruppe: 'Unten', titel: 'Deine Merkliste – CoreMarket',
+    beschreibung: 'Deine gemerkten Spawner und Spieler mit aktuellen Preisen.' },
+  { pfad: '/abo', datei: 'abo', name: 'Abo', icon: 'abo', gruppe: 'Unten', skript: true, titel: 'Abo: Endertruhe und Inventar ansehen – CoreMarket',
+    beschreibung: 'Mit dem CoreMarket-Abo siehst du Endertruhen und Inventare anderer Spieler auf HugoSMP.' },
+  // Ein Profil pro Clan-Mitglied: /spieler/<name>
+  { pfad: '/spieler/{{SLUG}}', datei: 'spieler', menue: false, aktiv: '/clan', dynamisch: true, titel: '{{SPIELER}} – CoreMarket Händler',
+    beschreibung: '{{SPIELER}} ist Händler bei CoreMarket auf HugoSMP: Clan, dabei seit, Bewertungen und Vouches.' },
   // Eine Seite pro Spawner: /spawner/<name>. {{SPAWNER}} und {{SLUG}} setzt der Server beim Aufruf ein.
   { pfad: '/spawner/{{SLUG}}', datei: 'spawner', menue: false, aktiv: '/preise', dynamisch: true, titel: '{{SPAWNER}} Spawner – Preis bei CoreMarket',
     beschreibung: '{{SPAWNER}} Spawner auf HugoSMP kaufen oder verkaufen: aktueller Preis, Mengenpreis und Rechner – sicher über ein Ticket bei CoreMarket.' },
@@ -132,17 +139,19 @@ const ICONS = {
   fragen: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/>',
   abo: '<path d="m3 8 4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
   discord: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',
+  live: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+  merken: '<path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z"/>',
 };
 const icon = name => `<svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
 
 // Seitenleiste: Gruppen mit Icons, der aktive Punkt ist markiert
 function seitenleiste(s) {
   const aktiv = s.aktiv || s.pfad;
-  const link = (pfad, name, ico, extra = '') => `<a href="${pfad}"${pfad === aktiv ? ` class="aktiv"${pfad === s.pfad ? ' aria-current="page"' : ''}` : ''}${extra} data-tip="${escAttr(name)}">${icon(ico)}<span>${escAttr(name)}</span></a>`;
+  const link = (pfad, name, ico, extra = '') => `<a href="${pfad}"${pfad === aktiv ? ` class="aktiv"${pfad === s.pfad ? ' aria-current="page"' : ''}` : ''}${extra} data-tip="${escAttr(name)}">${icon(ico)}<span>${escAttr(name)}</span>${ico === 'live' ? '<i class="live-puls" aria-hidden="true"></i>' : ''}${ico === 'merken' ? '<b class="merk-zahl" hidden></b>' : ''}</a>`;
   const gruppen = ['Handel', 'Community', 'Hilfe'];
   const teile = gruppen.map(g => {
     const punkte = SEITEN.filter(x => x.gruppe === g && x.menue !== false).map(x => link(x.pfad, x.name, x.icon));
-    if (g === 'Handel') punkte.splice(2, 0, link('/preise#rechner', 'Rechner', 'rechner'));
+    if (g === 'Handel') { const k = SEITEN.filter(x => x.gruppe === g && x.menue !== false).findIndex(x => x.pfad === '/preise'); punkte.splice(k + 1, 0, link('/preise#rechner', 'Rechner', 'rechner')); }
     return `<div class="leiste-gruppe"><p class="leiste-titel">${g}</p>${punkte.join('')}</div>`;
   });
   const unten = SEITEN.filter(x => x.gruppe === 'Unten').map(x => link(x.pfad, x.name, x.icon)).join('')
@@ -315,7 +324,8 @@ const spawnerSlug = n => String(n).toLowerCase().replace(/ä/g, 'ae').replace(/�
 function sitemap(req, res) {
   const basis = `https://${req.headers.host || 'coremarket.onrender.com'}`;
   const pfade = SEITEN.filter(s => !s.dynamisch).map(s => s.pfad)
-    .concat((cache.daten?.preise?.spawner || []).map(x => `/spawner/${spawnerSlug(x.name)}`));
+    .concat((cache.daten?.preise?.spawner || []).map(x => `/spawner/${spawnerSlug(x.name)}`))
+    .concat((cache.daten?.clans || []).flatMap(c => c.mitglieder.map(m => `/spieler/${m.name}`)));
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pfade.map(p => `  <url><loc>${basis}${p}</loc></url>`).join('\n')}\n</urlset>\n`;
   senden(req, res, 200, xml, { 'Content-Type': TYPEN['.xml'], 'Cache-Control': 'public, max-age=3600' });
 }
@@ -345,6 +355,16 @@ const server = http.createServer(async (req, res) => {
     if (url === '/auktionshaus') return umleiten(req, res, '/auction-orders'); // alte Seite, gibt es nicht mehr
     if (url.length > 1 && url.endsWith('/') && SEITEN_HTML.has(url.slice(0, -1))) return umleiten(req, res, url.slice(0, -1));
     if (SEITEN_HTML.has(url)) return await seite(req, res, SEITEN_HTML.get(url));
+    const sm = url.match(/^\/spieler\/([A-Za-z0-9_]{1,16})$/);
+    if (sm) {
+      const d = await daten();
+      const alle = (d?.clans || []).flatMap(c => c.mitglieder.map(m => m.name));
+      const treffer = alle.find(n => n.toLowerCase() === sm[1].toLowerCase());
+      if (d?.clans && !treffer) return nichtGefunden(req, res);
+      if (treffer && treffer !== sm[1]) return umleiten(req, res, `/spieler/${treffer}`);
+      const vorlage = SEITEN_HTML.get('/spieler/{{SLUG}}').replaceAll('{{SLUG}}', sm[1]).replaceAll('{{SPIELER}}', escAttr(treffer || sm[1]));
+      return await seite(req, res, vorlage);
+    }
     const sp = url.match(/^\/spawner\/([a-z0-9-]{1,40})$/);
     if (sp) {
       const d = await daten();

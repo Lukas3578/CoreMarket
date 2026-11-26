@@ -1,0 +1,27 @@
+<div class="app-seite">
+  <header class="app-kopf auftritt">
+    <div class="app-kopf-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z"/></svg></div>
+    <div>
+      <h1>Deine Merkliste</h1>
+      <p>Spawner und Spieler, die du dir mit dem Stern gemerkt hast – mit den aktuellen Preisen. Die Liste bleibt nur in diesem Browser gespeichert.</p>
+    </div>
+  </header>
+
+  <div class="merk-leer paneel auftritt" id="merk-leer" style="--i:1" hidden>
+    <div class="merk-leer-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg></div>
+    <h2>Noch nichts gemerkt</h2>
+    <p>Drück auf einer Spawner-Seite oder bei einem Händler auf den Stern, dann taucht er hier auf.</p>
+    <a class="knopf" href="/preise">Spawner ansehen</a>
+  </div>
+
+  <section class="dash-paar" id="merk-inhalt" hidden>
+    <div class="paneel auftritt" style="--i:1">
+      <div class="paneel-kopf"><h2>Spawner</h2><span class="live-chip"><span class="punkt an"></span>Live-Preise</span></div>
+      <ul class="zeilen" id="merk-spawner"></ul>
+    </div>
+    <div class="paneel auftritt" style="--i:2">
+      <div class="paneel-kopf"><h2>Spieler</h2></div>
+      <ul class="zeilen" id="merk-spieler"></ul>
+    </div>
+  </section>
+</div>

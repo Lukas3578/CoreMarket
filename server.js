@@ -84,29 +84,32 @@ ladeDateien();
 /* ---------- Seiten ---------- */
 // Reihenfolge = Reihenfolge im Menü. "menue: false" -> nicht im Hauptmenü.
 const SEITEN = [
-  { pfad: '/', datei: 'start', menue: false, titel: 'CoreMarket – Spawner kaufen und verkaufen auf HugoSMP',
+  { pfad: '/', datei: 'start', name: 'Startseite', icon: 'start', gruppe: 'Handel', titel: 'CoreMarket – Spawner kaufen und verkaufen auf HugoSMP',
     beschreibung: 'CoreMarket ist der Spawner-Trading-Clan auf HugoSMP: faire Preise für Blaze, Iron Golem, Creeper und mehr – sicher über Discord-Tickets mit verifizierten Händlern.' },
-  { pfad: '/preise', datei: 'preise', name: 'Preise', titel: 'Spawner-Preise & Rechner – CoreMarket',
+  { pfad: '/preise', datei: 'preise', name: 'Spawner', icon: 'spawner', gruppe: 'Handel', titel: 'Spawner-Preise & Rechner – CoreMarket',
     beschreibung: 'Aktuelle An- und Verkaufspreise für Spawner auf HugoSMP, mit Mengenrabatten und Preisrechner.' },
-  { pfad: '/ablauf', datei: 'ablauf', name: "So läuft's", titel: 'So läuft ein Handel – CoreMarket',
+  { pfad: '/ablauf', datei: 'ablauf', name: "So läuft's", icon: 'ablauf', gruppe: 'Hilfe', titel: 'So läuft ein Handel – CoreMarket',
     beschreibung: 'In vier Schritten zum Spawner: Discord beitreten, Minecraft verbinden, Ticket öffnen, Übergabe im Spiel.' },
-  { pfad: '/clan', datei: 'clan', name: 'Clan', titel: 'Unser Clan – CoreMarket',
+  { pfad: '/clan', datei: 'clan', name: 'Clan', icon: 'clan', gruppe: 'Community', titel: 'Unser Clan – CoreMarket',
     beschreibung: 'Alle Mitglieder von CoreMarket (CM0) und CoreMarket1 (CM1). Prüf hier, ob ein Händler wirklich zu uns gehört.' },
-  { pfad: '/bewertungen', datei: 'bewertungen', name: 'Bewertungen', titel: 'Bewertungen – CoreMarket',
+  { pfad: '/bewertungen', datei: 'bewertungen', name: 'Bewertungen', icon: 'stern', gruppe: 'Community', titel: 'Bewertungen – CoreMarket',
     beschreibung: 'Was Kunden über ihren Handel mit CoreMarket sagen, und welche Händler die meisten Vouches haben.' },
-  { pfad: '/auction-orders', datei: 'auction-orders', name: 'Auction-Orders', js: 'preise.js', titel: 'Auction-Orders: Item-Preise und Preistrend – CoreMarket',
+  { pfad: '/auction-orders', datei: 'auction-orders', name: 'Auction-Orders', icon: 'markt', gruppe: 'Handel', js: 'preise.js', titel: 'Auction-Orders: Item-Preise und Preistrend – CoreMarket',
     beschreibung: 'Was ist ein Item auf HugoSMP gerade wert? Billigster Preis im Auktionshaus, beste Order und der Preistrend der letzten Tage – rund um die Uhr neu gescannt.' },
-  { pfad: '/abo', datei: 'abo', name: 'Abo', skript: true, titel: 'Abo: Endertruhe und Inventar ansehen – CoreMarket',
+  { pfad: '/abo', datei: 'abo', name: 'Abo', icon: 'abo', gruppe: 'Unten', skript: true, titel: 'Abo: Endertruhe und Inventar ansehen – CoreMarket',
     beschreibung: 'Mit dem CoreMarket-Abo siehst du Endertruhen und Inventare anderer Spieler auf HugoSMP.' },
-  { pfad: '/fragen', datei: 'fragen', name: 'Fragen', titel: 'Häufige Fragen – CoreMarket',
+  { pfad: '/fragen', datei: 'fragen', name: 'Fragen', icon: 'fragen', gruppe: 'Hilfe', titel: 'Häufige Fragen – CoreMarket',
     beschreibung: 'Antworten auf die häufigsten Fragen zum Spawner-Handel mit CoreMarket auf HugoSMP.' },
+  // Eine Seite pro Spawner: /spawner/<name>. {{SPAWNER}} und {{SLUG}} setzt der Server beim Aufruf ein.
+  { pfad: '/spawner/{{SLUG}}', datei: 'spawner', menue: false, aktiv: '/preise', dynamisch: true, titel: '{{SPAWNER}} Spawner – Preis bei CoreMarket',
+    beschreibung: '{{SPAWNER}} Spawner auf HugoSMP kaufen oder verkaufen: aktueller Preis, Mengenpreis und Rechner – sicher über ein Ticket bei CoreMarket.' },
 ];
 
 // Wiki: jede .md-Datei in wiki/ wird eine eigene Seite unter /wiki/<dateiname>
 const wiki = require('./wiki');
 const WIKI = wiki.laden(path.join(__dirname, 'wiki'));
 if (WIKI.length) {
-  SEITEN.push({ pfad: '/wiki', datei: 'wiki', name: 'Wiki', inhalt: wiki.uebersicht(WIKI), titel: 'Wiki – CoreMarket',
+  SEITEN.push({ pfad: '/wiki', datei: 'wiki', name: 'Wiki', icon: 'wiki', gruppe: 'Hilfe', inhalt: wiki.uebersicht(WIKI), titel: 'Wiki – CoreMarket',
     beschreibung: 'Anleitungen und Erklärungen rund um den Spawner-Handel mit CoreMarket: Verifizierung, Tickets, Preisliste, Sicherheit und mehr.' });
   for (const a of WIKI) {
     SEITEN.push({ pfad: `/wiki/${a.slug}`, datei: 'wiki', menue: false, aktiv: '/wiki', inhalt: wiki.artikelSeite(WIKI, a),
@@ -115,6 +118,37 @@ if (WIKI.length) {
 }
 
 const SEITEN_DIR = path.join(__dirname, 'seiten');
+
+// Icons für die Seitenleiste (Linien-Icons, 24er Raster)
+const ICONS = {
+  start: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+  spawner: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>',
+  rechner: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 18h.01M12 18h4"/>',
+  markt: '<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/>',
+  clan: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/>',
+  stern: '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/>',
+  ablauf: '<path d="M10 6h10M10 12h10M10 18h10"/><path d="m3.5 6 1.5 1.5L7.5 5M3.5 12l1.5 1.5 2.5-2.5M3.5 18l1.5 1.5 2.5-2.5"/>',
+  wiki: '<path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"/>',
+  fragen: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/>',
+  abo: '<path d="m3 8 4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
+  discord: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',
+};
+const icon = name => `<svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
+
+// Seitenleiste: Gruppen mit Icons, der aktive Punkt ist markiert
+function seitenleiste(s) {
+  const aktiv = s.aktiv || s.pfad;
+  const link = (pfad, name, ico, extra = '') => `<a href="${pfad}"${pfad === aktiv ? ` class="aktiv"${pfad === s.pfad ? ' aria-current="page"' : ''}` : ''}${extra} data-tip="${escAttr(name)}">${icon(ico)}<span>${escAttr(name)}</span></a>`;
+  const gruppen = ['Handel', 'Community', 'Hilfe'];
+  const teile = gruppen.map(g => {
+    const punkte = SEITEN.filter(x => x.gruppe === g && x.menue !== false).map(x => link(x.pfad, x.name, x.icon));
+    if (g === 'Handel') punkte.splice(2, 0, link('/preise#rechner', 'Rechner', 'rechner'));
+    return `<div class="leiste-gruppe"><p class="leiste-titel">${g}</p>${punkte.join('')}</div>`;
+  });
+  const unten = SEITEN.filter(x => x.gruppe === 'Unten').map(x => link(x.pfad, x.name, x.icon)).join('')
+    + `<a class="discord-link" href="${escAttr(DISCORD)}" target="_blank" rel="noopener" data-tip="Discord">${icon('discord')}<span>Discord</span></a>`;
+  return teile.join('') + `<div class="leiste-gruppe leiste-unten">${unten}</div>`;
+}
 function baueSeiten() {
   const v = name => (dateien.get(name)?.etag || '').replace(/"/g, '').slice(0, 8);
   const layout = fs.readFileSync(path.join(SEITEN_DIR, '_layout.html'), 'utf8')
@@ -122,8 +156,7 @@ function baueSeiten() {
     .replace('/app.js"', `/app.js?v=${v('/app.js')}"`);
   const fertig = new Map();
   for (const s of SEITEN) {
-    const nav = SEITEN.filter(x => x.menue !== false)
-      .map(x => `<a href="${x.pfad}"${x.pfad === (s.aktiv || s.pfad) ? ` class="aktiv"${x.pfad === s.pfad ? ' aria-current="page"' : ''}` : ''}>${escAttr(x.name)}</a>`).join('');
+    const nav = seitenleiste(s);
     const inhalt = s.inhalt ?? fs.readFileSync(path.join(SEITEN_DIR, s.datei + '.html'), 'utf8');
     const html = layout
       .replace('{{INHALT}}', () => inhalt)
@@ -277,9 +310,13 @@ function umleiten(req, res, ziel) {
   res.end();
 }
 
+const spawnerSlug = n => String(n).toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
 function sitemap(req, res) {
   const basis = `https://${req.headers.host || 'coremarket.onrender.com'}`;
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${SEITEN.map(s => `  <url><loc>${basis}${s.pfad}</loc></url>`).join('\n')}\n</urlset>\n`;
+  const pfade = SEITEN.filter(s => !s.dynamisch).map(s => s.pfad)
+    .concat((cache.daten?.preise?.spawner || []).map(x => `/spawner/${spawnerSlug(x.name)}`));
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pfade.map(p => `  <url><loc>${basis}${p}</loc></url>`).join('\n')}\n</urlset>\n`;
   senden(req, res, 200, xml, { 'Content-Type': TYPEN['.xml'], 'Cache-Control': 'public, max-age=3600' });
 }
 
@@ -299,6 +336,7 @@ const server = http.createServer(async (req, res) => {
 
     if (url === '/health' || url === '/healthz') return json(req, res, 200, { ok: true, laufzeit: Math.round((Date.now() - START) / 1000), daten: cache.daten ? Math.round((Date.now() - cache.zeit) / 1000) + 's alt' : 'keine', fehler: cache.fehler });
     if (url === '/api/preise' || url.startsWith('/api/preise/')) return await preise(req, res, url);
+    if (url === '/api/wiki') return json(req, res, 200, WIKI.map(a => ({ s: a.slug, t: a.titel, b: a.beschreibung, k: a.kategorie })), { 'Cache-Control': 'public, max-age=300' });
     if (url === '/api/daten') {
       const d = await daten();
       return d ? json(req, res, 200, d) : json(req, res, 503, { fehler: cache.fehler || 'Keine Daten' }, { 'Retry-After': '30' });
@@ -307,6 +345,15 @@ const server = http.createServer(async (req, res) => {
     if (url === '/auktionshaus') return umleiten(req, res, '/auction-orders'); // alte Seite, gibt es nicht mehr
     if (url.length > 1 && url.endsWith('/') && SEITEN_HTML.has(url.slice(0, -1))) return umleiten(req, res, url.slice(0, -1));
     if (SEITEN_HTML.has(url)) return await seite(req, res, SEITEN_HTML.get(url));
+    const sp = url.match(/^\/spawner\/([a-z0-9-]{1,40})$/);
+    if (sp) {
+      const d = await daten();
+      const treffer = d?.preise?.spawner?.find(x => spawnerSlug(x.name) === sp[1]);
+      if (d?.preise && !treffer) return nichtGefunden(req, res);
+      const name = treffer ? treffer.name : sp[1].replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      const vorlage = SEITEN_HTML.get('/spawner/{{SLUG}}').replaceAll('{{SLUG}}', sp[1]).replaceAll('{{SPAWNER}}', escAttr(name));
+      return await seite(req, res, vorlage);
+    }
     if (url === '/sitemap.xml') return sitemap(req, res);
     if (url === '/404.html') return nichtGefunden(req, res);
     if (datei(req, res, url)) return;

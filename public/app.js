@@ -54,7 +54,7 @@
       const staffel = ab ? `<span class="staffel">ab ${ab} Stück: ${leer(st) ? 'Basispreis' : preis(st)}</span>` : '';
       return `<td class="${klasse}"><span class="betrag">${preis(v)}</span>${staffel}</td>`;
     };
-    const html = P.spawner.map((s, i) => `<tr${erstes ? ` class="neu" style="--i:${i}"` : ''}><td>${esc(s.name)}</td>${zelle(s.ankauf, s.ankaufAb, s.ankaufStaffel, 'kaufen')}${zelle(s.verkauf, s.verkaufAb, s.verkaufStaffel, 'verkaufen')}</tr>`).join('')
+    const html = P.spawner.map((s, i) => `<tr${erstes ? ` class="neu" style="--i:${i}"` : ''}><td><a class="tab-spawner" href="/spawner/${slug(s.name)}">${spawnerIcon(s.name)}<span class="tab-name">${esc(s.name)}</span></a></td>${zelle(s.ankauf, s.ankaufAb, s.ankaufStaffel, 'kaufen')}${zelle(s.verkauf, s.verkaufAb, s.verkaufStaffel, 'verkaufen')}</tr>`).join('')
       || '<tr><td colspan="3" class="leer">Gerade keine Preise eingetragen.</td></tr>';
     if (body.dataset.stand === html) return;
     body.innerHTML = html; body.dataset.stand = html;
@@ -67,8 +67,8 @@
     const body = $('#preis-tabelle tbody');
     let treffer = 0;
     body.querySelectorAll('tr:not(.lade):not(.kein-treffer)').forEach(tr => {
-      const zelle = tr.cells[0];
-      if (!zelle || tr.cells.length < 3) return;
+      if (!tr.cells[0] || tr.cells.length < 3) return;
+      const zelle = tr.cells[0].querySelector('.tab-name') || tr.cells[0];
       const name = zelle.dataset.name ?? (zelle.dataset.name = zelle.textContent);
       const p = name.toLowerCase().indexOf(q);
       const passt = !q || p >= 0;
@@ -143,12 +143,15 @@
   function rechnerFuellen(P) {
     const sel = $('#r-spawner');
     if (!sel) return;
-    if (!P.spawner.length) { $('#rechner').hidden = true; return; }
-    $('#rechner').hidden = false;
+    const block = $('#rechner');
+    if (!P.spawner.length) { if (block) block.hidden = true; return; }
+    if (block) block.hidden = false;
     const alt = sel.value;
     SPAWNER = P.spawner;
     sel.innerHTML = SPAWNER.map((x, k) => `<option value="${k}">${esc(x.name)}</option>`).join('');
     if (alt && SPAWNER[+alt]) sel.value = alt;
+    const fest = $('#sp')?.dataset.slug;
+    if (fest) { const k = SPAWNER.findIndex(x => slug(x.name) === fest); if (k >= 0) sel.value = String(k); }
     rechnen(false);
   }
   let letzteSumme = '';
@@ -256,6 +259,331 @@
     zahlenGezeigt = true;
   }
 
+  /* ==========================================================
+     Spawner-Icons: selbst gezeichnete Pixel-Käfige, Farbe je Mob
+     ========================================================== */
+  const MOBS = [
+    // [Suchbegriffe, Minecraft-ID, Hauptfarbe, Schatten, Augen]
+    [['zombie piglin', 'zombified', 'zombiepiglin'], 'zombified_piglin', '#e29a8f', '#5e9a4c', '#2a1a14'],
+    [['wither'], 'wither_skeleton', '#3a3a3e', '#1e1e22', '#b8b8b8'],
+    [['hoehlenspinne', 'cave spider', 'cavespider'], 'cave_spider', '#1f4a55', '#10262c', '#d8262f'],
+    [['skelly', 'skelett', 'skeleton', 'skele'], 'skeleton', '#dadada', '#9b9b9b', '#3a3a3a'],
+    [['creeper'], 'creeper', '#5cc04c', '#2f7a26', '#10240c'],
+    [['iron golem', 'irongolem', 'eisengolem', 'golem'], 'iron_golem', '#dcd4c6', '#8f877b', '#7a2a1a'],
+    [['spider', 'spinne'], 'spider', '#4a3b35', '#2a201c', '#d8262f'],
+    [['blaze', 'lohe'], 'blaze', '#f5c63a', '#c4680f', '#3d1d00'],
+    [['kuh', 'cow', 'mooshroom'], 'cow', '#5c3e2b', '#e9e2d8', '#111'],
+    [['piglin'], 'piglin', '#eaa79b', '#b56c5f', '#2a1a14'],
+    [['zombie'], 'zombie', '#3f8b47', '#2a5e30', '#10240c'],
+    [['schwein', 'pig'], 'pig', '#f1a4aa', '#c56d77', '#3a1a1e'],
+    [['enderman'], 'enderman', '#1d1424', '#0f0a14', '#d07ae0'],
+    [['schleim', 'slime'], 'slime', '#7dd06b', '#4c9a3f', '#1d3a17'],
+    [['magma'], 'magma_cube', '#5a1a0a', '#ff7a1a', '#ffd27a'],
+    [['hexe', 'witch'], 'witch', '#5b3a6e', '#3a2448', '#9be36b'],
+    [['schaf', 'sheep'], 'sheep', '#efefef', '#c9b8a6', '#2a2a2a'],
+    [['huhn', 'chicken'], 'chicken', '#f4f4f4', '#d8262f', '#111'],
+    [['waechter', 'guardian'], 'guardian', '#6fb5a3', '#3f7a6c', '#f2b23b'],
+    [['dorfbewohner', 'villager'], 'villager', '#b8866b', '#6e4a36', '#2f7a26'],
+    [['hase', 'rabbit'], 'rabbit', '#b5946e', '#7a5e40', '#111'],
+    [['ghast'], 'ghast', '#efefef', '#bdbdbd', '#555'],
+    [['silberfisch', 'silverfish'], 'silverfish', '#8f96a3', '#5a606c', '#111'],
+  ];
+  const normal = s => String(s || '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const slug = s => normal(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  function mob(name) {
+    const n = normal(name).replace(/\s*spawner\s*/, '');
+    const m = MOBS.find(([w]) => w.some(x => n.includes(x)));
+    if (m) return { id: m[1], a: m[2], b: m[3], c: m[4] };
+    let h = 0; for (const ch of n) h = (h * 31 + ch.charCodeAt(0)) % 360;
+    return { id: n.replace(/ /g, '_'), a: `hsl(${h} 55% 58%)`, b: `hsl(${h} 50% 36%)`, c: '#111' };
+  }
+  const iconCache = new Map();
+  function spawnerIcon(name) {
+    if (iconCache.has(name)) return iconCache.get(name);
+    const m = mob(name), r = [];
+    const px = (x, y, f, w = 1, h = 1) => r.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}"/>`);
+    px(1, 1, '#140f0b', 14, 14);                 // dunkles Innere
+    px(2, 10, '#5a2a0c', 12, 4); px(4, 12, '#a2480f', 8, 2); // Glut unten
+    px(3, 3, m.b, 10, 10); px(3, 3, m.a, 9, 9);   // Mob-Kopf
+    px(4, 4, 'rgba(255,255,255,.3)', 3, 1);       // Glanz
+    px(4, 6, m.c, 3, 2); px(9, 6, m.c, 3, 2);     // Augen
+    if (m.id === 'creeper') { px(7, 8, m.c, 2, 3); px(6, 9, m.c, 1, 3); px(9, 9, m.c, 1, 3); }
+    else if (m.id === 'pig' || m.id === 'piglin' || m.id === 'zombified_piglin') px(6, 9, m.b, 4, 3);
+    else if (m.id === 'iron_golem' || m.id === 'villager') px(7, 8, m.b, 2, 4);
+    else px(5, 10, m.b, 6, 1);
+    // Käfig: Rahmen und Gitterstäbe vor dem Mob
+    const eisen = '#4b515d', dunkel = '#2b2f37';
+    px(0, 0, dunkel, 16, 1); px(0, 15, dunkel, 16, 1); px(0, 0, dunkel, 1, 16); px(15, 0, dunkel, 1, 16);
+    px(1, 1, eisen, 14, 1); px(1, 14, eisen, 14, 1); px(1, 1, eisen, 1, 14); px(14, 1, eisen, 1, 14);
+    for (const k of [5, 10]) { px(k, 2, 'rgba(75,81,93,.55)', 1, 12); px(2, k, 'rgba(75,81,93,.55)', 12, 1); }
+    const svg = `<svg class="sp-svg" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">${r.join('')}</svg>`;
+    iconCache.set(name, svg);
+    return svg;
+  }
+
+  /* ---------- kleine Helfer ---------- */
+  const vor = t => {
+    const s = Math.max(0, Math.round((Date.now() - t) / 1000));
+    if (s < 60) return 'gerade eben';
+    if (s < 3600) return `vor ${Math.round(s / 60)} Min.`;
+    if (s < 86400) return `vor ${Math.round(s / 3600)} Std.`;
+    const tage = Math.round(s / 86400);
+    return tage === 1 ? 'gestern' : `vor ${tage} Tagen`;
+  };
+  // Markt-Preise kommen in Millionen: 1 = 1M, 0.018 = 18K
+  const marktPreis = v => {
+    if (v === null || v === undefined || !Number.isFinite(v)) return '–';
+    const z = (x, d) => x.toLocaleString('de-DE', { maximumFractionDigits: d });
+    if (v >= 1000) return z(v / 1000, 2) + 'B';
+    if (v >= 1) return z(v, v >= 100 ? 0 : 2) + 'M';
+    if (v >= 0.001) { const k = v * 1000; return z(k, k >= 100 ? 0 : k >= 10 ? 1 : 2) + 'K'; }
+    return z(v * 1e6, 0);
+  };
+  const kopf24 = name => `https://mc-heads.net/avatar/${encodeURIComponent(String(name).replace(/^[.*]/, ''))}/32`;
+  const staffelText = (ab, st, kaufen) => ab && !leer(st) ? `ab ${ab} Stück ${preis(st)}${kaufen ? '' : ''}` : '';
+
+  /* ---------- Online-Zahl oben ---------- */
+  let onlineGezeigt = false;
+  function onlineZeigen(d) {
+    const el = $('#online');
+    if (!el || !d.live) return;
+    el.hidden = false;
+    el.querySelector('.punkt').className = 'punkt ' + (d.live.online ? 'an' : 'aus');
+    const z = $('#online-zahl');
+    if (!d.live.online) { z.textContent = 'offline'; return; }
+    if (onlineGezeigt) z.textContent = tausend(d.live.spieler); else hochzaehlen(z, d.live.spieler, n => tausend(Math.round(n)));
+    onlineGezeigt = true;
+  }
+
+  /* ---------- Chips mit allen Spawnern ---------- */
+  function chipsZeigen(P) {
+    const ziel = $('#spawner-chips');
+    if (!ziel) return;
+    const fest = $('#sp')?.dataset.slug;
+    const liste = P.spawner.filter(s => slug(s.name) !== fest);
+    const html = liste.map((s, i) => {
+      const p = !leer(s.verkauf) ? `<b class="gold-text">${preis(s.verkauf)}</b>` : !leer(s.ankauf) ? `<b class="gruen-text">${preis(s.ankauf)}</b>` : '<b class="stop">STOP</b>';
+      return `<a class="chip" style="--i:${i}" href="/spawner/${slug(s.name)}">${spawnerIcon(s.name)}<span>${esc(s.name)}</span>${p}</a>`;
+    }).join('') || '<p class="leer">Gerade keine Preise eingetragen.</p>';
+    if (ziel.dataset.stand !== html) { ziel.innerHTML = html; ziel.dataset.stand = html; }
+  }
+
+  /* ---------- Zahlen-Kacheln ---------- */
+  let kachelnGezeigt = false;
+  function kachelnZeigen(d) {
+    if (!$('#kacheln')) return;
+    const setz = (id, wert, f = n => tausend(Math.round(n))) => {
+      const el = $(id); if (!el) return;
+      if (leer(wert)) { el.textContent = '–'; return; }
+      if (kachelnGezeigt) el.textContent = f(wert); else hochzaehlen(el, wert, f);
+    };
+    setz('#z-online', d.live?.online ? d.live.spieler : null);
+    setz('#z-abschluesse', d.zahlen?.abschluesse);
+    setz('#z-spawner', d.zahlen?.spawner);
+    if (d.zahlen?.verifiziert) text('#z-spawner-info', `${tausend(d.zahlen.verifiziert)} Kunden verifiziert`);
+    kachelnGezeigt = true;
+  }
+
+  /* ---------- Listen „Wir verkaufen“ / „Wir kaufen“ ---------- */
+  function listenZeigen(P) {
+    const zeile = (s, wert, ab, st, klasse, info) => `<li><a class="zeile" href="/spawner/${slug(s.name)}">
+      <span class="z-icon">${spawnerIcon(s.name)}</span>
+      <span class="z-text"><b>${esc(s.name)} Spawner</b><small>${ab && !leer(st) ? `ab ${ab} Stück nur ${preis(st)}` : info}</small></span>
+      <span class="z-preis ${klasse}">${preis(wert)}<small>pro Stück</small></span></a></li>`;
+    const leerZeile = t => `<li class="zeile-leer">${t}</li>`;
+    const v = $('#liste-verkauf'), a = $('#liste-ankauf');
+    if (v) {
+      const l = P.spawner.filter(s => !leer(s.verkauf));
+      const html = l.map(s => zeile(s, s.verkauf, s.verkaufAb, s.verkaufStaffel, 'gold-text', 'Kauf über ein Ticket')).join('') || leerZeile('Gerade verkaufen wir keine Spawner.');
+      if (v.dataset.stand !== html) { v.innerHTML = html; v.dataset.stand = html; }
+    }
+    if (a) {
+      const l = P.spawner.filter(s => !leer(s.ankauf));
+      const html = l.map(s => zeile(s, s.ankauf, s.ankaufAb, s.ankaufStaffel, 'gruen-text', 'Wir kaufen sofort an')).join('') || leerZeile('Gerade kaufen wir keine Spawner an.');
+      if (a.dataset.stand !== html) { a.innerHTML = html; a.dataset.stand = html; }
+    }
+  }
+
+  /* ---------- Bewertungen als Feed ---------- */
+  function vouchFeed(V) {
+    const ziel = $('#liste-vouches');
+    if (!ziel) return;
+    if (!V || !V.neueste?.length) { ziel.innerHTML = '<li class="zeile-leer">Noch keine Bewertungen.</li>'; return; }
+    if (V.anzahl) text('#vouch-schnitt-kurz', `Ø ${komma(V.schnitt)} ★ aus ${tausend(V.anzahl)} Bewertungen.`);
+    const html = V.neueste.slice(0, 5).map(v => `<li class="zeile zeile-vouch">
+      <img class="z-kopf" src="${kopf24(v.von)}" alt="" width="32" height="32" loading="lazy">
+      <span class="z-text"><b>${esc(v.von)}${v.haendler ? ` <span class="z-pfeil">→</span> ${esc(v.haendler)}` : ''}</b><small>„${esc(v.text)}“${v.was ? ` · ${esc(v.was)}` : ''}</small></span>
+      <span class="z-preis"><span class="sterne">${'★'.repeat(v.sterne)}<span class="aus">${'★'.repeat(5 - v.sterne)}</span></span><small>${v.at ? vor(v.at) : ''}</small></span></li>`).join('');
+    if (ziel.dataset.stand !== html) { ziel.innerHTML = html; ziel.dataset.stand = html; }
+    const hl = $('#haendler-leiste');
+    if (hl && V.haendler?.length) {
+      hl.hidden = false;
+      hl.innerHTML = `<p class="leiste-titel">Meiste Vouches</p>` + V.haendler.slice(0, 5).map((h, i) => `<span class="haendler-chip"><span class="rang-nr">${i + 1}</span><img src="${kopf24(h.name)}" alt="" width="22" height="22" loading="lazy">${esc(h.name)}<small>${tausend(h.anzahl)} · ${komma(h.schnitt)} ★</small></span>`).join('');
+    }
+  }
+
+  /* ---------- Markt-Paneel (Auktionshaus & Orders) ---------- */
+  const BILDER = $('[data-bilder]')?.dataset.bilder || '';
+  const TEXTUR = { ancient_debris: 'block/ancient_debris_side', tnt: 'block/tnt_side', obsidian: 'block/obsidian', spawner: 'block/spawner', beacon: 'block/beacon', sponge: 'block/sponge', dragon_egg: 'block/dragon_egg', heavy_core: 'block/heavy_core', shulker_box: 'item/shulker_shell', ender_chest: 'item/ender_eye' };
+  const itemBild = id => {
+    if (!BILDER) return '';
+    const [art, tex] = (TEXTUR[id] || (id.startsWith('spawner_') ? 'block/spawner' : `item/${id}`)).split('/');
+    return `<img src="${esc(BILDER.replace('{art}', art).replace('{id}', encodeURIComponent(tex)))}" data-id="${esc(id)}" data-art="${art}" alt="" width="32" height="32" loading="lazy">`;
+  };
+  document.addEventListener('error', e => {
+    const img = e.target;
+    if (!(img instanceof HTMLImageElement) || !img.dataset.id || !img.closest('.dash, .sp, #gs-treffer')) return;
+    if (img.dataset.art === 'item' && !img.dataset.block) { img.dataset.block = '1'; img.src = BILDER.replace('{art}', 'block').replace('{id}', encodeURIComponent(img.dataset.id)); return; }
+    img.remove();
+  }, true);
+  let MARKT = null, marktLaeuft = null;
+  const marktHolen = () => marktLaeuft || (marktLaeuft = fetch('/api/preise').then(r => r.ok ? r.json() : null).then(d => (MARKT = d)).catch(() => null));
+  async function marktPaneel() {
+    const ziel = $('#liste-markt');
+    if (!ziel) return;
+    const d = await marktHolen();
+    if (!d?.items?.length) { ziel.innerHTML = '<li class="zeile-leer">Die Marktpreise sind gerade nicht erreichbar.</li>'; return; }
+    if (d.demo) { const c = $('#markt-chip'); c.className = 'live-chip demo-chip'; c.textContent = 'Demo-Daten'; }
+    const beliebt = i => (i.ah?.anzahl || 0) + (i.order?.anzahl || 0) * 2;
+    const liste = d.items.filter(i => !leer(i.ah?.min) || !leer(i.order?.max)).sort((a, b) => beliebt(b) - beliebt(a)).slice(0, 6);
+    ziel.innerHTML = liste.map(i => {
+      const t = i.trend?.tag;
+      const trend = leer(t) ? '' : `<span class="trend ${t > 0 ? 'hoch' : t < 0 ? 'runter' : ''}">${t > 0 ? '▲' : t < 0 ? '▼' : '•'} ${komma(Math.abs(t).toFixed(1))} %</span>`;
+      return `<li><a class="zeile" href="/auction-orders?item=${encodeURIComponent(i.id)}">
+        <span class="z-icon mc">${itemBild(i.id)}</span>
+        <span class="z-text"><b>${esc(i.name)}</b><small>${tausend(i.ah?.anzahl || 0)} im AH · ${tausend(i.order?.anzahl || 0)} Orders ${trend}</small></span>
+        <span class="z-preis gruen-text">${marktPreis(i.ah?.min)}<small>${leer(i.order?.max) ? 'keine Order' : `Order ${marktPreis(i.order.max)}`}</small></span></a></li>`;
+    }).join('');
+  }
+
+  /* ---------- Karussell ---------- */
+  const karussell = $('#karussell');
+  if (karussell) {
+    const spur = $('#k-spur'), folien = [...spur.children], punkte = $('#k-punkte');
+    let i = 0, timer = null;
+    punkte.innerHTML = folien.map((_, k) => `<button type="button" role="tab" aria-label="Folie ${k + 1}"></button>`).join('');
+    const knoepfe = [...punkte.children];
+    const gehe = n => {
+      i = (n + folien.length) % folien.length;
+      spur.style.transform = `translateX(${-100 * i}%)`;
+      knoepfe.forEach((b, k) => b.setAttribute('aria-selected', String(k === i)));
+      folien.forEach((f, k) => { f.toggleAttribute('inert', k !== i); f.classList.toggle('aktiv', k === i); });
+    };
+    const start = () => { if (!ruhig) { clearInterval(timer); timer = setInterval(() => gehe(i + 1), 7000); } };
+    const stopp = () => clearInterval(timer);
+    karussell.querySelector('.k-vor').addEventListener('click', () => { gehe(i + 1); start(); });
+    karussell.querySelector('.k-zurueck').addEventListener('click', () => { gehe(i - 1); start(); });
+    knoepfe.forEach((b, k) => b.addEventListener('click', () => { gehe(k); start(); }));
+    karussell.addEventListener('pointerenter', stopp);
+    karussell.addEventListener('pointerleave', start);
+    karussell.addEventListener('focusin', stopp);
+    karussell.addEventListener('focusout', start);
+    // Wischen am Handy
+    let x0 = null;
+    spur.addEventListener('pointerdown', e => { x0 = e.clientX; });
+    spur.addEventListener('pointerup', e => { if (x0 === null) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 50) { gehe(i + (dx < 0 ? 1 : -1)); start(); } });
+    document.addEventListener('visibilitychange', () => document.hidden ? stopp() : start());
+    gehe(0); start();
+  }
+
+  /* ---------- Spawner-Seite ---------- */
+  const SP = $('#sp');
+  let spMarktGeholt = false;
+  function spawnerSeite(d) {
+    if (!SP || !d.preise) return;
+    const liste = d.preise.spawner, k = liste.findIndex(x => slug(x.name) === SP.dataset.slug);
+    if (k < 0) return;
+    const s = liste[k];
+    text('#sp-name', s.name);
+    $('#sp-icon').innerHTML = spawnerIcon(s.name);
+    const mitglieder = (d.clans || []).reduce((n, c) => n + (c.anzahl || 0), 0);
+    if (mitglieder) text('#sp-haendler', `${tausend(mitglieder)} Händler in CM0 und CM1`);
+    const feld = (id, wert, ab, st, wer) => {
+      const el = $(id);
+      el.innerHTML = leer(wert) ? '<span class="stop">STOP</span>' : `${preis(wert)}<small> pro Stück</small>`;
+      $(id + '-staffel').textContent = leer(wert) ? `Gerade ${wer} wir diesen Spawner nicht.` : ab && !leer(st) ? `Ab ${ab} Stück: ${preis(st)} pro Stück` : 'Gleicher Preis für jede Menge';
+    };
+    feld('#sp-verkauf', s.verkauf, s.verkaufAb, s.verkaufStaffel, 'verkaufen');
+    feld('#sp-ankauf', s.ankauf, s.ankaufAb, s.ankaufStaffel, 'kaufen');
+    // Rechner auf die Richtung stellen, die es gibt
+    if (leer(s.verkauf) && !leer(s.ankauf)) { const r = $('input[name="r-art"][value="verkaufen"]'); if (r && !r.checked) { r.checked = true; rechnen(false); } }
+    const n = liste[(k + 1) % liste.length];
+    if (n && n !== s) {
+      const w = $('#sp-weiter'); w.hidden = false; w.href = `/spawner/${slug(n.name)}`;
+      text('#sp-weiter-name', n.name); $('#sp-weiter-icon').innerHTML = spawnerIcon(n.name);
+    }
+    document.title = `${s.name} Spawner – Preis bei CoreMarket`;
+    if (!spMarktGeholt) { spMarktGeholt = true; spawnerMarkt(s); }
+  }
+  async function spawnerMarkt(s) {
+    const id = 'spawner_' + mob(s.name).id;
+    try {
+      const r = await fetch(`/api/preise/${encodeURIComponent(id)}`);
+      if (!r.ok) return;
+      const m = await r.json();
+      if (m.demo || (leer(m.ah?.min) && leer(m.order?.max))) return; // keine ausgedachten Zahlen als Vergleich
+      $('#sp-markt-werte').innerHTML = `<div><small>Billigstes Angebot</small><b class="gruen-text">${marktPreis(m.ah?.min)}</b></div><div><small>Beste Order</small><b>${marktPreis(m.order?.max)}</b></div>`;
+      $('#sp-markt-link').href = `/auction-orders?item=${encodeURIComponent(id)}`;
+      $('#sp-markt').hidden = false;
+    } catch { /* dann eben ohne Vergleich */ }
+  }
+
+  /* ==========================================================
+     Globale Suche oben: Spawner, Spieler, Seiten, Wiki, Items
+     ========================================================== */
+  const gs = $('#gs-eingabe'), gsTreffer = $('#gs-treffer'), gsBox = $('#globalsuche');
+  let WIKI_INDEX = null, DATEN = null;
+  const SEITEN_LISTE = [
+    ['Startseite', '/'], ['Spawner-Preise', '/preise'], ['Rechner', '/preise#rechner'], ['Auction-Orders', '/auction-orders'],
+    ['Clan', '/clan'], ['Bewertungen', '/bewertungen'], ["So läuft's", '/ablauf'], ['Wiki', '/wiki'], ['Häufige Fragen', '/fragen'], ['Abo', '/abo'],
+  ];
+  if (gs) {
+    let auswahl = -1, zeitGs;
+    const hervor = (t, q) => { const p = normal(t).indexOf(q); return p < 0 ? esc(t) : esc(t.slice(0, p)) + '<mark>' + esc(t.slice(p, p + q.length)) + '</mark>' + esc(t.slice(p + q.length)); };
+    const wikiLaden = () => WIKI_INDEX || (WIKI_INDEX = fetch('/api/wiki').then(r => r.ok ? r.json() : []).catch(() => []));
+    async function suchen() {
+      const roh = gs.value.trim(), q = normal(roh);
+      auswahl = -1;
+      if (!q) { gsTreffer.hidden = true; gs.setAttribute('aria-expanded', 'false'); return; }
+      const gruppen = [];
+      const sp = (DATEN?.preise?.spawner || []).filter(s => normal(s.name).includes(q) || mob(s.name).id.includes(q.replace(/ /g, '_')));
+      if (sp.length) gruppen.push(['Spawner', sp.slice(0, 5).map(s => `<a href="/spawner/${slug(s.name)}" role="option"><span class="gs-icon">${spawnerIcon(s.name)}</span><span>${hervor(s.name, q)} Spawner<small>${!leer(s.verkauf) ? `Kaufen ${preis(s.verkauf)}` : ''}${!leer(s.verkauf) && !leer(s.ankauf) ? ' · ' : ''}${!leer(s.ankauf) ? `Verkaufen ${preis(s.ankauf)}` : ''}</small></span></a>`)]);
+      const leute = (DATEN?.clans || []).flatMap(c => c.mitglieder.map(m => [m.name, c.key])).filter(([n]) => normal(n).includes(q));
+      if (leute.length) gruppen.push(['Clan-Mitglieder', leute.slice(0, 5).map(([n, k]) => `<a href="/clan?name=${encodeURIComponent(n)}" role="option"><img class="gs-icon" src="${kopf24(n)}" alt="" width="28" height="28" loading="lazy"><span>${hervor(n, q)}<small>${esc(k)} · gehört zu CoreMarket</small></span></a>`)]);
+      const seiten = SEITEN_LISTE.filter(([n]) => normal(n).includes(q));
+      const wiki = (await wikiLaden()).filter(a => normal(a.t).includes(q) || normal(a.b).includes(q));
+      if (seiten.length || wiki.length) gruppen.push(['Seiten & Wiki', [...seiten.map(([n, u]) => `<a href="${u}" role="option"><span class="gs-icon gs-seite">↗</span><span>${hervor(n, q)}<small>Seite</small></span></a>`), ...wiki.slice(0, 4).map(a => `<a href="/wiki/${esc(a.s)}" role="option"><span class="gs-icon gs-seite">W</span><span>${hervor(a.t, q)}<small>Wiki · ${esc(a.k)}</small></span></a>`)]]);
+      if (q.length >= 2) {
+        const markt = MARKT || await marktHolen();
+        const items = (markt?.items || []).filter(i => normal(i.name).includes(q) || i.id.includes(q.replace(/ /g, '_'))).slice(0, 5);
+        if (items.length) gruppen.push([`Items${markt.demo ? ' (Demo-Preise)' : ''}`, items.map(i => `<a href="/auction-orders?item=${encodeURIComponent(i.id)}" role="option"><span class="gs-icon mc">${itemBild(i.id)}</span><span>${hervor(i.name, q)}<small>AH ab ${marktPreis(i.ah?.min)}${leer(i.order?.max) ? '' : ` · Order ${marktPreis(i.order.max)}`}</small></span></a>`)]);
+      }
+      if (gs.value.trim() !== roh) return; // schon weitergetippt
+      gsTreffer.innerHTML = gruppen.length
+        ? gruppen.map(([t, l]) => `<p class="gs-gruppe">${t}</p>${l.join('')}`).join('')
+        : `<p class="gs-nichts">Nichts gefunden zu „${esc(roh)}“.${normal(roh).length > 2 ? ' Wer nicht in unserer Clan-Liste steht, handelt nicht in unserem Namen.' : ''}</p>`;
+      gsTreffer.hidden = false; gs.setAttribute('aria-expanded', 'true');
+    }
+    gs.addEventListener('input', () => { clearTimeout(zeitGs); zeitGs = setTimeout(suchen, 80); });
+    gs.addEventListener('focus', () => { if (gs.value.trim()) suchen(); marktHolen(); });
+    gs.addEventListener('keydown', e => {
+      const links = [...gsTreffer.querySelectorAll('a')];
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault(); if (!links.length) return;
+        auswahl = (auswahl + (e.key === 'ArrowDown' ? 1 : -1) + links.length) % links.length;
+        links.forEach((l, k) => l.classList.toggle('markiert', k === auswahl));
+        links[auswahl].scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'Enter' && links.length) { e.preventDefault(); location.href = links[Math.max(0, auswahl)].href; }
+      else if (e.key === 'Escape') { gsTreffer.hidden = true; gs.blur(); gsBox.classList.remove('offen'); }
+    });
+    document.addEventListener('click', e => { if (!e.target.closest('#globalsuche, #gs-mobil')) { gsTreffer.hidden = true; gsBox.classList.remove('offen'); } });
+    addEventListener('keydown', e => {
+      const tippt = /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '');
+      if (((e.key === '/' && !$('#wiki-suche') && !$('#ao-suche')) || (e.key.toLowerCase() === 'k' && (e.ctrlKey || e.metaKey))) && (!tippt || e.ctrlKey || e.metaKey)) { e.preventDefault(); gsBox.classList.add('offen'); gs.focus(); }
+    });
+    $('#gs-mobil')?.addEventListener('click', () => { gsBox.classList.add('offen'); gs.focus(); });
+  }
+
   /* ---------- Daten anwenden ---------- */
   let erstesMal = true;
   function anwenden(d) {
@@ -266,9 +594,15 @@
       $('#live-punkt').className = 'punkt ' + (d.live.online ? 'an' : 'aus');
       text('#live', d.live.online ? `${tausend(d.live.spieler)} Spieler gerade auf ${d.server || 'HugoSMP'}` : `${d.server || 'HugoSMP'} ist gerade nicht erreichbar`);
     }
+    DATEN = d;
+    onlineZeigen(d);
+    kachelnZeigen(d);
     if (d.preise) {
       tabelleZeigen(d.preise, erstesMal); vorschauZeigen(d.preise); laufbandZeigen(d.preise); kaefigZeigen(d.preise); rechnerFuellen(d.preise);
+      chipsZeigen(d.preise); listenZeigen(d.preise); spawnerSeite(d);
     } else fehler('Gerade sind keine Preise freigegeben.');
+    vouchFeed(d.vouches);
+    if (erstesMal) marktPaneel();
     CLANS = d.clans || [];
     clansZeigen(suche ? suche.value : '');
     vouchesZeigen(d.vouches);
@@ -310,28 +644,37 @@
 
   beobachte();
 
-  /* ---------- Kopf, Fortschritt, Nach-oben ---------- */
-  const kopfEl = $('#kopf'), balken = $('#fortschritt'), hoch = $('#nach-oben');
+  /* ---------- Nach oben ---------- */
+  const hoch = $('#nach-oben');
   let tick = false;
-  const scroll = () => {
-    tick = false;
-    const y = scrollY, max = document.documentElement.scrollHeight - innerHeight;
-    kopfEl.classList.toggle('gescrollt', y > 10);
-    balken.style.setProperty('--p', max > 0 ? (y / max).toFixed(4) : 0);
-    hoch.classList.toggle('da', y > innerHeight * 1.2);
-  };
+  const scroll = () => { tick = false; hoch?.classList.toggle('da', scrollY > innerHeight * 1.2); $('#kopf')?.classList.toggle('gescrollt', scrollY > 4); };
   addEventListener('scroll', () => { if (!tick) { tick = true; requestAnimationFrame(scroll); } }, { passive: true });
   scroll();
-  hoch.addEventListener('click', e => { e.preventDefault(); scrollTo({ top: 0, behavior: ruhig ? 'auto' : 'smooth' }); });
+  hoch?.addEventListener('click', e => { e.preventDefault(); scrollTo({ top: 0, behavior: ruhig ? 'auto' : 'smooth' }); });
 
-  /* ---------- Menü (Handy) ---------- */
-  const mk = $('#menue-knopf'), menue = $('#menue');
-  const menueZu = () => { menue.classList.remove('offen'); mk.setAttribute('aria-expanded', 'false'); mk.setAttribute('aria-label', 'Menü öffnen'); };
-  mk.addEventListener('click', () => {
-    const o = menue.classList.toggle('offen');
-    mk.setAttribute('aria-expanded', String(o)); mk.setAttribute('aria-label', o ? 'Menü schließen' : 'Menü öffnen');
+  /* ---------- Seitenleiste: am PC ein-/ausklappen (wird gemerkt), am Handy als Schublade ---------- */
+  const leisteKnopf = $('#leiste-knopf'), schatten = $('#leiste-schatten'), B = document.body;
+  const handy = () => matchMedia('(max-width: 899px)').matches;
+  const merken = (k, v) => { try { localStorage.setItem(k, v); } catch { /* egal */ } };
+  const holen = k => { try { return localStorage.getItem(k); } catch { return null; } };
+  const wunsch = holen('cm-leiste');
+  if (wunsch === 'schmal') B.classList.add('leiste-schmal');
+  if (wunsch === 'breit') B.classList.add('leiste-breit');
+  const istSchmal = () => B.classList.contains('leiste-schmal') || (!B.classList.contains('leiste-breit') && matchMedia('(max-width: 1199px)').matches);
+  const schubladeZu = () => { B.classList.remove('leiste-offen'); if (schatten) schatten.hidden = true; leisteKnopf?.setAttribute('aria-expanded', 'false'); };
+  leisteKnopf?.addEventListener('click', () => {
+    if (handy()) {
+      const auf = B.classList.toggle('leiste-offen');
+      schatten.hidden = !auf; leisteKnopf.setAttribute('aria-expanded', String(auf));
+      return;
+    }
+    const schmal = !istSchmal();
+    B.classList.toggle('leiste-schmal', schmal); B.classList.toggle('leiste-breit', !schmal);
+    merken('cm-leiste', schmal ? 'schmal' : 'breit');
   });
-  addEventListener('keydown', e => { if (e.key === 'Escape') menueZu(); });
+  schatten?.addEventListener('click', schubladeZu);
+  $$('#seitenleiste a').forEach(a => a.addEventListener('click', () => { if (handy()) schubladeZu(); }));
+  addEventListener('keydown', e => { if (e.key === 'Escape') schubladeZu(); });
 
   /* ---------- Überschrift Wort für Wort ---------- */
   const h1 = $('.held h1, .seitenkopf h1');

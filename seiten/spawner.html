@@ -1,0 +1,67 @@
+<div class="sp" id="sp" data-slug="{{SLUG}}" data-bilder="{{BILDER}}">
+  <header class="sp-kopf auftritt">
+    <a class="sp-zurueck" href="/preise" aria-label="Zurück zu allen Preisen"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a>
+    <span class="sp-icon" id="sp-icon"></span>
+    <div class="sp-titel">
+      <h1><span id="sp-name">{{SPAWNER}}</span> Spawner</h1>
+      <p><span class="punkt an"></span><span id="sp-haendler">Händler aus CM0 und CM1</span> · Kauf und Verkauf über ein Ticket in unserem Discord.</p>
+    </div>
+    <a class="sp-weiter" id="sp-weiter" href="/preise" hidden><span class="sp-icon klein" id="sp-weiter-icon"></span><span><small>Weiter zu</small><b id="sp-weiter-name"></b></span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+  </header>
+
+  <section class="sp-preise auftritt" style="--i:1">
+    <div class="sp-karte sp-kaufen">
+      <p class="sp-label">Du kaufst bei uns</p>
+      <p class="sp-preis" id="sp-verkauf">…</p>
+      <p class="sp-staffel" id="sp-verkauf-staffel"></p>
+    </div>
+    <div class="sp-karte sp-verkaufen">
+      <p class="sp-label">Du verkaufst an uns</p>
+      <p class="sp-preis" id="sp-ankauf">…</p>
+      <p class="sp-staffel" id="sp-ankauf-staffel"></p>
+    </div>
+    <div class="sp-markt" id="sp-markt" hidden>
+      <p class="sp-label">Zum Vergleich im Auktionshaus</p>
+      <div class="sp-markt-werte" id="sp-markt-werte"></div>
+      <a class="paneel-mehr" id="sp-markt-link" href="/auction-orders">Preisverlauf ansehen <span aria-hidden="true">›</span></a>
+    </div>
+  </section>
+
+  <section class="dash-paar sp-unten">
+    <div class="paneel auftritt" style="--i:2">
+      <div class="paneel-kopf"><h2>Was kostet das?</h2></div>
+      <form class="rechner sp-rechner" id="rechner-form">
+        <div class="umschalter" role="radiogroup" aria-label="Ich möchte">
+          <label><input type="radio" name="r-art" value="kaufen" checked><span>kaufen</span></label>
+          <label><input type="radio" name="r-art" value="verkaufen"><span>verkaufen</span></label>
+          <i class="umschalter-zeiger" aria-hidden="true"></i>
+        </div>
+        <select id="r-spawner" hidden aria-hidden="true" tabindex="-1"></select>
+        <label class="feld"><span>Menge</span>
+          <span class="menge"><button type="button" data-schritt="-1" aria-label="Eins weniger">−</button><input id="r-menge" type="number" inputmode="numeric" min="1" max="10000" value="1"><button type="button" data-schritt="1" aria-label="Eins mehr">+</button></span>
+        </label>
+        <output id="r-ergebnis" for="r-menge" aria-live="polite"><span class="r-summe">–</span><small></small></output>
+      </form>
+      <div class="sp-aktion">
+        <a class="knopf discord-link" href="{{DISCORD}}" target="_blank" rel="noopener">Ticket im Discord öffnen</a>
+        <a class="paneel-mehr" href="/wiki/ticket-oeffnen">Wie geht das? <span aria-hidden="true">›</span></a>
+      </div>
+    </div>
+
+    <div class="paneel auftritt" style="--i:3">
+      <div class="paneel-kopf"><h2>So läuft der Handel</h2></div>
+      <ol class="sp-schritte">
+        <li><b>Ticket öffnen</b> – im Discord unter der Preisliste auf <b>Ankauf</b> oder <b>Verkauf</b> drücken.</li>
+        <li><b>Preis steht fest</b> – Spawner und Menge wählen, der Preis wird automatisch ausgerechnet.</li>
+        <li><b>Übergabe im Spiel</b> – ein Händler aus CM0 oder CM1 trifft dich auf HugoSMP.</li>
+        <li><b>Bewerten</b> – danach mit <code>/vouch</code> eine Bewertung abgeben.</li>
+      </ol>
+      <p class="paneel-info sp-warnung">Handle nie mit Leuten, die dich im Spiel anschreiben. <a href="/clan">Namen prüfen</a></p>
+    </div>
+  </section>
+
+  <section class="dash-block auftritt" style="--i:4">
+    <div class="dash-kopf"><h2>Andere Spawner</h2><div class="dash-links"><a href="/preise">Alle Preise <span aria-hidden="true">›</span></a></div></div>
+    <div class="chips" id="spawner-chips"></div>
+  </section>
+</div>

@@ -26,6 +26,10 @@ const BILDER = process.env.ITEM_BILDER || 'https://assets.mcasset.cloud/1.21.4/a
 const PREISE_API = (process.env.PREISE_API || `${API.replace(/\/+$/, '')}/preise`).replace(/\/+$/, '');
 const PREISE_DEMO = (process.env.PREISE_DEMO || 'auto').toLowerCase();
 const BILDER_HOST = (() => { try { return new URL(BILDER.replace(/[{}]/g, '')).origin; } catch { return ''; } })();
+// Fertig gerenderte Inventar-Icons (Blöcke als 3D-Würfel, Treppen als Treppe …) von rendermite, {id} = z. B. tuff_stairs.
+// Fehlt ein Icon, nimmt die Seite die Textur von ITEM_BILDER.
+const ICONS = process.env.ITEM_ICONS || 'https://assets.rendermite.dev/icons/26.3/items/minecraft/{id}.webp';
+const ICONS_HOST = (() => { try { return new URL(ICONS.replace(/[{}]/g, '')).origin; } catch { return ''; } })();
 const PUBLIC = path.join(__dirname, 'public');
 const START = Date.now();
 
@@ -50,7 +54,7 @@ const SICHERHEIT = {
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
   'Content-Security-Policy': [
     "default-src 'self'",
-    `img-src 'self' data: https://mc-heads.net${BILDER_HOST ? ' ' + BILDER_HOST : ''}`,
+    `img-src 'self' data: https://mc-heads.net${BILDER_HOST ? ' ' + BILDER_HOST : ''}${ICONS_HOST && ICONS_HOST !== BILDER_HOST ? ' ' + ICONS_HOST : ''}`,
     "style-src 'self' https://fonts.googleapis.com",
     "style-src-attr 'unsafe-inline'",
     "font-src https://fonts.gstatic.com",
@@ -134,6 +138,7 @@ function baueSeiten() {
       .replaceAll('{{SEITE}}', s.datei)
       .replaceAll('{{DISCORD}}', escAttr(DISCORD))
       .replaceAll('{{BILDER}}', escAttr(BILDER))
+      .replaceAll('{{ICONS}}', escAttr(ICONS))
       .replace('</body>', () => (s.skript ? `<script src="/konto.js?v=${v('/konto.js')}" defer></script>\n` : '') + (s.js ? `<script src="/${s.js}?v=${v('/' + s.js)}" defer></script>\n` : '') + '</body>');
     fertig.set(s.pfad, html);
   }

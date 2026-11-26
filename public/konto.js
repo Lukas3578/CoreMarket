@@ -30,19 +30,22 @@
   function nurText(teile) { return (teile || []).map(x => x.t).join(''); }
   /* ---------- Item-Bilder: Vanilla-Textur, sonst Block-Textur, sonst Kürzel */
   const wurzel = $('#konto');
-  const BILDER = wurzel?.dataset.bilder || '';
+  const BILDER = wurzel?.dataset.bilder || '', ICONS = wurzel?.dataset.icons || '';
   const bildUrl = (id, art) => BILDER.replace('{art}', art).replace('{id}', encodeURIComponent(id));
+  // Reihenfolge: gerendertes Inventar-Icon (rendermite, webp → png), Item-Textur, Block-Textur, sonst Kürzel
+  const quellen = id => { const e = encodeURIComponent(id), l = []; if (ICONS) { l.push(ICONS.replace('{id}', e)); if (/\.webp$/.test(ICONS)) l.push(ICONS.replace('{id}', e).replace(/\.webp$/, '.png')); } if (BILDER) l.push(bildUrl(id, 'item'), bildUrl(id, 'block')); return l; };
   const kuerzel = n => String(n || '?').replace(/[^A-Za-zÄÖÜäöü0-9 ]/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
   function icon(it) {
     const id = String(it.id || '').replace(/^minecraft:/, '');
-    const maske = it.ench?.length && id && BILDER ? ` style="--maske:url('${esc(bildUrl(id, 'item'))}')"` : '';
-    return `<span class="mc-icon${maske ? ' glanz' : ''}"${maske} data-kurz="${esc(kuerzel(nurText(it.nameF) || it.name || id))}">${id && BILDER ? `<img src="${esc(bildUrl(id, 'item'))}" data-id="${esc(id)}" alt="" width="32" height="32" loading="lazy">` : ''}</span>`;
+    const q = id ? quellen(id) : [];
+    const maske = it.ench?.length && q.length ? ` style="--maske:url('${esc(q[0])}')"` : '';
+    return `<span class="mc-icon${maske ? ' glanz' : ''}"${maske} data-kurz="${esc(kuerzel(nurText(it.nameF) || it.name || id))}">${q.length ? `<img src="${esc(q[0])}" data-id="${esc(id)}" data-stufe="0" alt="" width="32" height="32" loading="lazy">` : ''}</span>`;
   }
-  // Bild-Fehler: einmal Block-Textur probieren, dann Kürzel zeigen
+  // Bild-Fehler: nächste Quelle probieren, am Ende Kürzel zeigen
   document.addEventListener('error', e => {
-    const img = e.target; if (!(img instanceof HTMLImageElement) || !img.dataset.id) return;
-    if (!img.dataset.block) { img.dataset.block = '1'; img.src = bildUrl(img.dataset.id, 'block'); return; }
-    img.remove();
+    const img = e.target; if (!(img instanceof HTMLImageElement) || !img.dataset.id || !wurzel?.contains(img)) return;
+    const q = quellen(img.dataset.id), n = +img.dataset.stufe + 1;
+    if (n < q.length) { img.dataset.stufe = n; img.src = q[n]; } else img.remove();
   }, true);
 
   const VZ = { protection: 'Schutz', fire_protection: 'Feuerschutz', feather_falling: 'Federfall', blast_protection: 'Explosionsschutz', projectile_protection: 'Schusssicher', respiration: 'Atmung', aqua_affinity: 'Wasseraffinität', thorns: 'Dornen', depth_strider: 'Wasserläufer', frost_walker: 'Eisläufer', binding_curse: 'Fluch der Bindung', soul_speed: 'Seelenläufer', swift_sneak: 'Huschen', sharpness: 'Schärfe', smite: 'Bann', bane_of_arthropods: 'Nemesis der Gliederfüßer', knockback: 'Rückstoß', fire_aspect: 'Verbrennung', looting: 'Plünderung', sweeping_edge: 'Schwungkraft', sweeping: 'Schwungkraft', efficiency: 'Effizienz', silk_touch: 'Behutsamkeit', unbreaking: 'Haltbarkeit', fortune: 'Glück', power: 'Stärke', punch: 'Schlag', flame: 'Flamme', infinity: 'Unendlichkeit', luck_of_the_sea: 'Glück des Meeres', lure: 'Köder', loyalty: 'Treue', impaling: 'Harpune', riptide: 'Sog', channeling: 'Entladung', multishot: 'Mehrfachschuss', quick_charge: 'Schnellladen', piercing: 'Durchschuss', mending: 'Reparatur', vanishing_curse: 'Fluch des Verschwindens', density: 'Dichte', breach: 'Bresche', wind_burst: 'Windstoß' };

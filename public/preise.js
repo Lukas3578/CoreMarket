@@ -26,25 +26,34 @@
   const dauer = ms => { const m = Math.max(1, Math.round(ms / 60000)); return m < 60 ? `${m} Min.` : `${Math.floor(m / 60)} Std. ${m % 60 ? `${m % 60} Min.` : ''}`.trim(); };
   const kopf = n => `https://mc-heads.net/avatar/${encodeURIComponent(String(n).replace(/^[.*]/, ''))}/24`;
 
-  /* ---------- Item-Bilder: eigene Zuordnung, sonst Item-Textur, sonst Block-Textur, sonst Kürzel */
-  const BILDER = W.dataset.bilder || '';
-  const TEXTUR = { ancient_debris: 'block/ancient_debris_side', tnt: 'block/tnt_side', cactus: 'block/cactus_side', oak_log: 'block/oak_log', spruce_log: 'block/spruce_log', honey_block: 'block/honey_block_side', sponge: 'block/sponge', wet_sponge: 'block/wet_sponge', obsidian: 'block/obsidian', glowstone: 'block/glowstone', dragon_egg: 'block/dragon_egg', cobweb: 'block/cobweb', conduit: 'block/conduit', spawner: 'block/spawner', beacon: 'block/beacon', crafting_table: 'block/crafting_table_front', furnace: 'block/furnace_front', ender_chest: 'item/ender_eye', shulker_box: 'item/shulker_shell', chest: 'block/oak_planks', sniffer_egg: 'block/sniffer_egg_not_cracked_east', heavy_core: 'block/heavy_core', dragon_head: 'item/dragon_breath', wither_skeleton_skull: 'item/coal', trial_spawner: 'block/trial_spawner_side_inactive' };
-  const bildUrl = (art, id) => BILDER.replace('{art}', art).replace('{id}', encodeURIComponent(id));
+  /* ---------- Item-Bilder: gerenderte Inventar-Icons (rendermite), sonst Item-Textur, sonst Block-Textur, sonst Kürzel */
+  const BILDER = W.dataset.bilder || '', ICONS = W.dataset.icons || '';
   const kuerzel = n => String(n || '?').replace(/[^A-Za-z0-9 ]/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
+  const mcId = id => id.startsWith('spawner_') ? 'spawner' : id;
+  function quellen(id) {
+    const e = encodeURIComponent(mcId(id)), l = [];
+    if (ICONS) { l.push(ICONS.replace('{id}', e)); if (/\.webp$/.test(ICONS)) l.push(ICONS.replace('{id}', e).replace(/\.webp$/, '.png')); }
+    if (BILDER) for (const art of ['item', 'block']) l.push(BILDER.replace('{art}', art).replace('{id}', e));
+    return l;
+  }
   function icon(id, name, gross) {
-    const [art, tex] = (TEXTUR[id] || (id.startsWith('spawner_') ? 'block/spawner' : `item/${id}`)).split('/');
-    return `<span class="mc-icon${gross ? ' gross' : ''}" data-kurz="${esc(kuerzel(name))}">${BILDER ? `<img src="${esc(bildUrl(art, tex))}" data-id="${esc(id)}" data-art="${art}" alt="" width="32" height="32" loading="lazy">` : ''}</span>`;
+    const q = quellen(id);
+    return `<span class="mc-icon${gross ? ' gross' : ''}" data-kurz="${esc(kuerzel(name))}">${q.length ? `<img src="${esc(q[0])}" data-id="${esc(id)}" data-stufe="0" alt="" width="32" height="32" loading="lazy">` : ''}</span>`;
   }
   document.addEventListener('error', e => {
     const img = e.target; if (!(img instanceof HTMLImageElement) || !img.dataset.id || !img.closest('main')) return;
-    if (img.dataset.art === 'item' && !img.dataset.block) { img.dataset.block = '1'; img.src = bildUrl('block', img.dataset.id); return; }
-    img.remove();
+    const q = quellen(img.dataset.id), n = +img.dataset.stufe + 1;
+    if (n < q.length) { img.dataset.stufe = n; img.src = q[n]; } else img.remove();
   }, true);
 
   /* ---------- Suche: englische Namen, Minecraft-ID und ein paar deutsche Namen */
   const DEUTSCH = { spawner_skeleton: 'skelett skelly spawner', spawner_blaze: 'lohe blaze spawner', spawner_iron_golem: 'eisengolem iron golem spawner', spawner_creeper: 'creeper spawner', spawner_spider: 'spinne spawner', spawner_cow: 'kuh spawner', spawner_piglin: 'piglin spawner', spawner_zombie: 'zombie spawner', spawner_pig: 'schwein spawner', spawner_cave_spider: 'höhlenspinne spawner', spawner_wither_skeleton: 'wither skelett spawner', spawner_enderman: 'enderman spawner', ancient_debris: 'antiker schutt', netherite_ingot: 'netheritbarren', netherite_scrap: 'netheritplatten', diamond: 'diamant', diamond_block: 'diamantblock', elytra: 'elytren flügel', totem_of_undying: 'totem der unsterblichkeit', beacon: 'leuchtfeuer', enchanted_golden_apple: 'verzauberter goldener apfel notch apfel', golden_apple: 'goldener apfel', shulker_box: 'shulkerkiste', shulker_shell: 'shulkerschale', nether_star: 'netherstern', netherite_upgrade_smithing_template: 'netheritaufwertung schmiedevorlage', mace: 'streitkolben', heavy_core: 'schwerer kern', trident: 'dreizack', end_crystal: 'enderkristall', experience_bottle: 'erfahrungsfläschchen xp flasche', obsidian: 'obsidian', ender_pearl: 'enderperle', blaze_rod: 'lohenrute', gunpowder: 'schwarzpulver', slime_ball: 'schleimball', iron_ingot: 'eisenbarren', iron_block: 'eisenblock', gold_ingot: 'goldbarren', gold_block: 'goldblock', emerald: 'smaragd', emerald_block: 'smaragdblock', netherite_block: 'netheritblock', dragon_head: 'drachenkopf', dragon_egg: 'drachenei', wither_skeleton_skull: 'witherskelettschädel', sponge: 'schwamm', nautilus_shell: 'nautilusschale', heart_of_the_sea: 'herz des meeres', conduit: 'aquisator', echo_shard: 'echoscherbe', recovery_compass: 'bergungskompass', sniffer_egg: 'schnüffler ei', trial_key: 'prüfungsschlüssel', breeze_rod: 'böenrute', wind_charge: 'windkugel', cobweb: 'spinnennetz', honey_block: 'honigblock', oak_log: 'eichenstamm holz', sugar_cane: 'zuckerrohr', cactus: 'kaktus', bone: 'knochen', string: 'faden', leather: 'leder', carrot: 'karotte', wheat: 'weizen', cooked_beef: 'steak gebratenes rindfleisch', golden_carrot: 'goldene karotte', amethyst_shard: 'amethystsplitter', quartz: 'netherquarz', redstone: 'redstone', glowstone: 'leuchtstein', diamond_sword: 'diamantschwert', netherite_sword: 'netheritschwert', netherite_pickaxe: 'netheritspitzhacke', netherite_chestplate: 'netheritbrustpanzer', netherite_helmet: 'netherithelm', diamond_pickaxe: 'diamantspitzhacke', bow: 'bogen', crossbow: 'armbrust', shield: 'schild', ender_chest: 'endertruhe', hopper: 'trichter', chest: 'truhe kiste', name_tag: 'namensschild', saddle: 'sattel', spawner: 'spawner', tnt: 'tnt' };
   const norm = s => String(s || '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[_\-']/g, ' ').replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
-  const beliebtheit = i => (i.ah.anzahl || 0) + (i.order.anzahl || 0) * 2;
+  // Beliebt = vom Bot als Top-Item geführt, oft angeschaut, und viel Handel MIT Wert (36 Andesit < 36 Beacons)
+  const beliebtheit = i => {
+    const wert = Math.log10(1 + ((i.ah.min ?? i.order.max) || 0) * 1e6);
+    return (i.kl === 'top' ? 1e6 : i.kl === 'beliebt' ? 1e4 : 0) + (i.aufrufe || 0) * 500 + ((i.ah.anzahl || 0) + (i.order.anzahl || 0) * 2) * wert * wert;
+  };
   function suchen(q, max = 8) {
     q = norm(q); if (!q) return [];
     const k = q.replace(/ /g, '');
@@ -342,7 +351,7 @@
 
   /* ---------- Marktübersicht */
   const TABS = {
-    beliebt: { titel: 'Gerade gefragt', info: 'Items mit den meisten Angeboten und Orders.', liste: l => l.sort((a, b) => beliebtheit(b) - beliebtheit(a)) },
+    beliebt: { titel: 'Gerade gefragt', info: 'Die gefragtesten Items: was der Clan am meisten handelt, was oft angeschaut wird und wo viel Geld drinsteckt.', liste: l => l.sort((a, b) => beliebtheit(b) - beliebtheit(a)) },
     steigt: { titel: 'Werden teurer', info: 'Größter Anstieg des billigsten AH-Preises in den letzten 24 Stunden.', liste: l => l.filter(i => i.trend?.tag > 0).sort((a, b) => b.trend.tag - a.trend.tag) },
     faellt: { titel: 'Werden billiger', info: 'Größter Rückgang des billigsten AH-Preises in den letzten 24 Stunden. Vielleicht ein guter Moment zum Kaufen.', liste: l => l.filter(i => i.trend?.tag < 0).sort((a, b) => a.trend.tag - b.trend.tag) },
     flip: { titel: 'Flip-Chancen', info: 'Hier zahlt eine Order mehr, als das billigste Angebot im AH kostet: im AH kaufen, an die Order verkaufen. Preise ändern sich schnell, schau vorher im Spiel nach.', liste: l => l.filter(i => !leer(i.order.max) && !leer(i.ah.min) && i.order.max > i.ah.min).sort((a, b) => b.order.max / b.ah.min - a.order.max / a.ah.min) },

@@ -1,0 +1,23 @@
+<div class="app-seite" data-bilder="{{BILDER}}">
+  <header class="app-kopf auftritt">
+    <div class="app-kopf-icon live-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div>
+    <div>
+      <h1>Live-Feed <span class="live-chip"><span class="punkt an"></span>Live</span></h1>
+      <p>Was gerade bei CoreMarket passiert – neue Bewertungen, geänderte Preise und frisch gescannte Items aus dem Auktionshaus. Aktualisiert sich von selbst.</p>
+    </div>
+  </header>
+
+  <div class="live-filter auftritt" style="--i:1" role="tablist" aria-label="Filter">
+    <button type="button" role="tab" data-filter="alle" aria-selected="true">Alles</button>
+    <button type="button" role="tab" data-filter="vouch" aria-selected="false">Bewertungen</button>
+    <button type="button" role="tab" data-filter="preis" aria-selected="false">Spawner-Preise</button>
+    <button type="button" role="tab" data-filter="markt" aria-selected="false">Auktionshaus</button>
+    <span class="live-stand" id="live-stand"></span>
+  </div>
+
+  <div class="paneel auftritt" style="--i:2">
+    <ol class="feed" id="live-feed" aria-live="polite">
+      <li class="zeile lade"></li><li class="zeile lade"></li><li class="zeile lade"></li><li class="zeile lade"></li><li class="zeile lade"></li>
+    </ol>
+  </div>
+</div>

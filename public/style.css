@@ -1280,3 +1280,195 @@ a.zeile:hover .z-icon { transform: scale(1.08) rotate(-3deg); }
 @media (max-width: 420px) {
   .leiste-oben .marke span { display: none; }
 }
+
+/* ==========================================================
+   Runde 2: näher am Vorbild, neue Funktionen, Feinschliff
+   ========================================================== */
+:root { --zahl: 'Press Start 2P', var(--text); }
+@keyframes laufen-ticker { to { transform: translateX(-50%); } }
+@keyframes puls-ring { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(2.4); opacity: 0; } }
+@keyframes stern-hops { 0% { transform: scale(1); } 35% { transform: scale(1.35) rotate(-12deg); } 65% { transform: scale(.92) rotate(6deg); } 100% { transform: scale(1); } }
+@keyframes toast-rein { from { opacity: 0; transform: translate(-50%, 16px) scale(.96); } }
+@keyframes toast-raus { to { opacity: 0; transform: translate(-50%, 10px) scale(.97); } }
+@keyframes karte-rein { from { opacity: 0; transform: translateY(14px); } }
+@keyframes glanz-quer { from { background-position: -150% 0; } to { background-position: 250% 0; } }
+@keyframes zahl-tick { 0% { opacity: .35; transform: translateY(-3px); } 100% { opacity: 1; transform: none; } }
+
+/* Spawner-Bild: Mob hinter dem echten Spawner-Käfig */
+.spi { position: relative; display: inline-block; flex: none; width: 32px; height: 32px; }
+.spi > svg, .spi > img { position: absolute; inset: 0; width: 100% !important; height: 100% !important; image-rendering: pixelated; }
+.spi > img { opacity: 0; transition: opacity .2s; }
+.spi.tex > img { opacity: 1; }
+.spi.tex .spi-gitter { display: none; }
+.chip .spi { width: 30px; height: 30px; }
+.z-icon .spi { width: 36px; height: 36px; }
+.tab-spawner .spi { width: 34px; height: 34px; transition: transform .3s var(--feder); }
+.tab-spawner:hover .spi { transform: scale(1.1) rotate(-4deg); }
+.sp-icon .spi { width: 100%; height: 100%; }
+.gs-icon .spi { width: 28px; height: 28px; }
+
+/* Pixel-Zahlen wie im Spiel-Look */
+.kachel-zahl { font: 400 24px/1.25 var(--zahl); letter-spacing: 0; margin: 10px 0 6px; color: #f4f4f7; text-shadow: 0 2px 0 rgba(0, 0, 0, .5); }
+.kachel-zahl.tick { animation: zahl-tick .35s ease; }
+.online b { font: 400 12px/1 var(--zahl); }
+.kachel::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, .06) 50%, transparent 60%) -150% 0 / 250% 100% no-repeat; }
+.kachel:hover::after { animation: glanz-quer 1.1s ease; }
+
+/* Live-Puls in der Seitenleiste, Zähler für die Merkliste */
+.live-puls { position: absolute; left: 30px; top: 10px; width: 7px; height: 7px; border-radius: 50%; background: var(--gruen); }
+.live-puls::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--gruen); animation: puls-ring 1.8s ease-out infinite; }
+.merk-zahl { margin-left: auto; min-width: 22px; height: 20px; padding: 0 6px; display: inline-grid; place-items: center; border-radius: 99px; background: var(--gold); color: #2a1700; font-size: 11.5px; font-weight: 800; }
+.leiste-schmal .merk-zahl, body:not(.leiste-breit) .merk-zahl { position: absolute; top: 4px; right: 6px; margin: 0; min-width: 16px; height: 16px; font-size: 10px; padding: 0 4px; }
+@media (min-width: 1200px) { body:not(.leiste-schmal) .merk-zahl { position: static; min-width: 22px; height: 20px; font-size: 11.5px; } }
+
+/* Live-Ticker */
+.ticker { display: flex; align-items: stretch; height: 46px; margin: -6px 0 18px; border-radius: 12px; background: var(--flaeche); border: 1px solid var(--rand); overflow: hidden; }
+.ticker-label { flex: none; display: flex; align-items: center; gap: 8px; padding: 0 16px; border-right: 1px solid var(--rand); color: var(--papier); text-decoration: none; font: 400 11px/1 var(--zahl); background: linear-gradient(90deg, rgba(74, 222, 128, .1), transparent); }
+.ticker-label .punkt { width: 8px; height: 8px; }
+.ticker-fenster { flex: 1; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 3%, #000 95%, transparent); }
+.ticker-spur { display: flex; width: max-content; height: 100%; animation: laufen-ticker var(--dauer, 60s) linear infinite; }
+.ticker:hover .ticker-spur { animation-play-state: paused; }
+.t-teil { display: inline-flex; align-items: center; gap: 8px; padding: 0 22px; height: 100%; color: var(--papier-2); text-decoration: none; font-size: 13.5px; white-space: nowrap; border-right: 1px solid var(--rand); transition: background .2s, color .2s; }
+.t-teil:hover { background: #202026; color: var(--papier); }
+.t-teil b { color: var(--papier); font-weight: 600; }
+.t-teil small { color: #6e6e79; font-size: 12px; }
+.t-teil img { border-radius: 4px; image-rendering: pixelated; }
+.t-teil .sterne { font-size: 12px; letter-spacing: 0; }
+.t-teil .sterne .aus { color: var(--obsidian-4); }
+.t-icon { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 5px; background: rgba(242, 178, 59, .15); color: var(--gold); font-weight: 800; font-size: 12px; }
+.t-mc { width: 20px; height: 20px; display: inline-grid; place-items: center; }
+.t-mc img { width: 20px; height: 20px; }
+
+/* Merken-Knöpfe */
+.merk-knopf.an { color: var(--gold); box-shadow: inset 0 0 0 1px rgba(242, 178, 59, .55); background: rgba(242, 178, 59, .1); }
+.merk-knopf.an svg { fill: currentColor; }
+.merk-knopf.hops svg { animation: stern-hops .5s var(--feder); }
+.merk-knopf.rund { flex: none; width: 42px; height: 42px; display: grid; place-items: center; padding: 0; border-radius: 10px; border: 1px solid var(--rand); background: var(--flaeche); color: var(--papier-2); cursor: pointer; transition: color .2s, background .2s, border-color .2s, transform .25s var(--feder); }
+.merk-knopf.rund:hover { color: var(--gold); border-color: rgba(242, 178, 59, .55); transform: translateY(-2px); }
+.merk-knopf.rund.an { color: var(--gold); border-color: rgba(242, 178, 59, .55); background: rgba(242, 178, 59, .1); }
+.merk-knopf.rund.klein { width: 34px; height: 34px; border-radius: 8px; }
+.sp-kopf .merk-knopf { margin-left: auto; }
+.sp-kopf .merk-knopf + .sp-weiter { margin-left: 4px; }
+.sp-unterzeile { color: #6e6e79; }
+.sp-unterzeile::before { content: '·'; margin: 0 8px 0 4px; }
+
+/* Meldung unten */
+.toast { position: fixed; left: 50%; bottom: 26px; z-index: 90; transform: translateX(-50%); padding: 12px 18px; border-radius: 12px; background: #26262c; border: 1px solid var(--obsidian-4); color: var(--papier); font-weight: 600; font-size: 14.5px; box-shadow: 0 20px 50px rgba(0, 0, 0, .55); }
+.toast.da { animation: toast-rein .3s var(--feder); }
+.toast.weg { animation: toast-raus .3s ease forwards; }
+
+/* Neue App-Seiten (Live, Merkliste, Profil) */
+.app-seite { width: 100%; max-width: 1180px; margin: 0 auto; padding: 28px 28px 48px; }
+.app-kopf { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 22px; }
+.app-kopf-icon { flex: none; width: 56px; height: 56px; display: grid; place-items: center; border-radius: 14px; background: rgba(242, 178, 59, .12); border: 1px solid rgba(242, 178, 59, .3); color: var(--gold); }
+.app-kopf-icon svg { width: 28px; height: 28px; }
+.app-kopf-icon.live-icon { background: rgba(74, 222, 128, .1); border-color: rgba(74, 222, 128, .3); color: var(--gruen); }
+.app-kopf h1 { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 2px 0 6px; font: 800 clamp(26px, 3vw, 34px)/1.1 var(--text); letter-spacing: -.025em; }
+.app-kopf p { margin: 0; color: var(--papier-2); max-width: 70ch; }
+.live-filter { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.live-filter button { height: 36px; padding: 0 14px; border-radius: 9px; border: 1px solid var(--rand); background: var(--flaeche); color: var(--papier-2); font: 600 14px/1 var(--text); cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+.live-filter button:hover { color: var(--papier); border-color: var(--obsidian-4); }
+.live-filter button[aria-selected="true"] { background: var(--gold); border-color: var(--gold); color: #2a1700; }
+.live-stand { margin-left: auto; font-size: 13px; color: #6e6e79; }
+.feed { list-style: none; margin: 0 -8px; padding: 0; }
+.feed > li + li > .zeile, .feed > .zeile + li > .zeile, .feed > li + .zeile, .feed > .zeile + .zeile { border-top: 1px solid var(--rand); }
+.feed-zeile { animation: karte-rein .45s var(--weich) backwards; }
+.feed-art { border-radius: 8px; background: rgba(242, 178, 59, .12); color: var(--gold); font-weight: 800; }
+.feed-tag { display: inline-block; padding: 3px 8px; border-radius: 6px; background: rgba(242, 178, 59, .12); color: var(--gold); font-size: 12px; }
+.name-link { color: var(--gold-hell); text-decoration: none; }
+.name-link:hover { text-decoration: underline; }
+.rot-text { color: var(--rot); }
+
+/* Merkliste */
+.merk-leer { text-align: center; padding: 48px 24px; }
+.merk-leer-icon { width: 64px; height: 64px; margin: 0 auto 16px; display: grid; place-items: center; border-radius: 18px; background: rgba(242, 178, 59, .1); color: var(--gold); }
+.merk-leer-icon svg { width: 32px; height: 32px; animation: schweben 4s ease-in-out infinite; }
+.merk-leer h2 { margin: 0 0 8px; font-size: 22px; }
+.merk-leer p { margin: 0 auto 20px; color: var(--papier-2); max-width: 44ch; }
+.merk-zeile { display: flex; align-items: center; gap: 8px; }
+.merk-zeile > .zeile { flex: 1; min-width: 0; }
+.merk-zeile + .merk-zeile { border-top: 1px solid var(--rand); }
+.merk-zeile + .merk-zeile > .zeile { border-top: 0 !important; }
+.chip-kopf { width: 28px; height: 28px; border-radius: 6px; image-rendering: pixelated; background: var(--obsidian-3); }
+
+/* Profil */
+.profil-kopf { position: relative; display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: 26px; padding: 26px 28px; margin-bottom: 18px; border-radius: 18px; background: radial-gradient(500px 260px at 18% 50%, rgba(242, 178, 59, .12), transparent 70%), var(--flaeche); border: 1px solid var(--rand); overflow: hidden; }
+.profil-kopf .sp-zurueck { align-self: start; }
+.profil-figur { width: 110px; height: 220px; display: grid; place-items: end center; }
+.profil-figur img { width: 90px; height: auto; image-rendering: pixelated; filter: drop-shadow(0 16px 22px rgba(0, 0, 0, .55)); animation: schweben 6s ease-in-out infinite; }
+.profil-figur.ohne-skin { width: 0; }
+.profil-figur.ohne-skin img { display: none; }
+.profil-clan { margin: 0 0 6px; font: 700 11px/1 var(--pixel); text-transform: uppercase; letter-spacing: .14em; color: var(--gold); }
+.profil-info h1 { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; font: 800 clamp(28px, 3.4vw, 42px)/1.05 var(--text); letter-spacing: -.03em; word-break: break-word; }
+.profil-haken { color: var(--gruen); display: inline-flex; }
+.profil-text { margin: 0 0 16px; color: var(--papier-2); max-width: 52ch; }
+.profil-aktionen { display: flex; gap: 10px; flex-wrap: wrap; }
+.profil-aktionen .knopf { gap: 8px; padding: 10px 16px; font-size: 14.5px; }
+.profil-zahlen { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; min-width: 260px; }
+.profil-zahlen div { padding: 12px 14px; border-radius: 12px; background: var(--obsidian-2); border: 1px solid var(--rand); }
+.profil-zahlen dt { font-size: 12.5px; color: var(--papier-2); }
+.profil-zahlen dd { margin: 6px 0 0; font: 400 13px/1.3 var(--zahl); color: var(--papier); }
+
+/* Clan-Seite: Mitglieder als klickbare Karten */
+.spieler li { padding: 0; }
+.spieler-link { display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 10px 7px 7px; color: inherit; text-decoration: none; border-radius: inherit; }
+.spieler li:hover .spieler-link span { color: var(--gold-hell); }
+
+/* Unterseiten im selben App-Stil wie das Dashboard */
+.seitenkopf { padding: 34px 0 26px; }
+.seitenkopf h1, .seitenkopf .wort { font-size: clamp(28px, 3.4vw, 40px) !important; line-height: 1.1; }
+.seitenkopf h1 { margin: 12px 0 12px; }
+.seitenkopf .einleitung { font-size: 16.5px; max-width: 70ch; }
+.breite { max-width: 1180px; }
+.tabelle-rahmen, .rechner-karte, .clan, .zitat, .rang, .schritt, .regeln li, .hinweis-box, .wiki-karte, .warum-punkt { background-color: var(--flaeche); border-color: var(--rand); }
+.rechner-karte { background-image: none; }
+.schritte-gross .nr { font: 400 18px/1 var(--zahl); }
+.nr { font-family: var(--zahl); font-weight: 400; font-size: 12px; }
+.paneel, .kachel, .chip, .karussell, .sp-karte, .sp-markt { animation: karte-rein .5s var(--weich) backwards; }
+.dash-paar .paneel:nth-child(2) { animation-delay: .06s; }
+.kacheln .kachel:nth-child(2) { animation-delay: .05s; }
+.kacheln .kachel:nth-child(3) { animation-delay: .1s; }
+.paneel { transition: border-color .3s; }
+.paneel:hover { border-color: var(--obsidian-4); }
+a.zeile { position: relative; }
+a.zeile::after { content: '›'; position: absolute; right: -2px; top: 50%; transform: translate(-6px, -50%); opacity: 0; color: var(--gold); font-weight: 700; transition: opacity .2s, transform .25s var(--weich); }
+a.zeile:hover::after { opacity: 1; transform: translate(0, -50%); }
+a.zeile:hover .z-preis { transform: translateX(-10px); }
+.z-preis { transition: transform .25s var(--weich); }
+
+@media (max-width: 1000px) {
+  .profil-kopf { grid-template-columns: auto 1fr; }
+  .profil-kopf .sp-zurueck { position: absolute; top: 16px; left: 16px; }
+  .profil-figur { grid-row: span 2; width: 90px; height: 190px; }
+  .profil-zahlen { grid-column: 2; min-width: 0; grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 720px) {
+  .app-seite { padding: 18px 14px 36px; }
+  .app-kopf-icon { width: 46px; height: 46px; }
+  .ticker { margin-top: -4px; }
+  .live-stand { width: 100%; margin: 4px 0 0; }
+  .profil-kopf { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 56px 18px 20px; gap: 14px; }
+  .profil-figur { grid-row: auto; height: 170px; }
+  .profil-info h1, .profil-aktionen { justify-content: center; }
+  .profil-zahlen { grid-column: auto; width: 100%; grid-template-columns: 1fr 1fr; }
+  .kachel-zahl { font-size: 18px; }
+  .sp-unterzeile { display: block; width: 100%; }
+  .sp-unterzeile::before { display: none; }
+  .sp-kopf .merk-knopf { margin-left: auto; }
+  .seitenkopf { padding: 24px 0 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-spur { animation: none; overflow-x: auto; }
+  .live-puls::after { display: none; }
+}
+
+/* Mob sitzt vor dem echten Spawner-Käfig */
+.spi > .spi-mob { display: none; inset: 21% !important; width: 58% !important; height: 58% !important; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .7)) drop-shadow(0 0 3px rgba(0, 0, 0, .5)); }
+.spi.tex > .spi-mob { display: block; }
+.spi.tex > .sp-svg { display: none; }
+.spi.tex > .spi-tex { filter: brightness(1.15); }
+@media (max-width: 720px) {
+  .profil-figur { height: auto; padding-top: 4px; }
+  .profil-figur img { width: 78px; }
+  .profil-zahlen dd { font-size: 11px; }
+}

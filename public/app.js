@@ -205,7 +205,7 @@
       const l = c.mitglieder.filter(m => !q || m.name.toLowerCase().includes(q));
       if (q && !l.length) return '';
       return `<div class="clan"><h3><span class="kuerzel">${esc(c.key)}</span> ${esc(c.name)}<span class="anz">${tausend(c.anzahl)} Mitglied${c.anzahl === 1 ? '' : 'er'}</span></h3>
-        ${l.length ? `<ul class="spieler">${l.map((m, i) => `<li style="--i:${i}" title="Dabei seit ${esc(datum(m.seit))}"><img src="${kopf(m.name)}" alt="" width="32" height="32" loading="lazy"><span>${markiere(m.name)}</span></li>`).join('')}</ul>` : '<p class="leer">Noch keine Mitglieder eingetragen.</p>'}</div>`;
+        ${l.length ? `<ul class="spieler">${l.map((m, i) => `<li style="--i:${i}"><a class="spieler-link" href="/spieler/${encodeURIComponent(m.name)}" title="Dabei seit ${esc(datum(m.seit))}"><img src="${kopf(m.name)}" alt="" width="32" height="32" loading="lazy"><span>${markiere(m.name)}</span></a></li>`).join('')}</ul>` : '<p class="leer">Noch keine Mitglieder eingetragen.</p>'}</div>`;
     }).join('');
     const neu = html || `<p class="leer treffer-nein">Niemand mit „${esc(filter)}“ in unserem Clan. Wer nicht hier steht, handelt nicht in unserem Namen.</p>`;
     if (ziel.dataset.stand === neu) return;
@@ -298,25 +298,36 @@
     return { id: n.replace(/ /g, '_'), a: `hsl(${h} 55% 58%)`, b: `hsl(${h} 50% 36%)`, c: '#111' };
   }
   const iconCache = new Map();
+  const BILD_VORLAGE = document.body.dataset.bilder || '';
+  const SPAWNER_TEX = BILD_VORLAGE ? BILD_VORLAGE.replace('{art}', 'block').replace('{id}', 'spawner') : '';
   function spawnerIcon(name) {
     if (iconCache.has(name)) return iconCache.get(name);
-    const m = mob(name), r = [];
-    const px = (x, y, f, w = 1, h = 1) => r.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}"/>`);
+    const m = mob(name), r = [], kopfR = [];
+    let ziel = r;
+    const px = (x, y, f, w = 1, h = 1) => ziel.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}"/>`);
+    const kopf = () => {
+      px(3, 3, m.b, 10, 10); px(3, 3, m.a, 9, 9);   // Mob-Kopf
+      px(4, 4, 'rgba(255,255,255,.3)', 3, 1);       // Glanz
+      px(4, 6, m.c, 3, 2); px(9, 6, m.c, 3, 2);     // Augen
+      if (m.id === 'creeper') { px(7, 8, m.c, 2, 3); px(6, 9, m.c, 1, 3); px(9, 9, m.c, 1, 3); }
+      else if (m.id === 'pig' || m.id === 'piglin' || m.id === 'zombified_piglin') px(6, 9, m.b, 4, 3);
+      else if (m.id === 'iron_golem' || m.id === 'villager') px(7, 8, m.b, 2, 4);
+      else px(5, 10, m.b, 6, 1);
+    };
     px(1, 1, '#140f0b', 14, 14);                 // dunkles Innere
     px(2, 10, '#5a2a0c', 12, 4); px(4, 12, '#a2480f', 8, 2); // Glut unten
-    px(3, 3, m.b, 10, 10); px(3, 3, m.a, 9, 9);   // Mob-Kopf
-    px(4, 4, 'rgba(255,255,255,.3)', 3, 1);       // Glanz
-    px(4, 6, m.c, 3, 2); px(9, 6, m.c, 3, 2);     // Augen
-    if (m.id === 'creeper') { px(7, 8, m.c, 2, 3); px(6, 9, m.c, 1, 3); px(9, 9, m.c, 1, 3); }
-    else if (m.id === 'pig' || m.id === 'piglin' || m.id === 'zombified_piglin') px(6, 9, m.b, 4, 3);
-    else if (m.id === 'iron_golem' || m.id === 'villager') px(7, 8, m.b, 2, 4);
-    else px(5, 10, m.b, 6, 1);
-    // Käfig: Rahmen und Gitterstäbe vor dem Mob
+    kopf();
+    // Käfig: Rahmen und Gitterstäbe vor dem Mob (Ersatz, falls die echte Textur nicht lädt)
+    r.push('<g class="spi-gitter">');
     const eisen = '#4b515d', dunkel = '#2b2f37';
     px(0, 0, dunkel, 16, 1); px(0, 15, dunkel, 16, 1); px(0, 0, dunkel, 1, 16); px(15, 0, dunkel, 1, 16);
     px(1, 1, eisen, 14, 1); px(1, 14, eisen, 14, 1); px(1, 1, eisen, 1, 14); px(14, 1, eisen, 1, 14);
     for (const k of [5, 10]) { px(k, 2, 'rgba(75,81,93,.55)', 1, 12); px(2, k, 'rgba(75,81,93,.55)', 12, 1); }
-    const svg = `<svg class="sp-svg" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">${r.join('')}</svg>`;
+    r.push('</g>');
+    ziel = kopfR; kopf();
+    const mobSvg = `<svg class="spi-mob" viewBox="3 3 10 10" shape-rendering="crispEdges" aria-hidden="true">${kopfR.join('')}</svg>`;
+    const tex = SPAWNER_TEX ? `<img class="spi-tex" src="${esc(SPAWNER_TEX)}" alt="" width="16" height="16" decoding="async">${mobSvg}` : '';
+    const svg = `<span class="spi"><svg class="sp-svg" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">${r.join('')}</svg>${tex}</span>`;
     iconCache.set(name, svg);
     return svg;
   }
@@ -412,18 +423,18 @@
     if (V.anzahl) text('#vouch-schnitt-kurz', `Ø ${komma(V.schnitt)} ★ aus ${tausend(V.anzahl)} Bewertungen.`);
     const html = V.neueste.slice(0, 5).map(v => `<li class="zeile zeile-vouch">
       <img class="z-kopf" src="${kopf24(v.von)}" alt="" width="32" height="32" loading="lazy">
-      <span class="z-text"><b>${esc(v.von)}${v.haendler ? ` <span class="z-pfeil">→</span> ${esc(v.haendler)}` : ''}</b><small>„${esc(v.text)}“${v.was ? ` · ${esc(v.was)}` : ''}</small></span>
+      <span class="z-text"><b>${esc(v.von)}${v.haendler ? ` <span class="z-pfeil">→</span> ${nameLink(v.haendler)}` : ''}</b><small>„${esc(v.text)}“${v.was ? ` · ${esc(v.was)}` : ''}</small></span>
       <span class="z-preis"><span class="sterne">${'★'.repeat(v.sterne)}<span class="aus">${'★'.repeat(5 - v.sterne)}</span></span><small>${v.at ? vor(v.at) : ''}</small></span></li>`).join('');
     if (ziel.dataset.stand !== html) { ziel.innerHTML = html; ziel.dataset.stand = html; }
     const hl = $('#haendler-leiste');
     if (hl && V.haendler?.length) {
       hl.hidden = false;
-      hl.innerHTML = `<p class="leiste-titel">Meiste Vouches</p>` + V.haendler.slice(0, 5).map((h, i) => `<span class="haendler-chip"><span class="rang-nr">${i + 1}</span><img src="${kopf24(h.name)}" alt="" width="22" height="22" loading="lazy">${esc(h.name)}<small>${tausend(h.anzahl)} · ${komma(h.schnitt)} ★</small></span>`).join('');
+      hl.innerHTML = `<p class="leiste-titel">Meiste Vouches</p>` + V.haendler.slice(0, 5).map((h, i) => `<a class="haendler-chip" href="/spieler/${encodeURIComponent(h.name)}"><span class="rang-nr">${i + 1}</span><img src="${kopf24(h.name)}" alt="" width="22" height="22" loading="lazy">${esc(h.name)}<small>${tausend(h.anzahl)} · ${komma(h.schnitt)} ★</small></a>`).join('');
     }
   }
 
   /* ---------- Markt-Paneel (Auktionshaus & Orders) ---------- */
-  const BILDER = $('[data-bilder]')?.dataset.bilder || '';
+  const BILDER = BILD_VORLAGE;
   const TEXTUR = { ancient_debris: 'block/ancient_debris_side', tnt: 'block/tnt_side', obsidian: 'block/obsidian', spawner: 'block/spawner', beacon: 'block/beacon', sponge: 'block/sponge', dragon_egg: 'block/dragon_egg', heavy_core: 'block/heavy_core', shulker_box: 'item/shulker_shell', ender_chest: 'item/ender_eye' };
   const itemBild = id => {
     if (!BILDER) return '';
@@ -432,7 +443,7 @@
   };
   document.addEventListener('error', e => {
     const img = e.target;
-    if (!(img instanceof HTMLImageElement) || !img.dataset.id || !img.closest('.dash, .sp, #gs-treffer')) return;
+    if (!(img instanceof HTMLImageElement) || !img.dataset.id || !img.closest('.dash, .sp, .app-seite, .ticker, #gs-treffer')) return;
     if (img.dataset.art === 'item' && !img.dataset.block) { img.dataset.block = '1'; img.src = BILDER.replace('{art}', 'block').replace('{id}', encodeURIComponent(img.dataset.id)); return; }
     img.remove();
   }, true);
@@ -549,7 +560,7 @@
       const sp = (DATEN?.preise?.spawner || []).filter(s => normal(s.name).includes(q) || mob(s.name).id.includes(q.replace(/ /g, '_')));
       if (sp.length) gruppen.push(['Spawner', sp.slice(0, 5).map(s => `<a href="/spawner/${slug(s.name)}" role="option"><span class="gs-icon">${spawnerIcon(s.name)}</span><span>${hervor(s.name, q)} Spawner<small>${!leer(s.verkauf) ? `Kaufen ${preis(s.verkauf)}` : ''}${!leer(s.verkauf) && !leer(s.ankauf) ? ' · ' : ''}${!leer(s.ankauf) ? `Verkaufen ${preis(s.ankauf)}` : ''}</small></span></a>`)]);
       const leute = (DATEN?.clans || []).flatMap(c => c.mitglieder.map(m => [m.name, c.key])).filter(([n]) => normal(n).includes(q));
-      if (leute.length) gruppen.push(['Clan-Mitglieder', leute.slice(0, 5).map(([n, k]) => `<a href="/clan?name=${encodeURIComponent(n)}" role="option"><img class="gs-icon" src="${kopf24(n)}" alt="" width="28" height="28" loading="lazy"><span>${hervor(n, q)}<small>${esc(k)} · gehört zu CoreMarket</small></span></a>`)]);
+      if (leute.length) gruppen.push(['Clan-Mitglieder', leute.slice(0, 5).map(([n, k]) => `<a href="/spieler/${encodeURIComponent(n)}" role="option"><img class="gs-icon" src="${kopf24(n)}" alt="" width="28" height="28" loading="lazy"><span>${hervor(n, q)}<small>${esc(k)} · gehört zu CoreMarket</small></span></a>`)]);
       const seiten = SEITEN_LISTE.filter(([n]) => normal(n).includes(q));
       const wiki = (await wikiLaden()).filter(a => normal(a.t).includes(q) || normal(a.b).includes(q));
       if (seiten.length || wiki.length) gruppen.push(['Seiten & Wiki', [...seiten.map(([n, u]) => `<a href="${u}" role="option"><span class="gs-icon gs-seite">↗</span><span>${hervor(n, q)}<small>Seite</small></span></a>`), ...wiki.slice(0, 4).map(a => `<a href="/wiki/${esc(a.s)}" role="option"><span class="gs-icon gs-seite">W</span><span>${hervor(a.t, q)}<small>Wiki · ${esc(a.k)}</small></span></a>`)]]);
@@ -584,6 +595,174 @@
     $('#gs-mobil')?.addEventListener('click', () => { gsBox.classList.add('offen'); gs.focus(); });
   }
 
+  /* ==========================================================
+     Merkliste (nur im Browser gespeichert) + kleine Meldungen
+     ========================================================== */
+  const toastEl = $('#toast');
+  let toastTimer;
+  function toast(t) {
+    if (!toastEl) return;
+    toastEl.textContent = t; toastEl.hidden = false;
+    toastEl.classList.remove('weg'); void toastEl.offsetWidth; toastEl.classList.add('da');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toastEl.classList.remove('da'); toastEl.classList.add('weg'); setTimeout(() => { toastEl.hidden = true; }, 300); }, 2200);
+  }
+  const MERK_KEY = 'cm-merkliste';
+  const merkLesen = () => { try { const l = JSON.parse(localStorage.getItem(MERK_KEY) || '[]'); return Array.isArray(l) ? l.filter(x => typeof x === 'string').slice(0, 100) : []; } catch { return []; } };
+  let MERK = merkLesen();
+  const merkSpeichern = () => { try { localStorage.setItem(MERK_KEY, JSON.stringify(MERK)); } catch { /* privater Modus */ } };
+  function merkKnoepfe() {
+    $$('[data-merk]').forEach(b => {
+      const an = MERK.includes(b.dataset.merk);
+      b.setAttribute('aria-pressed', String(an));
+      b.classList.toggle('an', an);
+      const t = b.querySelector('span'); if (t) t.textContent = an ? 'Gemerkt' : 'Merken';
+    });
+    const z = $('.merk-zahl');
+    if (z) { z.hidden = !MERK.length; z.textContent = MERK.length; }
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-merk]');
+    if (!b) return;
+    e.preventDefault();
+    const k = b.dataset.merk, an = MERK.includes(k);
+    MERK = an ? MERK.filter(x => x !== k) : [k, ...MERK];
+    merkSpeichern(); merkKnoepfe();
+    if (!an && !ruhig) { b.classList.remove('hops'); void b.offsetWidth; b.classList.add('hops'); }
+    const name = k.split(':')[0] === 'spieler' ? k.slice(8) : (DATEN?.preise?.spawner.find(s => slug(s.name) === k.slice(8))?.name || k.slice(8)) + ' Spawner';
+    toast(an ? `${name} von der Merkliste entfernt` : `${name} gemerkt`);
+    if (DATEN) merkZeigen(DATEN);
+  });
+  addEventListener('storage', e => { if (e.key === MERK_KEY) { MERK = merkLesen(); merkKnoepfe(); if (DATEN) merkZeigen(DATEN); } });
+
+  function merkZeigen(d) {
+    const sp = MERK.filter(k => k.startsWith('spawner:')).map(k => d.preise?.spawner.find(s => slug(s.name) === k.slice(8))).filter(Boolean);
+    const leute = MERK.filter(k => k.startsWith('spieler:')).map(k => k.slice(8));
+    // Startseite: kleine Chip-Reihe
+    const block = $('#merk-block');
+    if (block) {
+      block.hidden = !sp.length && !leute.length;
+      $('#merk-chips').innerHTML = sp.map(s => `<a class="chip" href="/spawner/${slug(s.name)}">${spawnerIcon(s.name)}<span>${esc(s.name)}</span>${!leer(s.verkauf) ? `<b class="gold-text">${preis(s.verkauf)}</b>` : !leer(s.ankauf) ? `<b class="gruen-text">${preis(s.ankauf)}</b>` : '<b class="stop">STOP</b>'}</a>`).join('')
+        + leute.map(n => `<a class="chip" href="/spieler/${encodeURIComponent(n)}"><img class="chip-kopf" src="${kopf24(n)}" alt="" width="28" height="28" loading="lazy"><span>${esc(n)}</span></a>`).join('');
+    }
+    // Merkliste-Seite
+    if (!$('#merk-inhalt')) return;
+    $('#merk-leer').hidden = !!(sp.length || leute.length);
+    $('#merk-inhalt').hidden = !(sp.length || leute.length);
+    const loesch = k => `<button type="button" class="merk-knopf rund klein an" data-merk="${esc(k)}" aria-pressed="true" aria-label="Von der Merkliste entfernen" title="Entfernen"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg></button>`;
+    $('#merk-spawner').innerHTML = sp.map(s => `<li class="merk-zeile"><a class="zeile" href="/spawner/${slug(s.name)}"><span class="z-icon">${spawnerIcon(s.name)}</span><span class="z-text"><b>${esc(s.name)} Spawner</b><small>${!leer(s.ankauf) ? `Wir kaufen für ${preis(s.ankauf)}` : 'Wir kaufen gerade nicht'}</small></span><span class="z-preis gold-text">${leer(s.verkauf) ? '<span class="stop">STOP</span>' : preis(s.verkauf)}<small>Kaufpreis</small></span></a>${loesch('spawner:' + slug(s.name))}</li>`).join('') || '<li class="zeile-leer">Keine Spawner gemerkt.</li>';
+    const mitglied = n => (d.clans || []).find(c => c.mitglieder.some(m => m.name.toLowerCase() === n.toLowerCase()));
+    $('#merk-spieler').innerHTML = leute.map(n => { const c = mitglied(n); return `<li class="merk-zeile"><a class="zeile" href="/spieler/${encodeURIComponent(n)}"><img class="z-kopf" src="${kopf24(n)}" alt="" width="32" height="32" loading="lazy"><span class="z-text"><b>${esc(n)}</b><small>${c ? `${esc(c.key)} · gehört zu CoreMarket` : '<span class="rot-text">Nicht mehr im Clan</span>'}</small></span><span></span></a>${loesch('spieler:' + n)}</li>`; }).join('') || '<li class="zeile-leer">Keine Spieler gemerkt.</li>';
+  }
+
+  /* ==========================================================
+     Live: Ticker auf der Startseite und Live-Feed-Seite
+     ========================================================== */
+  function ereignisse(d, markt) {
+    const e = [];
+    for (const v of d.vouches?.neueste || []) if (v.at) e.push({ art: 'vouch', at: v.at, v });
+    if (d.preise?.aktualisiert) e.push({ art: 'preis', at: d.preise.aktualisiert });
+    for (const i of (markt?.items || [])) if (i.at && (!leer(i.ah?.min) || !leer(i.order?.max))) e.push({ art: 'markt', at: i.at, i });
+    return e.sort((a, b) => b.at - a.at);
+  }
+  const sterneKurz = n => `<span class="sterne">${'★'.repeat(n)}<span class="aus">${'★'.repeat(5 - n)}</span></span>`;
+  const istMitglied = n => (DATEN?.clans || []).some(c => c.mitglieder.some(m => m.name.toLowerCase() === String(n).toLowerCase()));
+  const nameLink = n => istMitglied(n) ? `<a class="name-link" href="/spieler/${encodeURIComponent(n)}">${esc(n)}</a>` : esc(n);
+
+  function tickerZeigen(d) {
+    const spur = $('#ticker-spur');
+    if (!spur) return;
+    const e = ereignisse(d, MARKT).slice(0, 14);
+    if (!e.length) return;
+    const teile = e.map(x => {
+      if (x.art === 'vouch') return `<a class="t-teil" href="/bewertungen"><img src="${kopf24(x.v.von)}" alt="" width="20" height="20" loading="lazy"><b>${esc(x.v.von)}</b> bewertet ${esc(x.v.haendler || 'CoreMarket')} ${sterneKurz(x.v.sterne)}<small>${vor(x.at)}</small></a>`;
+      if (x.art === 'preis') return `<a class="t-teil" href="/preise"><span class="t-icon">€</span><b>Spawner-Preise</b> aktualisiert<small>${vor(x.at)}</small></a>`;
+      return `<a class="t-teil" href="/auction-orders?item=${encodeURIComponent(x.i.id)}"><span class="t-mc">${itemBild(x.i.id)}</span><b>${esc(x.i.name)}</b> AH ab <span class="gruen-text">${marktPreis(x.i.ah?.min)}</span><small>${vor(x.at)}</small></a>`;
+    });
+    const html = teile.join('') + teile.join('');
+    if (spur.dataset.stand === html) return;
+    spur.innerHTML = html; spur.dataset.stand = html;
+    spur.style.setProperty('--dauer', `${teile.length * 5}s`);
+    $('#ticker').hidden = false;
+  }
+
+  const feed = $('#live-feed');
+  let feedFilter = 'alle';
+  function feedZeigen(d) {
+    if (!feed) return;
+    const e = ereignisse(d, MARKT).filter(x => feedFilter === 'alle' || x.art === feedFilter).slice(0, 60);
+    const zeile = x => {
+      if (x.art === 'vouch') return `<li class="zeile feed-zeile"><img class="z-kopf" src="${kopf24(x.v.von)}" alt="" width="32" height="32" loading="lazy">
+        <span class="z-text"><b>${esc(x.v.von)} <span class="z-pfeil">hat</span> ${x.v.haendler ? nameLink(x.v.haendler) : 'CoreMarket'} <span class="z-pfeil">bewertet</span></b><small>„${esc(x.v.text)}“${x.v.was ? ` · ${esc(x.v.was)}` : ''}</small></span>
+        <span class="z-preis">${sterneKurz(x.v.sterne)}<small>${vor(x.at)}</small></span></li>`;
+      if (x.art === 'preis') return `<li><a class="zeile feed-zeile" href="/preise"><span class="z-icon feed-art">€</span><span class="z-text"><b>Spawner-Preise wurden geändert</b><small>Neue An- und Verkaufspreise in der Preisliste</small></span><span class="z-preis"><span class="feed-tag">Preise</span><small>${vor(x.at)}</small></span></a></li>`;
+      const t = x.i.trend?.tag;
+      return `<li><a class="zeile feed-zeile" href="/auction-orders?item=${encodeURIComponent(x.i.id)}"><span class="z-icon mc">${itemBild(x.i.id)}</span>
+        <span class="z-text"><b>${esc(x.i.name)} geprüft</b><small>${tausend(x.i.ah?.anzahl || 0)} Angebote im AH · ${tausend(x.i.order?.anzahl || 0)} Orders${leer(t) ? '' : ` · <span class="trend ${t > 0 ? 'hoch' : t < 0 ? 'runter' : ''}">${t > 0 ? '▲' : t < 0 ? '▼' : '•'} ${komma(Math.abs(t).toFixed(1))} %</span>`}</small></span>
+        <span class="z-preis gruen-text">${marktPreis(x.i.ah?.min)}<small>${vor(x.at)}</small></span></a></li>`;
+    };
+    const html = e.map(zeile).join('') || '<li class="zeile-leer">Gerade ist es ruhig. Schau gleich nochmal vorbei.</li>';
+    if (feed.dataset.stand !== html) { feed.innerHTML = html; feed.dataset.stand = html; }
+    text('#live-stand', `Stand ${new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`);
+  }
+  $$('.live-filter [data-filter]').forEach(b => b.addEventListener('click', () => {
+    feedFilter = b.dataset.filter;
+    $$('.live-filter [data-filter]').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+    if (DATEN) feedZeigen(DATEN);
+  }));
+  // Markt-Daten regelmäßig frisch holen, wo sie gebraucht werden
+  if ($('#live-feed') || $('#ticker')) {
+    marktHolen().then(() => { if (DATEN) { tickerZeigen(DATEN); feedZeigen(DATEN); } });
+    setInterval(() => {
+      if (document.hidden) return;
+      marktLaeuft = null;
+      marktHolen().then(() => { if (DATEN) { tickerZeigen(DATEN); feedZeigen(DATEN); } });
+    }, feed ? 30000 : 120000);
+  }
+
+  /* ==========================================================
+     Spieler-Profil
+     ========================================================== */
+  const PROFIL = $('#profil');
+  function profilZeigen(d) {
+    if (!PROFIL) return;
+    const name = PROFIL.dataset.name;
+    let clan = null, mitglied = null;
+    for (const c of d.clans || []) { const m = c.mitglieder.find(x => x.name.toLowerCase() === name.toLowerCase()); if (m) { clan = c; mitglied = m; break; } }
+    if (!mitglied) return;
+    text('#profil-name', mitglied.name);
+    text('#profil-clan', `${clan.key} · ${clan.name}`);
+    text('#profil-clan2', clan.name);
+    if (mitglied.seit) text('#pz-seit', new Date(mitglied.seit).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' }));
+    const liste = d.vouches?.haendler || [];
+    const k = liste.findIndex(h => h.name.toLowerCase() === name.toLowerCase());
+    const h = liste[k];
+    text('#pz-vouches', h ? tausend(h.anzahl) : '0');
+    text('#pz-schnitt', h ? `${komma(h.schnitt)} ★` : '–');
+    text('#pz-rang', h ? `#${k + 1}` : '–');
+    const eigene = (d.vouches?.neueste || []).filter(v => (v.haendler || '').toLowerCase() === name.toLowerCase());
+    $('#profil-vouches').innerHTML = eigene.map(v => `<li class="zeile zeile-vouch"><img class="z-kopf" src="${kopf24(v.von)}" alt="" width="32" height="32" loading="lazy"><span class="z-text"><b>${esc(v.von)}</b><small>„${esc(v.text)}“${v.was ? ` · ${esc(v.was)}` : ''}</small></span><span class="z-preis">${sterneKurz(v.sterne)}<small>${v.at ? vor(v.at) : ''}</small></span></li>`).join('')
+      || `<li class="zeile-leer">${h ? 'Die Bewertungen sind älter und stehen nicht mehr in der Liste der neuesten.' : `${esc(mitglied.name)} hat noch keine Bewertungen. Nach deinem Handel kannst du mit <code>/vouch</code> die erste abgeben.`}</li>`;
+    const andere = clan.mitglieder.filter(m => m !== mitglied).slice(0, 24);
+    $('#profil-andere').innerHTML = andere.map((m, i) => `<a class="chip" style="--i:${i}" href="/spieler/${encodeURIComponent(m.name)}"><img class="chip-kopf" src="${kopf24(m.name)}" alt="" width="28" height="28" loading="lazy"><span>${esc(m.name)}</span></a>`).join('');
+    document.title = `${mitglied.name} – CoreMarket Händler`;
+  }
+  $('#profil-kopieren')?.addEventListener('click', async () => {
+    const n = $('#profil-name').textContent;
+    try { await navigator.clipboard.writeText(n); toast(`„${n}“ kopiert`); } catch { toast('Kopieren ging nicht'); }
+  });
+  $('#profil-koerper')?.addEventListener('error', e => { e.target.closest('.profil-figur')?.classList.add('ohne-skin'); });
+
+  /* ---------- Spawner-Bilder: Mob hinter dem echten Spawner-Käfig ---------- */
+  document.addEventListener('load', e => {
+    const img = e.target;
+    if (img instanceof HTMLImageElement && img.classList.contains('spi-tex')) img.parentElement.classList.add('tex');
+  }, true);
+  document.addEventListener('error', e => {
+    const img = e.target;
+    if (img instanceof HTMLImageElement && img.classList.contains('spi-tex')) img.remove();
+  }, true);
+
   /* ---------- Daten anwenden ---------- */
   let erstesMal = true;
   function anwenden(d) {
@@ -603,6 +782,8 @@
     } else fehler('Gerade sind keine Preise freigegeben.');
     vouchFeed(d.vouches);
     if (erstesMal) marktPaneel();
+    merkZeigen(d); merkKnoepfe();
+    tickerZeigen(d); feedZeigen(d); profilZeigen(d);
     CLANS = d.clans || [];
     clansZeigen(suche ? suche.value : '');
     vouchesZeigen(d.vouches);

@@ -145,6 +145,10 @@
       finally { knopf.disabled = false; knopf.textContent = 'Ansehen'; try { ICH = await api('ich'); $('#k-abo-bis').textContent = `Abo läuft bis ${datum(ICH.abo.bis)}. Heute ${ICH.heute} von ${ICH.limit} Abfragen.`; verlaufZeigen(); } catch { /* egal */ } }
     });
     $('#k-ziel').addEventListener('input', e => e.target.setCustomValidity(''));
+    // von der Spieler-Seite: /abo?ziel=Name&art=ec
+    const vor = new URLSearchParams(location.search);
+    if (MC.test(vor.get('ziel') || '')) $('#k-ziel').value = vor.get('ziel');
+    if (vor.get('art') === 'ec' || vor.get('art') === 'inv') { const r = $(`input[name="art"][value="${vor.get('art')}"]`); if (r) { r.checked = true; r.dispatchEvent(new Event('change')); } }
 
     function fensterHtml(r) {
       const n = Math.max(9, Math.ceil((r.groesse || 27) / 9) * 9), bySlot = new Map(r.slots.map(s => [s.slot, s]));

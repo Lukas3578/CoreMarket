@@ -15,6 +15,7 @@ server.js            Webserver: Seiten bauen, Bot-Daten cachen, /health
 seiten/              die einzelnen Seiten (_layout.html = Kopf, Menü, Fuß)
 wiki/                Wiki-Artikel als Markdown, eine Datei = ein Artikel
 wiki.js              macht aus den Markdown-Dateien die Wiki-Seiten
+spieler.js           Spieler-Index: wer verkauft was im Auktionshaus (aus den Item-Daten des Bots)
 preise-demo.js       Demo-Preise für /auction-orders, solange der Bot noch keine liefert
 public/              CSS, JS, Logo und andere Dateien für den Browser
 keepalive/           Script, das die Seite auf Render wach hält
@@ -34,6 +35,11 @@ Der Server holt die Daten alle 30 Sekunden vom Bot und legt sie direkt in die Se
 | `/abo`        | Login per `/msg`, Abo kaufen, Endertruhe und Inventar ansehen |
 | `/fragen`     | Häufige Fragen                                   |
 | `/wiki`       | Wiki-Übersicht mit Suche                         |
+| `/spieler`    | Spieler nachschlagen, größte Verkäufer im AH     |
+| `/spieler/<name>` | jeder HugoSMP-Spieler: AH-Angebote, Orders, Bewertungen; Endertruhe/Inventar über das Abo |
+| `/live`, `/merkliste` | Live-Feed und Merkliste                  |
+
+Der Spieler-Index geht im Hintergrund alle 0,7 s ein Item beim Bot durch (eine Runde ≈ 10 Min.) und merkt sich die Verkäufer aus `ahTop`/`orderTop`. Er sieht pro Item nur die günstigsten Angebote. Vollständig wäre es nur mit einem eigenen Bot-Endpunkt wie `/api/public/spieler/<name>`. Namen prüft der Server über die Mojang-API (`api.mojang.com`).
 | `/wiki/<name>`| ein Wiki-Artikel, z. B. `/wiki/preisliste-lesen` |
 | `/api/daten`  | die Bot-Daten als JSON (gecacht)                 |
 | `/api/preise` | Preise aller Items (vom Bot, 45 s gecacht) |

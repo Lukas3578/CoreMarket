@@ -1,43 +1,81 @@
-<div class="app-seite profil" id="profil" data-name="{{SLUG}}">
+<div class="app-seite profil" id="profil" data-name="{{SLUG}}" data-bilder="{{BILDER}}">
   <section class="profil-kopf auftritt">
-    <a class="sp-zurueck" href="/clan" aria-label="Zurück zum Clan"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a>
+    <a class="sp-zurueck" href="/spieler" aria-label="Zurück zur Spieler-Suche"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a>
     <div class="profil-figur">
       <img id="profil-koerper" src="https://mc-heads.net/body/{{SLUG}}/180" alt="Skin von {{SPIELER}}" width="90" height="216">
     </div>
     <div class="profil-info">
-      <p class="profil-clan" id="profil-clan">CoreMarket</p>
-      <h1><span id="profil-name">{{SPIELER}}</span> <span class="profil-haken" title="Gehört zu CoreMarket" aria-label="Gehört zu CoreMarket"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></span></h1>
-      <p class="profil-text">Offizieller Händler von CoreMarket. Handel mit {{SPIELER}} nur über ein Ticket in unserem Discord.</p>
+      <p class="profil-clan" id="profil-clan">Spieler auf HugoSMP</p>
+      <h1><span id="profil-name">{{SPIELER}}</span> <span class="profil-haken" id="profil-haken" title="Gehört zu CoreMarket" aria-label="Gehört zu CoreMarket" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></span></h1>
+      <p class="profil-text" id="profil-text">Was {{SPIELER}} gerade im Auktionshaus anbietet und was du sonst über ihn wissen solltest.</p>
       <div class="profil-aktionen">
         <button type="button" class="knopf zweit merk-knopf" data-merk="spieler:{{SLUG}}" aria-pressed="false"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg><span>Merken</span></button>
         <button type="button" class="knopf zweit" id="profil-kopieren"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span>Name kopieren</span></button>
       </div>
+      <p class="profil-uuid" id="profil-uuid" hidden></p>
     </div>
     <dl class="profil-zahlen" id="profil-zahlen">
-      <div><dt>Dabei seit</dt><dd id="pz-seit">–</dd></div>
-      <div><dt>Vouches</dt><dd id="pz-vouches">–</dd></div>
-      <div><dt>Bewertung</dt><dd id="pz-schnitt">–</dd></div>
-      <div><dt>Rang</dt><dd id="pz-rang">–</dd></div>
+      <div><dt>Im AH</dt><dd id="pz-angebote">–</dd></div>
+      <div><dt>Gesamtwert</dt><dd id="pz-wert">–</dd></div>
+      <div><dt>Orders</dt><dd id="pz-orders">–</dd></div>
+      <div><dt id="pz-4-titel">Vouches</dt><dd id="pz-4">–</dd></div>
     </dl>
   </section>
 
-  <section class="dash-paar">
-    <div class="paneel auftritt" style="--i:1">
-      <div class="paneel-kopf"><h2>Bewertungen als Händler</h2><a class="paneel-mehr" href="/bewertungen">Alle <span aria-hidden="true">›</span></a></div>
-      <ul class="zeilen" id="profil-vouches"><li class="zeile lade"></li><li class="zeile lade"></li></ul>
-    </div>
-    <div class="paneel auftritt" style="--i:2">
-      <div class="paneel-kopf"><h2>Sicher handeln</h2></div>
-      <ol class="sp-schritte">
-        <li><b>Nur über Tickets</b> – öffne im Discord ein Ticket, dort wird dir ein Händler zugeteilt.</li>
-        <li><b>Namen prüfen</b> – der Name im Spiel muss genau so geschrieben sein wie hier.</li>
-        <li><b>Im Zweifel nachfragen</b> – mit <code>/check Name</code> im Discord.</li>
-      </ol>
-      <div class="sp-aktion"><a class="knopf discord-link" href="{{DISCORD}}" target="_blank" rel="noopener">Ticket im Discord öffnen</a></div>
+  <div class="warn-box" id="profil-warnung" hidden>
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 21h20z"/><path d="M12 10v5M12 18h.01"/></svg>
+    <p><b>Kein CoreMarket-Händler.</b> <span id="warn-name">Dieser Spieler</span> gehört nicht zu CM0 oder CM1 und handelt nicht in unserem Namen. Willst du sicher Spawner kaufen, öffne ein Ticket in unserem Discord.</p>
+  </div>
+
+  <div class="tabs auftritt" role="tablist" aria-label="Bereiche" style="--i:1">
+    <button type="button" role="tab" aria-selected="true" aria-controls="tab-ah" data-tab="ah">Auktionshaus <b class="tab-zahl" id="tz-ah"></b></button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="tab-orders" data-tab="orders">Orders <b class="tab-zahl" id="tz-orders"></b></button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="tab-ec" data-tab="ec">Endertruhe</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="tab-inv" data-tab="inv">Inventar</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="tab-vouches" data-tab="vouches">Bewertungen <b class="tab-zahl" id="tz-vouches"></b></button>
+  </div>
+
+  <section class="paneel tab-inhalt" id="tab-ah" role="tabpanel">
+    <div class="paneel-kopf"><h2>Im Auktionshaus</h2><span class="live-chip"><span class="punkt an"></span>Live</span><span class="paneel-mehr" id="ah-stand"></span></div>
+    <p class="paneel-info">Was <b class="pn">{{SPIELER}}</b> gerade im <code>/ah</code> anbietet – soweit unser Bot es beim Scannen gesehen hat.</p>
+    <ul class="zeilen ah-liste" id="profil-ah"><li class="zeile lade"></li><li class="zeile lade"></li><li class="zeile lade"></li></ul>
+    <p class="hinweis klein-hinweis" id="ah-hinweis">Der Bot geht alle Items reihum durch und sieht pro Item nur die günstigsten Angebote. Teure Angebote oder seltene Items können fehlen – das vollständige Angebot siehst du im Spiel mit <code>/ah {{SPIELER}}</code>.</p>
+  </section>
+
+  <section class="paneel tab-inhalt" id="tab-orders" role="tabpanel" hidden>
+    <div class="paneel-kopf"><h2>Orders</h2></div>
+    <p class="paneel-info">Was <b class="pn">{{SPIELER}}</b> gerade sucht und dafür zahlt.</p>
+    <ul class="zeilen" id="profil-orders"></ul>
+  </section>
+
+  <section class="paneel tab-inhalt" id="tab-ec" role="tabpanel" hidden>
+    <div class="abo-hinweis">
+      <div class="abo-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 11h18M10 11v3h4v-3"/></svg></div>
+      <div>
+        <h2>Endertruhe von <span class="pn">{{SPIELER}}</span></h2>
+        <p>Die Endertruhe öffnet unser Bot live im Spiel – das geht mit dem CoreMarket-Abo. Der Name ist schon eingetragen.</p>
+        <a class="knopf" href="/abo?art=ec&amp;ziel={{SLUG}}">Endertruhe ansehen</a>
+      </div>
     </div>
   </section>
 
-  <section class="dash-block auftritt" style="--i:3">
+  <section class="paneel tab-inhalt" id="tab-inv" role="tabpanel" hidden>
+    <div class="abo-hinweis">
+      <div class="abo-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16M15 4v16"/></svg></div>
+      <div>
+        <h2>Inventar von <span class="pn">{{SPIELER}}</span></h2>
+        <p>Das Inventar kann man nur sehen, wenn der Spieler gerade online ist. Auch das läuft über das CoreMarket-Abo.</p>
+        <a class="knopf" href="/abo?art=inv&amp;ziel={{SLUG}}">Inventar ansehen</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="paneel tab-inhalt" id="tab-vouches" role="tabpanel" hidden>
+    <div class="paneel-kopf"><h2>Bewertungen</h2><a class="paneel-mehr" href="/bewertungen">Alle <span aria-hidden="true">›</span></a></div>
+    <ul class="zeilen" id="profil-vouches"></ul>
+  </section>
+
+  <section class="dash-block auftritt" id="profil-andere-block" style="--i:3" hidden>
     <div class="dash-kopf"><h2>Weitere Händler aus <span id="profil-clan2">dem Clan</span></h2><div class="dash-links"><a href="/clan">Alle Mitglieder <span aria-hidden="true">›</span></a></div></div>
     <div class="chips" id="profil-andere"></div>
   </section>

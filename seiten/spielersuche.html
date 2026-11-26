@@ -1,0 +1,34 @@
+<div class="app-seite">
+  <header class="app-kopf auftritt">
+    <div class="app-kopf-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="8" r="4"/><path d="M4 21a7 7 0 0 1 11-5.7"/><circle cx="18" cy="17" r="3"/><path d="m22 21-1.8-1.8"/></svg></div>
+    <div>
+      <h1>Spieler nachschlagen</h1>
+      <p>Jeden Spieler auf HugoSMP ansehen: was er gerade im Auktionshaus verkauft, seine Orders, Skin und – mit Abo – Endertruhe und Inventar.</p>
+    </div>
+  </header>
+
+  <form class="spieler-suche auftritt" id="spieler-form" style="--i:1" role="search" autocomplete="off">
+    <label class="gs-feld gross">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <span class="sr">Minecraft-Name</span>
+      <input id="spieler-name" maxlength="17" spellcheck="false" placeholder="Minecraft-Name eingeben, z. B. Steve123" required>
+    </label>
+    <button class="knopf">Ansehen</button>
+    <p class="fehler-text" id="spieler-fehler" hidden></p>
+  </form>
+
+  <div class="zuletzt auftritt" id="zuletzt" style="--i:2" hidden><span class="leiste-titel">Zuletzt angesehen</span><div class="chips" id="zuletzt-chips"></div></div>
+
+  <section class="dash-paar">
+    <div class="paneel auftritt" style="--i:2">
+      <div class="paneel-kopf"><h2>Größte Verkäufer im AH</h2><span class="live-chip"><span class="punkt an"></span>Live</span></div>
+      <p class="paneel-info" id="top-info">Spieler mit dem höchsten Gesamtwert an Angeboten, die unser Bot gerade im Auktionshaus sieht.</p>
+      <ol class="zeilen rangliste" id="top-verkaeufer"><li class="zeile lade"></li><li class="zeile lade"></li><li class="zeile lade"></li><li class="zeile lade"></li></ol>
+    </div>
+    <div class="paneel auftritt" style="--i:3">
+      <div class="paneel-kopf"><h2>CoreMarket-Händler</h2><a class="paneel-mehr" href="/clan">Ganzer Clan <span aria-hidden="true">›</span></a></div>
+      <p class="paneel-info">Offizielle Händler aus CM0 und CM1.</p>
+      <div class="kopf-raster" id="haendler-raster"></div>
+    </div>
+  </section>
+</div>

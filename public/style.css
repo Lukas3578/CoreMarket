@@ -1472,3 +1472,65 @@ a.zeile:hover .z-preis { transform: translateX(-10px); }
   .profil-figur img { width: 78px; }
   .profil-zahlen dd { font-size: 11px; }
 }
+
+/* ==========================================================
+   Spieler: Suche, Profil mit Tabs
+   ========================================================== */
+.spieler-suche { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; max-width: 720px; }
+.gs-feld.gross { flex: 1; min-width: 240px; height: 52px; border-radius: 13px; font-size: 16px; }
+.gs-feld.gross input { font-size: 16.5px; }
+.spieler-suche .knopf { height: 52px; padding: 0 26px; }
+.spieler-suche .fehler-text { width: 100%; margin: 0; color: var(--rot); font-size: 14px; }
+.zuletzt { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.zuletzt .leiste-titel { margin: 0; flex: none; }
+.zuletzt .chips { padding-bottom: 4px; }
+.rangliste .zeile { grid-template-columns: 28px 40px minmax(0, 1fr) auto; }
+.rang-platz { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 7px; background: var(--obsidian-3); color: var(--papier-2); font: 400 10px/1 var(--zahl); }
+.rang-platz.p1 { background: var(--gold); color: #2a1700; }
+.rang-platz.p2 { background: #d6dbe3; color: #1a1a1a; }
+.rang-platz.p3 { background: #c98a52; color: #2a1700; }
+.kopf-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; margin: 4px 0 10px; }
+.kopf-kachel { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px 10px; border-radius: 12px; background: var(--obsidian-2); border: 1px solid var(--rand); color: var(--papier-2); text-decoration: none; font-size: 12px; transition: transform .25s var(--feder), border-color .2s, color .2s; }
+.kopf-kachel img { width: 40px; height: 40px; border-radius: 8px; image-rendering: pixelated; background: var(--obsidian-3); transition: transform .3s var(--feder); }
+.kopf-kachel span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kopf-kachel:hover { transform: translateY(-3px); border-color: rgba(242, 178, 59, .5); color: var(--papier); }
+.kopf-kachel:hover img { transform: scale(1.08) rotate(-4deg); }
+
+.profil-uuid { margin: 12px 0 0; font: 500 11.5px/1 ui-monospace, Consolas, monospace; color: #6e6e79; }
+.warn-box { display: flex; gap: 14px; align-items: flex-start; margin: -4px 0 18px; padding: 14px 18px; border-radius: 14px; background: rgba(248, 113, 113, .07); border: 1px solid rgba(248, 113, 113, .35); color: var(--papier-2); animation: karte-rein .5s var(--weich) backwards; }
+.warn-box svg { flex: none; color: var(--rot); margin-top: 1px; }
+.warn-box p { margin: 0; }
+.warn-box b { color: var(--papier); }
+
+.tabs { display: flex; gap: 4px; margin-bottom: 14px; padding: 4px; border-radius: 12px; background: var(--flaeche); border: 1px solid var(--rand); overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs button { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px; border: 0; border-radius: 9px; background: none; color: var(--papier-2); font: 600 14.5px/1 var(--text); cursor: pointer; transition: background .2s, color .2s; }
+.tabs button:hover { color: var(--papier); background: var(--obsidian-3); }
+.tabs button[aria-selected="true"] { background: var(--obsidian-3); color: var(--papier); box-shadow: inset 0 -2px 0 var(--gold); }
+.tab-zahl { min-width: 20px; height: 18px; padding: 0 6px; display: inline-grid; place-items: center; border-radius: 99px; background: var(--obsidian-4); font-size: 11px; }
+.tab-zahl:empty { display: none; }
+.tabs button[aria-selected="true"] .tab-zahl { background: var(--gold); color: #2a1700; }
+.tab-inhalt { animation: karte-rein .35s var(--weich); margin-bottom: 18px; }
+.klein-hinweis { margin: 10px 0 6px; font-size: 13px; color: #6e6e79; }
+.abo-hinweis { display: flex; gap: 22px; align-items: center; padding: 18px 6px 12px; }
+.abo-symbol { flex: none; width: 88px; height: 88px; display: grid; place-items: center; border-radius: 22px; background: linear-gradient(145deg, rgba(150, 90, 230, .25), rgba(60, 30, 110, .3)); border: 1px solid rgba(170, 120, 255, .35); color: #c9a6ff; }
+.abo-symbol svg { width: 44px; height: 44px; animation: schweben 5s ease-in-out infinite; }
+.abo-hinweis h2 { margin: 0 0 6px; font: 700 20px/1.2 var(--text); }
+.abo-hinweis p { margin: 0 0 14px; color: var(--papier-2); max-width: 56ch; }
+#tab-inv .abo-symbol { background: linear-gradient(145deg, rgba(242, 178, 59, .2), rgba(120, 70, 10, .25)); border-color: rgba(242, 178, 59, .35); color: var(--gold); }
+
+@media (max-width: 720px) {
+  .spieler-suche .knopf { width: 100%; }
+  .zuletzt { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .zuletzt .chips { max-width: 100%; }
+  .abo-hinweis { flex-direction: column; text-align: center; }
+  .rangliste .zeile { grid-template-columns: 24px 32px minmax(0, 1fr) auto; }
+}
+
+/* Karussell-Folie: Spieler nachschlagen */
+.k-spieler { --k-farbe: rgba(170, 120, 255, .18); }
+.k-spieler .k-symbol svg { color: #c9a6ff; filter: drop-shadow(0 0 30px rgba(170, 120, 255, .4)); }
+.k-suche { display: flex; gap: 8px; max-width: 420px; }
+.k-suche input { flex: 1; min-width: 0; height: 46px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--obsidian-4); background: rgba(18, 18, 21, .8); color: var(--papier); font: 500 15.5px/1 var(--text); outline: none; transition: border-color .2s, box-shadow .2s; }
+.k-suche input:focus { border-color: rgba(242, 178, 59, .7); box-shadow: 0 0 0 4px rgba(242, 178, 59, .12); }
+.k-suche .knopf { height: 46px; padding: 0 18px; }

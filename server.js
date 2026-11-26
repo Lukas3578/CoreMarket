@@ -94,6 +94,8 @@ const SEITEN = [
     beschreibung: 'In vier Schritten zum Spawner: Discord beitreten, Minecraft verbinden, Ticket öffnen, Übergabe im Spiel.' },
   { pfad: '/clan', datei: 'clan', name: 'Clan', icon: 'clan', gruppe: 'Community', titel: 'Unser Clan – CoreMarket',
     beschreibung: 'Alle Mitglieder von CoreMarket (CM0) und CoreMarket1 (CM1). Prüf hier, ob ein Händler wirklich zu uns gehört.' },
+  { pfad: '/spieler', datei: 'spielersuche', name: 'Spieler', icon: 'spieler', gruppe: 'Community', titel: 'Spieler nachschlagen – CoreMarket',
+    beschreibung: 'Jeden Spieler auf HugoSMP nachschlagen: was er gerade im Auktionshaus verkauft, Orders, Skin und mehr.' },
   { pfad: '/bewertungen', datei: 'bewertungen', name: 'Bewertungen', icon: 'stern', gruppe: 'Community', titel: 'Bewertungen – CoreMarket',
     beschreibung: 'Was Kunden über ihren Handel mit CoreMarket sagen, und welche Händler die meisten Vouches haben.' },
   { pfad: '/auction-orders', datei: 'auction-orders', name: 'Auction-Orders', icon: 'markt', gruppe: 'Handel', js: 'preise.js', titel: 'Auction-Orders: Item-Preise und Preistrend – CoreMarket',
@@ -105,8 +107,8 @@ const SEITEN = [
   { pfad: '/abo', datei: 'abo', name: 'Abo', icon: 'abo', gruppe: 'Unten', skript: true, titel: 'Abo: Endertruhe und Inventar ansehen – CoreMarket',
     beschreibung: 'Mit dem CoreMarket-Abo siehst du Endertruhen und Inventare anderer Spieler auf HugoSMP.' },
   // Ein Profil pro Clan-Mitglied: /spieler/<name>
-  { pfad: '/spieler/{{SLUG}}', datei: 'spieler', menue: false, aktiv: '/clan', dynamisch: true, titel: '{{SPIELER}} – CoreMarket Händler',
-    beschreibung: '{{SPIELER}} ist Händler bei CoreMarket auf HugoSMP: Clan, dabei seit, Bewertungen und Vouches.' },
+  { pfad: '/spieler/{{SLUG}}', datei: 'spieler', menue: false, aktiv: '/spieler', dynamisch: true, titel: '{{SPIELER}} auf HugoSMP – CoreMarket',
+    beschreibung: '{{SPIELER}} auf HugoSMP: was er gerade im Auktionshaus verkauft, Orders, Skin und Bewertungen.' },
   // Eine Seite pro Spawner: /spawner/<name>. {{SPAWNER}} und {{SLUG}} setzt der Server beim Aufruf ein.
   { pfad: '/spawner/{{SLUG}}', datei: 'spawner', menue: false, aktiv: '/preise', dynamisch: true, titel: '{{SPAWNER}} Spawner – Preis bei CoreMarket',
     beschreibung: '{{SPAWNER}} Spawner auf HugoSMP kaufen oder verkaufen: aktueller Preis, Mengenpreis und Rechner – sicher über ein Ticket bei CoreMarket.' },
@@ -140,6 +142,7 @@ const ICONS = {
   abo: '<path d="m3 8 4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
   discord: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',
   live: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+  spieler: '<circle cx="11" cy="8" r="4"/><path d="M4 21a7 7 0 0 1 11-5.7"/><circle cx="18" cy="17" r="3"/><path d="m22 21-1.8-1.8"/>',
   merken: '<path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z"/>',
 };
 const icon = name => `<svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
@@ -262,6 +265,13 @@ async function preisHolen(schluessel, url, maxAlterMs) {
   if (!c.d) await c.laeuft; // ohne alte Daten warten, sonst alte sofort liefern
   return c;
 }
+/* ---------- Spieler-Index: wer verkauft was im AH (siehe spieler.js) ---------- */
+const SPIELER = require('./spieler')({
+  holeUebersicht: async () => (await preisHolen('_alle', PREISE_API, 45000))?.d,
+  holeItem: async id => (await preisHolen(id, `${PREISE_API}/${encodeURIComponent(id)}`, 10 * 60000))?.d,
+  istDemo: () => PREISE_DEMO === 'an' || PREISE_DEMO === 'true' || PREISE_DEMO === '1',
+});
+
 async function preise(req, res, url) {
   const id = url === '/api/preise' ? '' : url.slice('/api/preise/'.length).toLowerCase().replace(/^minecraft:/, '');
   if (id && !/^[a-z0-9_]{1,64}$/.test(id)) return json(req, res, 404, { error: 'Dieses Item gibt es nicht.' });
@@ -346,6 +356,13 @@ const server = http.createServer(async (req, res) => {
 
     if (url === '/health' || url === '/healthz') return json(req, res, 200, { ok: true, laufzeit: Math.round((Date.now() - START) / 1000), daten: cache.daten ? Math.round((Date.now() - cache.zeit) / 1000) + 's alt' : 'keine', fehler: cache.fehler });
     if (url === '/api/preise' || url.startsWith('/api/preise/')) return await preise(req, res, url);
+    if (url === '/api/spieler') return json(req, res, 200, SPIELER.top(40), { 'Cache-Control': 'public, max-age=60' });
+    if (url.startsWith('/api/spieler/')) {
+      const d = await SPIELER.spieler(url.slice('/api/spieler/'.length));
+      if (!d) return json(req, res, 400, { error: 'Das ist kein gültiger Minecraft-Name.' });
+      if (d.existiert === false && !d.ah.length && !d.orders.length) return json(req, res, 404, { error: 'Diesen Spieler gibt es nicht.' });
+      return json(req, res, 200, d, { 'Cache-Control': 'public, max-age=30' });
+    }
     if (url === '/api/wiki') return json(req, res, 200, WIKI.map(a => ({ s: a.slug, t: a.titel, b: a.beschreibung, k: a.kategorie })), { 'Cache-Control': 'public, max-age=300' });
     if (url === '/api/daten') {
       const d = await daten();
@@ -355,14 +372,21 @@ const server = http.createServer(async (req, res) => {
     if (url === '/auktionshaus') return umleiten(req, res, '/auction-orders'); // alte Seite, gibt es nicht mehr
     if (url.length > 1 && url.endsWith('/') && SEITEN_HTML.has(url.slice(0, -1))) return umleiten(req, res, url.slice(0, -1));
     if (SEITEN_HTML.has(url)) return await seite(req, res, SEITEN_HTML.get(url));
-    const sm = url.match(/^\/spieler\/([A-Za-z0-9_]{1,16})$/);
+    const sm = url.match(/^\/spieler\/([.*]?[A-Za-z0-9_]{2,16})$/);
     if (sm) {
       const d = await daten();
       const alle = (d?.clans || []).flatMap(c => c.mitglieder.map(m => m.name));
-      const treffer = alle.find(n => n.toLowerCase() === sm[1].toLowerCase());
-      if (d?.clans && !treffer) return nichtGefunden(req, res);
-      if (treffer && treffer !== sm[1]) return umleiten(req, res, `/spieler/${treffer}`);
-      const vorlage = SEITEN_HTML.get('/spieler/{{SLUG}}').replaceAll('{{SLUG}}', sm[1]).replaceAll('{{SPIELER}}', escAttr(treffer || sm[1]));
+      let richtig = alle.find(n => n.toLowerCase() === sm[1].toLowerCase());
+      if (!richtig) {
+        const m = await SPIELER.mojang(sm[1]);
+        if (m === null) {
+          const s2 = await SPIELER.spieler(sm[1]); // vielleicht kennt ihn der AH-Index trotzdem
+          if (!s2?.ah.length && !s2?.orders.length) return nichtGefunden(req, res);
+        }
+        richtig = m?.name || sm[1];
+      }
+      if (richtig !== sm[1]) return umleiten(req, res, `/spieler/${richtig}`);
+      const vorlage = SEITEN_HTML.get('/spieler/{{SLUG}}').replaceAll('{{SLUG}}', richtig).replaceAll('{{SPIELER}}', escAttr(richtig));
       return await seite(req, res, vorlage);
     }
     const sp = url.match(/^\/spawner\/([a-z0-9-]{1,40})$/);
@@ -388,6 +412,7 @@ server.keepAliveTimeout = 65000;
 server.listen(PORT, () => {
   console.log(`CoreMarket läuft auf Port ${PORT}, Daten von ${API}`);
   holeDaten();
+  setTimeout(() => SPIELER.dauerlauf(), 15000).unref(); // Spieler-Index im Hintergrund
   // Daten warm halten, damit Besucher nie auf den Bot warten müssen
   setInterval(holeDaten, CACHE_MS).unref();
 });

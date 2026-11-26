@@ -546,7 +546,7 @@
   let WIKI_INDEX = null, DATEN = null;
   const SEITEN_LISTE = [
     ['Startseite', '/'], ['Spawner-Preise', '/preise'], ['Rechner', '/preise#rechner'], ['Auction-Orders', '/auction-orders'],
-    ['Clan', '/clan'], ['Bewertungen', '/bewertungen'], ["So läuft's", '/ablauf'], ['Wiki', '/wiki'], ['Häufige Fragen', '/fragen'], ['Abo', '/abo'],
+    ['Clan', '/clan'], ['Spieler nachschlagen', '/spieler'], ['Live-Feed', '/live'], ['Merkliste', '/merkliste'], ['Bewertungen', '/bewertungen'], ["So läuft's", '/ablauf'], ['Wiki', '/wiki'], ['Häufige Fragen', '/fragen'], ['Abo', '/abo'],
   ];
   if (gs) {
     let auswahl = -1, zeitGs;
@@ -561,6 +561,8 @@
       if (sp.length) gruppen.push(['Spawner', sp.slice(0, 5).map(s => `<a href="/spawner/${slug(s.name)}" role="option"><span class="gs-icon">${spawnerIcon(s.name)}</span><span>${hervor(s.name, q)} Spawner<small>${!leer(s.verkauf) ? `Kaufen ${preis(s.verkauf)}` : ''}${!leer(s.verkauf) && !leer(s.ankauf) ? ' · ' : ''}${!leer(s.ankauf) ? `Verkaufen ${preis(s.ankauf)}` : ''}</small></span></a>`)]);
       const leute = (DATEN?.clans || []).flatMap(c => c.mitglieder.map(m => [m.name, c.key])).filter(([n]) => normal(n).includes(q));
       if (leute.length) gruppen.push(['Clan-Mitglieder', leute.slice(0, 5).map(([n, k]) => `<a href="/spieler/${encodeURIComponent(n)}" role="option"><img class="gs-icon" src="${kopf24(n)}" alt="" width="28" height="28" loading="lazy"><span>${hervor(n, q)}<small>${esc(k)} · gehört zu CoreMarket</small></span></a>`)]);
+      if (/^[.*]?[A-Za-z0-9_]{2,16}$/.test(roh) && !leute.some(([n]) => n.toLowerCase() === roh.toLowerCase()))
+        gruppen.push(['Spieler auf HugoSMP', [`<a href="/spieler/${encodeURIComponent(roh)}" role="option"><img class="gs-icon" src="${kopf24(roh)}" alt="" width="28" height="28" loading="lazy"><span>${esc(roh)} ansehen<small>Auktionshaus, Orders, Endertruhe …</small></span></a>`]]);
       const seiten = SEITEN_LISTE.filter(([n]) => normal(n).includes(q));
       const wiki = (await wikiLaden()).filter(a => normal(a.t).includes(q) || normal(a.b).includes(q));
       if (seiten.length || wiki.length) gruppen.push(['Seiten & Wiki', [...seiten.map(([n, u]) => `<a href="${u}" role="option"><span class="gs-icon gs-seite">↗</span><span>${hervor(n, q)}<small>Seite</small></span></a>`), ...wiki.slice(0, 4).map(a => `<a href="/wiki/${esc(a.s)}" role="option"><span class="gs-icon gs-seite">W</span><span>${hervor(a.t, q)}<small>Wiki · ${esc(a.k)}</small></span></a>`)]]);
@@ -721,37 +723,131 @@
   }
 
   /* ==========================================================
-     Spieler-Profil
+     Spieler-Profil: jeder Spieler auf HugoSMP
      ========================================================== */
   const PROFIL = $('#profil');
+  const MC_NAME = /^[.*]?[A-Za-z0-9_]{2,16}$/;
+  const ZULETZT_KEY = 'cm-zuletzt';
+  const zuletztLesen = () => { try { const l = JSON.parse(localStorage.getItem(ZULETZT_KEY) || '[]'); return Array.isArray(l) ? l.filter(x => typeof x === 'string' && MC_NAME.test(x)).slice(0, 12) : []; } catch { return []; } };
+  const zuletztMerken = n => { try { localStorage.setItem(ZULETZT_KEY, JSON.stringify([n, ...zuletztLesen().filter(x => x.toLowerCase() !== n.toLowerCase())].slice(0, 12))); } catch { /* egal */ } };
+  let PROFIL_AH = null;
+
+  // Tabs
+  $$('.tabs [data-tab]').forEach(b => b.addEventListener('click', () => {
+    $$('.tabs [data-tab]').forEach(x => { const an = x === b; x.setAttribute('aria-selected', String(an)); $('#tab-' + x.dataset.tab).hidden = !an; });
+    history.replaceState(null, '', '#' + b.dataset.tab);
+  }));
+  if (PROFIL && /^#(ah|orders|ec|inv|vouches)$/.test(location.hash)) $(`.tabs [data-tab="${location.hash.slice(1)}"]`)?.click();
+
   function profilZeigen(d) {
     if (!PROFIL) return;
     const name = PROFIL.dataset.name;
     let clan = null, mitglied = null;
     for (const c of d.clans || []) { const m = c.mitglieder.find(x => x.name.toLowerCase() === name.toLowerCase()); if (m) { clan = c; mitglied = m; break; } }
-    if (!mitglied) return;
-    text('#profil-name', mitglied.name);
-    text('#profil-clan', `${clan.key} · ${clan.name}`);
-    text('#profil-clan2', clan.name);
-    if (mitglied.seit) text('#pz-seit', new Date(mitglied.seit).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' }));
+    const echt = mitglied?.name || PROFIL_AH?.name || name;
+    text('#profil-name', echt);
+    $$('.pn').forEach(el => { el.textContent = echt; });
     const liste = d.vouches?.haendler || [];
     const k = liste.findIndex(h => h.name.toLowerCase() === name.toLowerCase());
     const h = liste[k];
-    text('#pz-vouches', h ? tausend(h.anzahl) : '0');
-    text('#pz-schnitt', h ? `${komma(h.schnitt)} ★` : '–');
-    text('#pz-rang', h ? `#${k + 1}` : '–');
-    const eigene = (d.vouches?.neueste || []).filter(v => (v.haendler || '').toLowerCase() === name.toLowerCase());
-    $('#profil-vouches').innerHTML = eigene.map(v => `<li class="zeile zeile-vouch"><img class="z-kopf" src="${kopf24(v.von)}" alt="" width="32" height="32" loading="lazy"><span class="z-text"><b>${esc(v.von)}</b><small>„${esc(v.text)}“${v.was ? ` · ${esc(v.was)}` : ''}</small></span><span class="z-preis">${sterneKurz(v.sterne)}<small>${v.at ? vor(v.at) : ''}</small></span></li>`).join('')
-      || `<li class="zeile-leer">${h ? 'Die Bewertungen sind älter und stehen nicht mehr in der Liste der neuesten.' : `${esc(mitglied.name)} hat noch keine Bewertungen. Nach deinem Handel kannst du mit <code>/vouch</code> die erste abgeben.`}</li>`;
-    const andere = clan.mitglieder.filter(m => m !== mitglied).slice(0, 24);
-    $('#profil-andere').innerHTML = andere.map((m, i) => `<a class="chip" style="--i:${i}" href="/spieler/${encodeURIComponent(m.name)}"><img class="chip-kopf" src="${kopf24(m.name)}" alt="" width="28" height="28" loading="lazy"><span>${esc(m.name)}</span></a>`).join('');
-    document.title = `${mitglied.name} – CoreMarket Händler`;
+    const alsHaendler = (d.vouches?.neueste || []).filter(v => (v.haendler || '').toLowerCase() === name.toLowerCase());
+    const alsKunde = (d.vouches?.neueste || []).filter(v => (v.von || '').toLowerCase() === name.toLowerCase());
+    if (mitglied) {
+      text('#profil-clan', `${clan.key} · ${clan.name}`);
+      $('#profil-haken').hidden = false;
+      text('#profil-text', `Offizieller Händler von CoreMarket${mitglied.seit ? `, dabei seit ${new Date(mitglied.seit).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}` : ''}. Handel mit ${echt} nur über ein Ticket in unserem Discord.`);
+      text('#pz-4-titel', 'Vouches');
+      text('#pz-4', h ? `${tausend(h.anzahl)} · ${komma(h.schnitt)}★` : '0');
+      text('#profil-clan2', clan.name);
+      const andere = clan.mitglieder.filter(m => m !== mitglied).slice(0, 24);
+      $('#profil-andere').innerHTML = andere.map((m, i) => `<a class="chip" style="--i:${i}" href="/spieler/${encodeURIComponent(m.name)}"><img class="chip-kopf" src="${kopf24(m.name)}" alt="" width="28" height="28" loading="lazy"><span>${esc(m.name)}</span></a>`).join('');
+      $('#profil-andere-block').hidden = !andere.length;
+    } else if (d.clans) {
+      $('#profil-warnung').hidden = false;
+      text('#warn-name', echt);
+      text('#pz-4-titel', 'Bewertet');
+      text('#pz-4', alsKunde.length ? `${alsKunde.length}×` : '–');
+    }
+    const vouchZeile = (v, wer) => `<li class="zeile zeile-vouch"><img class="z-kopf" src="${kopf24(wer)}" alt="" width="32" height="32" loading="lazy"><span class="z-text"><b>${nameLink(wer)}${v.haendler && wer === v.von ? ` <span class="z-pfeil">→</span> ${nameLink(v.haendler)}` : ''}</b><small>„${esc(v.text)}“${v.was ? ` · ${esc(v.was)}` : ''}</small></span><span class="z-preis">${sterneKurz(v.sterne)}<small>${v.at ? vor(v.at) : ''}</small></span></li>`;
+    const vouches = [...alsHaendler.map(v => vouchZeile(v, v.von)), ...alsKunde.map(v => vouchZeile(v, v.von))];
+    $('#profil-vouches').innerHTML = vouches.join('') || `<li class="zeile-leer">${mitglied ? `${esc(echt)} hat noch keine Bewertungen in der Liste der neuesten. Nach deinem Handel kannst du mit <code>/vouch</code> eine abgeben.` : `Keine Bewertungen mit ${esc(echt)} bei CoreMarket.`}</li>`;
+    text('#tz-vouches', vouches.length ? String(vouches.length) : '');
+    document.title = `${echt} auf HugoSMP – CoreMarket`;
   }
+
+  async function profilAhLaden() {
+    if (!PROFIL) return;
+    const name = PROFIL.dataset.name;
+    zuletztMerken(name);
+    try {
+      const r = await fetch(`/api/spieler/${encodeURIComponent(name)}`);
+      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `HTTP ${r.status}`);
+      const d = await r.json();
+      PROFIL_AH = d;
+      if (d.uuid) { const u = $('#profil-uuid'); u.hidden = false; u.textContent = `UUID ${d.uuid.replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, '$1-$2-$3-$4-$5')}`; }
+      const wert = d.ah.reduce((s, x) => s + x.proStueck * x.menge, 0);
+      const anz = d.ah.reduce((s, x) => s + x.stapel, 0);
+      text('#pz-angebote', tausend(anz));
+      text('#pz-wert', anz ? marktPreis(wert) : '–');
+      text('#pz-orders', tausend(d.orders.length));
+      text('#tz-ah', anz ? String(anz) : ''); text('#tz-orders', d.orders.length ? String(d.orders.length) : '');
+      const i = d.index || {};
+      text('#ah-stand', i.laeuft ? `Bot scannt gerade: ${tausend(i.gescannt)} von ${tausend(i.items)} Items` : i.runden ? `${tausend(i.items)} Items durchsucht` : '');
+      const zeile = x => `<li><a class="zeile" href="/auction-orders?item=${encodeURIComponent(x.id)}"><span class="z-icon mc">${itemBild(x.id)}</span>
+        <span class="z-text"><b>${x.menge > 1 ? `${tausend(x.menge)}× ` : ''}${esc(x.item)}</b><small>${x.stapel > 1 ? `${x.stapel} Angebote · ` : ''}${marktPreis(x.proStueck)} pro Stück · gesehen ${vor(x.at)}</small></span>
+        <span class="z-preis gruen-text">${marktPreis(x.proStueck * x.menge)}<small>zusammen</small></span></a></li>`;
+      const noch = !i.runden;
+      $('#profil-ah').innerHTML = d.ah.map(zeile).join('') || `<li class="zeile-leer">${noch ? `Der Bot baut die Liste gerade auf (${tausend(i.gescannt || 0)} von ${tausend(i.items || 0)} Items) – schau in ein paar Minuten nochmal.` : `Im Moment sieht unser Bot keine Angebote von ${esc(d.name)} im Auktionshaus.`}</li>`;
+      $('#profil-orders').innerHTML = d.orders.map(zeile).join('') || `<li class="zeile-leer">Keine Orders von ${esc(d.name)} gefunden.</li>`;
+      if (DATEN) profilZeigen(DATEN);
+    } catch (e) {
+      $('#profil-ah').innerHTML = `<li class="zeile-leer">${esc(e.message || 'Die Daten sind gerade nicht erreichbar.')}</li>`;
+    }
+  }
+  if (PROFIL) { profilAhLaden(); setInterval(() => { if (!document.hidden) profilAhLaden(); }, 90000); }
+
   $('#profil-kopieren')?.addEventListener('click', async () => {
     const n = $('#profil-name').textContent;
     try { await navigator.clipboard.writeText(n); toast(`„${n}“ kopiert`); } catch { toast('Kopieren ging nicht'); }
   });
   $('#profil-koerper')?.addEventListener('error', e => { e.target.closest('.profil-figur')?.classList.add('ohne-skin'); });
+
+  /* ---------- Spieler-Suche (/spieler) ---------- */
+  const sForm = $('#spieler-form');
+  if (sForm) {
+    sForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const n = $('#spieler-name').value.trim();
+      const f = $('#spieler-fehler');
+      if (!MC_NAME.test(n)) { f.hidden = false; f.textContent = 'Das ist kein gültiger Minecraft-Name (3–16 Zeichen, nur Buchstaben, Zahlen und _).'; return; }
+      f.hidden = true;
+      location.href = `/spieler/${encodeURIComponent(n)}`;
+    });
+    const z = zuletztLesen();
+    if (z.length) { $('#zuletzt').hidden = false; $('#zuletzt-chips').innerHTML = z.map(n => `<a class="chip" href="/spieler/${encodeURIComponent(n)}"><img class="chip-kopf" src="${kopf24(n)}" alt="" width="28" height="28" loading="lazy"><span>${esc(n)}</span></a>`).join(''); }
+    (async () => {
+      const ziel = $('#top-verkaeufer');
+      try {
+        const r = await fetch('/api/spieler'); const d = await r.json();
+        const i = d.index || {};
+        if (!d.top.length) { ziel.innerHTML = `<li class="zeile-leer">${i.laeuft || !i.runden ? `Der Bot baut die Liste gerade auf (${tausend(i.gescannt || 0)} von ${tausend(i.items || 0)} Items). Schau in ein paar Minuten nochmal.` : 'Gerade keine Angebote gefunden.'}</li>`; return; }
+        ziel.innerHTML = d.top.slice(0, 15).map((s, k) => `<li><a class="zeile" href="/spieler/${encodeURIComponent(s.name)}"><span class="rang-platz${k < 3 ? ' p' + (k + 1) : ''}">${k + 1}</span><img class="z-kopf" src="${kopf24(s.name)}" alt="" width="32" height="32" loading="lazy">
+          <span class="z-text"><b>${esc(s.name)}</b><small>${tausend(s.angebote)} Angebote · ${tausend(s.items)} verschiedene Items</small></span><span class="z-preis gruen-text">${marktPreis(s.wert)}<small>im AH</small></span></a></li>`).join('');
+        if (i.laeuft) text('#top-info', `Spieler mit dem höchsten Gesamtwert an Angeboten im Auktionshaus. Der Bot scannt gerade (${tausend(i.gescannt)} von ${tausend(i.items)} Items).`);
+      } catch { ziel.innerHTML = '<li class="zeile-leer">Gerade nicht erreichbar.</li>'; }
+    })();
+  }
+  $$('[data-spieler-suche]').forEach(f => f.addEventListener('submit', e => {
+    e.preventDefault();
+    const n = f.querySelector('input').value.trim();
+    if (MC_NAME.test(n)) location.href = `/spieler/${encodeURIComponent(n)}`;
+    else { f.querySelector('input').focus(); toast('Bitte einen gültigen Minecraft-Namen eingeben'); }
+  }));
+  function haendlerRaster(d) {
+    const ziel = $('#haendler-raster'); if (!ziel) return;
+    const alle = (d.clans || []).flatMap(c => c.mitglieder.map(m => [m.name, c.key]));
+    ziel.innerHTML = alle.map(([n, k]) => `<a class="kopf-kachel" href="/spieler/${encodeURIComponent(n)}" title="${esc(n)} · ${esc(k)}"><img src="${kopf24(n)}" alt="" width="40" height="40" loading="lazy"><span>${esc(n)}</span></a>`).join('');
+  }
 
   /* ---------- Spawner-Bilder: Mob hinter dem echten Spawner-Käfig ---------- */
   document.addEventListener('load', e => {
@@ -783,7 +879,7 @@
     vouchFeed(d.vouches);
     if (erstesMal) marktPaneel();
     merkZeigen(d); merkKnoepfe();
-    tickerZeigen(d); feedZeigen(d); profilZeigen(d);
+    tickerZeigen(d); feedZeigen(d); profilZeigen(d); haendlerRaster(d);
     CLANS = d.clans || [];
     clansZeigen(suche ? suche.value : '');
     vouchesZeigen(d.vouches);

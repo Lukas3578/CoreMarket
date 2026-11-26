@@ -62,13 +62,13 @@ function verlauf([id, , basis, ah, ord], jetzt) {
     wert *= 1 + richtung + (r() - .5) * .07;
     if (r() < .04) wert *= r() < .5 ? .8 : 1.22; // ab und zu ein Sprung
     const t = heute - d * TAG;
-    p.push(punkt(t, wert, ah, ord, r, 'n'));
+    p.push(punkt(t, wert, ah, ord, r, 'r'));
   }
   // Schnell-Scans alle 2 Std. der letzten 3 Tage
   for (let t = heute - 3 * TAG + 2 * STD; t <= jetzt; t += 2 * STD) {
     if ((t - heute) % TAG === 0) continue;
     wert *= 1 + (r() - .5) * .03;
-    p.push(punkt(t, wert, ah, ord, r, 's'));
+    p.push(punkt(t, wert, ah, ord, r, 'r'));
   }
   return p.sort((a, b) => a.t - b.t);
 }
@@ -80,7 +80,7 @@ function punkt(t, wert, ah, ord, r, q) {
 }
 
 function kurz(b, v, jetzt) {
-  const [id, name] = b, l = v[v.length - 1], n = v.filter(x => x.q === 'n');
+  const [id, name] = b, l = v[v.length - 1], n = v.filter((x, i) => i === v.length - 1 || new Date(x.t).getUTCHours() === 23);
   const vor = ms => v.reduce((best, x) => Math.abs(jetzt - ms - x.t) < Math.abs(jetzt - ms - best.t) ? x : best).ahMin;
   const proz = alt => Math.round((l.ahMin / alt - 1) * 1000) / 10;
   return {
@@ -93,8 +93,7 @@ function kurz(b, v, jetzt) {
 }
 const SPIELER = ['Steve_Builder', 'xXDiamondXx', 'MrPofessor', 'Lena_mc', 'Kroko77', 'NetherNinja', 'Bananenbrot', 'Herobrine2k', 'ZockerJan', 'Mia_Craft'];
 function status(jetzt) {
-  const heute = mitternacht(jetzt);
-  return { letzter: { start: heute, ende: heute + 52 * 60000, items: 1087 }, naechster: heute + TAG, schnellAlleMin: 120, laeuft: null };
+  return { modus: 'laufend', an: true, online: true, aktuell: { id: 'ancient_debris', name: 'Ancient Debris' }, proStunde: 410, items: BASIS.length, runde: 165, topMin: 15, beliebtMin: 60, normalMin: 180, pauseBis: 0, letzter: jetzt - 40000 };
 }
 
 module.exports = {
@@ -110,6 +109,6 @@ module.exports = {
       const proStueck = rund(start * (auf ? 1 + i * (0.015 + r() * .03) : 1 - i * (0.02 + r() * .03)));
       return { preis: rund(proStueck * menge), menge, proStueck, verkaeufer: SPIELER[Math.floor(r() * SPIELER.length)] };
     });
-    return { ...k, demo: true, ahTop: angebote(k.ah.min, Math.min(8, k.ah.anzahl), true), orderTop: k.order.max ? angebote(k.order.max, Math.min(8, k.order.anzahl), false) : [], live: null, verlauf: v, scan: status(jetzt) };
+    return { ...k, demo: true, taktMin: b[3] > 30 ? 15 : b[3] > 10 ? 60 : 180, ahTop: angebote(k.ah.min, Math.min(8, k.ah.anzahl), true), orderTop: k.order.max ? angebote(k.order.max, Math.min(8, k.order.anzahl), false) : [], live: null, verlauf: v, scan: status(jetzt) };
   },
 };

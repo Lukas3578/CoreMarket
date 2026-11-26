@@ -32,7 +32,7 @@
   const bildUrl = (art, id) => BILDER.replace('{art}', art).replace('{id}', encodeURIComponent(id));
   const kuerzel = n => String(n || '?').replace(/[^A-Za-z0-9 ]/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
   function icon(id, name, gross) {
-    const [art, tex] = (TEXTUR[id] || `item/${id}`).split('/');
+    const [art, tex] = (TEXTUR[id] || (id.startsWith('spawner_') ? 'block/spawner' : `item/${id}`)).split('/');
     return `<span class="mc-icon${gross ? ' gross' : ''}" data-kurz="${esc(kuerzel(name))}">${BILDER ? `<img src="${esc(bildUrl(art, tex))}" data-id="${esc(id)}" data-art="${art}" alt="" width="32" height="32" loading="lazy">` : ''}</span>`;
   }
   document.addEventListener('error', e => {
@@ -42,7 +42,7 @@
   }, true);
 
   /* ---------- Suche: englische Namen, Minecraft-ID und ein paar deutsche Namen */
-  const DEUTSCH = { ancient_debris: 'antiker schutt', netherite_ingot: 'netheritbarren', netherite_scrap: 'netheritplatten', diamond: 'diamant', diamond_block: 'diamantblock', elytra: 'elytren flügel', totem_of_undying: 'totem der unsterblichkeit', beacon: 'leuchtfeuer', enchanted_golden_apple: 'verzauberter goldener apfel notch apfel', golden_apple: 'goldener apfel', shulker_box: 'shulkerkiste', shulker_shell: 'shulkerschale', nether_star: 'netherstern', netherite_upgrade_smithing_template: 'netheritaufwertung schmiedevorlage', mace: 'streitkolben', heavy_core: 'schwerer kern', trident: 'dreizack', end_crystal: 'enderkristall', experience_bottle: 'erfahrungsfläschchen xp flasche', obsidian: 'obsidian', ender_pearl: 'enderperle', blaze_rod: 'lohenrute', gunpowder: 'schwarzpulver', slime_ball: 'schleimball', iron_ingot: 'eisenbarren', iron_block: 'eisenblock', gold_ingot: 'goldbarren', gold_block: 'goldblock', emerald: 'smaragd', emerald_block: 'smaragdblock', netherite_block: 'netheritblock', dragon_head: 'drachenkopf', dragon_egg: 'drachenei', wither_skeleton_skull: 'witherskelettschädel', sponge: 'schwamm', nautilus_shell: 'nautilusschale', heart_of_the_sea: 'herz des meeres', conduit: 'aquisator', echo_shard: 'echoscherbe', recovery_compass: 'bergungskompass', sniffer_egg: 'schnüffler ei', trial_key: 'prüfungsschlüssel', breeze_rod: 'böenrute', wind_charge: 'windkugel', cobweb: 'spinnennetz', honey_block: 'honigblock', oak_log: 'eichenstamm holz', sugar_cane: 'zuckerrohr', cactus: 'kaktus', bone: 'knochen', string: 'faden', leather: 'leder', carrot: 'karotte', wheat: 'weizen', cooked_beef: 'steak gebratenes rindfleisch', golden_carrot: 'goldene karotte', amethyst_shard: 'amethystsplitter', quartz: 'netherquarz', redstone: 'redstone', glowstone: 'leuchtstein', diamond_sword: 'diamantschwert', netherite_sword: 'netheritschwert', netherite_pickaxe: 'netheritspitzhacke', netherite_chestplate: 'netheritbrustpanzer', netherite_helmet: 'netherithelm', diamond_pickaxe: 'diamantspitzhacke', bow: 'bogen', crossbow: 'armbrust', shield: 'schild', ender_chest: 'endertruhe', hopper: 'trichter', chest: 'truhe kiste', name_tag: 'namensschild', saddle: 'sattel', spawner: 'spawner', tnt: 'tnt' };
+  const DEUTSCH = { spawner_skeleton: 'skelett skelly spawner', spawner_blaze: 'lohe blaze spawner', spawner_iron_golem: 'eisengolem iron golem spawner', spawner_creeper: 'creeper spawner', spawner_spider: 'spinne spawner', spawner_cow: 'kuh spawner', spawner_piglin: 'piglin spawner', spawner_zombie: 'zombie spawner', spawner_pig: 'schwein spawner', spawner_cave_spider: 'höhlenspinne spawner', spawner_wither_skeleton: 'wither skelett spawner', spawner_enderman: 'enderman spawner', ancient_debris: 'antiker schutt', netherite_ingot: 'netheritbarren', netherite_scrap: 'netheritplatten', diamond: 'diamant', diamond_block: 'diamantblock', elytra: 'elytren flügel', totem_of_undying: 'totem der unsterblichkeit', beacon: 'leuchtfeuer', enchanted_golden_apple: 'verzauberter goldener apfel notch apfel', golden_apple: 'goldener apfel', shulker_box: 'shulkerkiste', shulker_shell: 'shulkerschale', nether_star: 'netherstern', netherite_upgrade_smithing_template: 'netheritaufwertung schmiedevorlage', mace: 'streitkolben', heavy_core: 'schwerer kern', trident: 'dreizack', end_crystal: 'enderkristall', experience_bottle: 'erfahrungsfläschchen xp flasche', obsidian: 'obsidian', ender_pearl: 'enderperle', blaze_rod: 'lohenrute', gunpowder: 'schwarzpulver', slime_ball: 'schleimball', iron_ingot: 'eisenbarren', iron_block: 'eisenblock', gold_ingot: 'goldbarren', gold_block: 'goldblock', emerald: 'smaragd', emerald_block: 'smaragdblock', netherite_block: 'netheritblock', dragon_head: 'drachenkopf', dragon_egg: 'drachenei', wither_skeleton_skull: 'witherskelettschädel', sponge: 'schwamm', nautilus_shell: 'nautilusschale', heart_of_the_sea: 'herz des meeres', conduit: 'aquisator', echo_shard: 'echoscherbe', recovery_compass: 'bergungskompass', sniffer_egg: 'schnüffler ei', trial_key: 'prüfungsschlüssel', breeze_rod: 'böenrute', wind_charge: 'windkugel', cobweb: 'spinnennetz', honey_block: 'honigblock', oak_log: 'eichenstamm holz', sugar_cane: 'zuckerrohr', cactus: 'kaktus', bone: 'knochen', string: 'faden', leather: 'leder', carrot: 'karotte', wheat: 'weizen', cooked_beef: 'steak gebratenes rindfleisch', golden_carrot: 'goldene karotte', amethyst_shard: 'amethystsplitter', quartz: 'netherquarz', redstone: 'redstone', glowstone: 'leuchtstein', diamond_sword: 'diamantschwert', netherite_sword: 'netheritschwert', netherite_pickaxe: 'netheritspitzhacke', netherite_chestplate: 'netheritbrustpanzer', netherite_helmet: 'netherithelm', diamond_pickaxe: 'diamantspitzhacke', bow: 'bogen', crossbow: 'armbrust', shield: 'schild', ender_chest: 'endertruhe', hopper: 'trichter', chest: 'truhe kiste', name_tag: 'namensschild', saddle: 'sattel', spawner: 'spawner', tnt: 'tnt' };
   const norm = s => String(s || '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[_\-']/g, ' ').replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
   const beliebtheit = i => (i.ah.anzahl || 0) + (i.order.anzahl || 0) * 2;
   function suchen(q, max = 8) {
@@ -78,21 +78,21 @@
       $('#ao-status').innerHTML = `<span class="ao-status-text fehler-text">${esc(x.message)}</span>`;
       if (!UEB) $('#ao-karten').innerHTML = `<li class="leer">Die Preise sind gerade nicht erreichbar.</li>`;
     }
-    ladeTimer = setTimeout(uebersichtLaden, UEB?.scan?.laeuft ? 30000 : 120000);
+    ladeTimer = setTimeout(uebersichtLaden, 60000);
   }
 
   function statusMalen() {
+    // Der Bot scannt rund um die Uhr reihum: Top-Items alle 15 Min., beliebte jede Stunde, der Rest so schnell es geht
     const s = UEB.scan || {}, teile = [];
-    if (s.laeuft) {
-      const p = s.laeuft.gesamt ? Math.round(s.laeuft.fertig / s.laeuft.gesamt * 100) : 0;
-      $('#ao-status').innerHTML = `<span class="ao-status-text"><span class="punkt an"></span>${s.laeuft.art === 'voll' ? 'Großer Scan läuft' : 'Beliebte Items werden gescannt'}: ${tausend(s.laeuft.fertig)} von ${tausend(s.laeuft.gesamt)} Items</span><span class="ao-balken" role="progressbar" aria-valuenow="${p}" aria-valuemin="0" aria-valuemax="100"><i style="width:${p}%"></i></span>`;
-      return;
-    }
-    if (s.letzter) teile.push(`Letzter großer Scan ${heuteOderTag(s.letzter.start)} um ${uhr(s.letzter.start)} Uhr: ${tausend(s.letzter.items)} Items in ${dauer(s.letzter.ende - s.letzter.start)}`);
-    else teile.push('Der erste große Scan läuft heute Nacht um 0 Uhr');
-    if (s.schnellAlleMin) teile.push(`beliebte Items alle ${s.schnellAlleMin >= 60 ? `${s.schnellAlleMin / 60} Std.` : `${s.schnellAlleMin} Min.`}`);
-    if (s.naechster && s.naechster > Date.now()) teile.push(`nächster Scan in ${dauer(s.naechster - Date.now())}`);
-    $('#ao-status').innerHTML = `<span class="ao-status-text"><span class="punkt"></span>${esc(teile.join(' · ').replace(/\.?$/, '.'))} ${tausend(ITEMS.length)} Items mit Preisen.</span>`;
+    const laeuft = s.an !== false && s.online !== false && !s.pauseBis;
+    if (s.aktuell && laeuft) teile.push(`Gerade geprüft: ${s.aktuell.name}`);
+    else if (s.an === false) teile.push('Der Preis-Scanner ist gerade aus');
+    else if (s.online === false) teile.push('Der Bot ist gerade nicht im Spiel');
+    else if (s.pauseBis) teile.push(`Kurze Pause bis ${uhr(s.pauseBis)} Uhr`);
+    if (s.topMin) teile.push(`Top-Items alle ${s.topMin} Min.`);
+    if (s.runde) teile.push(`alle anderen etwa alle ${dauer(s.runde * 60000)}`);
+    if (s.letzter) teile.push(`zuletzt ${vor(s.letzter)}`);
+    $('#ao-status').innerHTML = `<span class="ao-status-text"><span class="punkt${laeuft ? ' an' : ''}"></span>${esc(teile.join(' · ').replace(/\.?$/, '.'))} ${tausend(ITEMS.length)} Items mit Preisen.</span>`;
   }
   function chipsMalen() {
     const top = ITEMS.slice().sort((a, b) => beliebtheit(b) - beliebtheit(a)).slice(0, 6);
@@ -177,8 +177,12 @@
   function punkteIn(v, b) {
     const [, , ms] = BEREICHE.find(x => x[0] === b);
     const ab = Date.now() - ms;
-    // lange Zeiträume nur mit den Nacht-Scans, sonst wird die Kurve unruhig
-    return v.filter(p => p.t >= ab && (ms <= 7 * 864e5 || p.q === 'n'));
+    const l = v.filter(p => p.t >= ab);
+    if (ms <= 7 * 864e5) return l;
+    // lange Zeiträume ausdünnen: ein Punkt pro 6 Std. (30 Tage) bzw. pro Tag (alles), sonst wird die Kurve unruhig
+    const fach = ms <= 30 * 864e5 ? 6 * 36e5 : 864e5, m = new Map();
+    for (const p of l) { const k = Math.floor(p.t / fach), alt = m.get(k); if (!alt || (alt.q === 'l' && p.q !== 'l') || (p.q !== 'l' && p.t > alt.t)) m.set(k, p); }
+    return [...m.values()].sort((a, b) => a.t - b.t);
   }
   function standardBereich(v) {
     for (const b of ['7t', '30t', 'alles', '24h']) if (punkteIn(v, b).filter(p => !leer(p.ahMin) || !leer(p.orderMax)).length >= 2) return b;
@@ -198,7 +202,7 @@
     $('#ao-item').innerHTML = `
       <div class="ao-item-kopf">
         ${icon(d.id, d.name, true)}
-        <div class="ao-item-titel"><h2>${esc(d.name)}</h2><p class="hinweis">minecraft:${esc(d.id)} · Stand ${esc(vor(d.at))}${a.live ? ' <span class="ao-live">live</span>' : ''}</p></div>
+        <div class="ao-item-titel"><h2>${esc(d.name)}</h2><p class="hinweis">${d.id.startsWith('spawner_') ? 'Spawner' : `minecraft:${esc(d.id)}`} · Stand ${esc(vor(d.at))}${a.live ? ' <span class="ao-live">live</span>' : ''}${d.wartet ? ' · wird gerade neu geprüft' : d.taktMin ? ` · wird etwa alle ${esc(dauer(d.taktMin * 60000))} geprüft` : ''}</p></div>
         <div class="ao-trends">${trendChip(d.trend?.tag, '24 Std.')}${trendChip(d.trend?.woche, '7 Tage')}</div>
         <button type="button" class="ao-teilen knopf zweit klein" title="Link kopieren">Link kopieren</button>
         <button type="button" class="ao-zu" aria-label="Schließen">×</button>
@@ -284,7 +288,7 @@
     const aktiv = REIHEN.filter(([k]) => !aus.has(k) && v.some(p => !leer(p[k])));
     const werte = v.flatMap(p => aktiv.map(([k]) => p[k])).filter(x => !leer(x));
     if (v.length < 2 || !werte.length) {
-      ziel.innerHTML = `<p class="ao-graph-leer">${bereich === '24h' ? 'Für die letzten 24 Stunden gibt es noch zu wenig Punkte. Beliebte Items werden alle 2 Std. gescannt, alle anderen einmal pro Nacht.' : 'Für diesen Zeitraum gibt es noch zu wenig Punkte. Nach ein paar Nächten wird hier eine Kurve draus.'}</p>`;
+      ziel.innerHTML = `<p class="ao-graph-leer">Für diesen Zeitraum gibt es noch zu wenig Punkte. Der Bot prüft dieses Item etwa alle ${dauer((DETAIL.taktMin || 180) * 60000)}, nach ein paar Runden wird hier eine Kurve draus.</p>`;
       return;
     }
     const B = Math.max(300, ziel.clientWidth || 600), H = B < 560 ? 230 : 300, L = 58, R = 14, O = 16, U = 30;
@@ -321,7 +325,7 @@
       const px = x(best.t);
       g.removeAttribute('hidden'); g.querySelector('line').setAttribute('x1', px); g.querySelector('line').setAttribute('x2', px);
       g.querySelectorAll('circle').forEach(c => { const w = best[c.dataset.k]; c.style.display = leer(w) ? 'none' : ''; if (!leer(w)) { c.setAttribute('cx', px); c.setAttribute('cy', y(w)); } });
-      const quelle = { n: 'Nacht-Scan', s: 'Schnell-Scan', l: 'Live' }[best.q] || '';
+      const quelle = { r: 'Scan', n: 'Scan', s: 'Scan', l: 'Live aus dem Auktionshaus' }[best.q] || '';
       tip.innerHTML = `<b>${new Date(best.t).toLocaleString('de-DE', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</b>${quelle ? `<small>${quelle}</small>` : ''}
         ${aktiv.slice().reverse().map(([k, c, l]) => leer(best[k]) ? '' : `<span class="${c}"><i></i>${l}: <b>${preis(best[k])}</b></span>`).join('')}
         ${!leer(best.ahAnzahl) ? `<small>${tausend(best.ahAnzahl)} im AH${best.orderAnzahl ? `, ${tausend(best.orderAnzahl)} Orders` : ''}</small>` : ''}`;

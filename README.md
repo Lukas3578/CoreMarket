@@ -16,7 +16,6 @@ seiten/              die einzelnen Seiten (_layout.html = Kopf, Menü, Fuß)
 wiki/                Wiki-Artikel als Markdown, eine Datei = ein Artikel
 wiki.js              macht aus den Markdown-Dateien die Wiki-Seiten
 preise-demo.js       Demo-Preise für /auction-orders, solange der Bot noch keine liefert
-bot/                 Preis-Tracker zum Einbauen in den Bot (siehe bot/README.md)
 public/              CSS, JS, Logo und andere Dateien für den Browser
 keepalive/           Script, das die Seite auf Render wach hält
 render.yaml          Render-Blueprint
@@ -86,7 +85,7 @@ Dann `http://localhost:3000` öffnen. Mit `npm run dev` startet der Server bei j
 | `CACHE_SEKUNDEN`  | `30`                                       |
 | `PORT`            | wird von Render gesetzt, lokal `3000`      |
 | `BOT_URL`         | Adresse des Bots, Standard: aus `COREMARKET_API` (`https://hugo.vortexpvp.eu`) |
-| `PREISE_API`      | Preise vom Bot, Standard: `COREMARKET_API` + `/preise` |
+| `PREISE_API`      | Preise vom Bot (Preis-Scanner, ab Bot 4.2.0), Standard: `COREMARKET_API` + `/preise` |
 | `PREISE_DEMO`     | `auto` (Demo-Daten, bis der Bot echte liefert), `an` oder `aus` |
 | `ITEM_BILDER`     | Quelle der Item-Bilder, Standard: `https://assets.mcasset.cloud/1.21.4/assets/minecraft/textures/{art}/{id}.png` |
 

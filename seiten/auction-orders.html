@@ -2,7 +2,7 @@
     <div class="breite">
       <nav class="brotkrumen auftritt" aria-label="Pfad"><a href="/">Start</a><span>Auction-Orders</span></nav>
       <h1 class="auftritt" style="--i:1">Auction-<span class="gold">Orders</span></h1>
-      <p class="einleitung auftritt" style="--i:2">Was ist ein Item gerade wert? Jede Nacht um <b>0 Uhr</b> sucht unser Bot jedes Item im Auktionshaus und in den Orders und merkt sich die Preise. Hier siehst du den billigsten Preis, die beste Order und wie sich der Preis entwickelt.</p>
+      <p class="einleitung auftritt" style="--i:2">Was ist ein Item gerade wert? Unser Bot schaut <b>rund um die Uhr</b> reihum nach, was jedes Item im Auktionshaus und in den Orders kostet, und merkt sich die Preise. Hier siehst du den billigsten Preis, die beste Order und wie sich der Preis entwickelt.</p>
       <form class="ao-suche auftritt" style="--i:3" id="ao-form" role="search" autocomplete="off">
         <label class="suche suche-gross"><span class="sr">Item suchen</span><input type="search" id="ao-suche" placeholder="Item suchen, z. B. Ancient Debris …" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="ao-treffer" aria-autocomplete="list"></label>
         <div class="wiki-treffer ao-treffer" id="ao-treffer" role="listbox" aria-label="Treffer" hidden></div>
@@ -40,11 +40,11 @@
       <details class="ao-wie">
         <summary>Wie kommen die Preise zustande?</summary>
         <ul>
-          <li><b>Großer Scan um 0 Uhr:</b> Der Bot sucht jedes Item mit <code>/ah</code> und <code>/orders</code> und blättert ein paar Seiten durch.</li>
+          <li><b>Rund um die Uhr:</b> Der Bot sucht jedes Item mit <code>/ah</code> und <code>/orders</code> und blättert ein paar Seiten durch. Spawner, Ancient Debris und andere Top-Items alle 15 Minuten, beliebte jede Stunde, alle anderen reihum.</li>
           <li><b>Billigster Preis:</b> das günstigste Angebot pro Stück. Umbenannte Fakes (anderes Item mit falschem Namen) zählen nicht.</li>
           <li><b>Ø erste Seite:</b> Durchschnitt der 10 billigsten Angebote. Troll-Preise, die weit daneben liegen, fliegen raus.</li>
           <li><b>Beste Order:</b> der höchste Preis pro Stück, den gerade jemand für das Item zahlt.</li>
-          <li><b>Beliebte Items</b> werden zusätzlich alle 2 Stunden gescannt. </li>
+          <li><b>Was ihr oft anschaut, wird öfter geprüft:</b> Suchst du ein Item, das länger nicht dran war, schaut der Bot gleich nach.</li>
           <li><b>Flip-Chance:</b> Eine Order zahlt mehr als das billigste Angebot im AH. Wer schnell ist, kauft im AH und verkauft an die Order.</li>
         </ul>
         <p class="hinweis">Alle Preise ohne Gewähr. Was wirklich gilt, steht im Spiel.</p>

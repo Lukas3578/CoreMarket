@@ -95,7 +95,7 @@ const SEITEN = [
   { pfad: '/bewertungen', datei: 'bewertungen', name: 'Bewertungen', titel: 'Bewertungen – CoreMarket',
     beschreibung: 'Was Kunden über ihren Handel mit CoreMarket sagen, und welche Händler die meisten Vouches haben.' },
   { pfad: '/auction-orders', datei: 'auction-orders', name: 'Auction-Orders', js: 'preise.js', titel: 'Auction-Orders: Item-Preise und Preistrend – CoreMarket',
-    beschreibung: 'Was ist ein Item auf HugoSMP gerade wert? Billigster Preis im Auktionshaus, beste Order und der Preistrend der letzten Tage – jede Nacht neu gescannt.' },
+    beschreibung: 'Was ist ein Item auf HugoSMP gerade wert? Billigster Preis im Auktionshaus, beste Order und der Preistrend der letzten Tage – rund um die Uhr neu gescannt.' },
   { pfad: '/abo', datei: 'abo', name: 'Abo', skript: true, titel: 'Abo: Endertruhe und Inventar ansehen – CoreMarket',
     beschreibung: 'Mit dem CoreMarket-Abo siehst du Endertruhen und Inventare anderer Spieler auf HugoSMP.' },
   { pfad: '/fragen', datei: 'fragen', name: 'Fragen', titel: 'Häufige Fragen – CoreMarket',
@@ -209,7 +209,7 @@ async function preisHolen(schluessel, url, maxAlterMs) {
     try {
       const r = await fetch(url, { signal: ctrl.signal, headers: { accept: 'application/json', 'user-agent': 'CoreMarket-Website' } });
       c.status = r.status;
-      if (r.status === 404) { c.d = null; c.zeit = Date.now(); return; }
+      if (r.status === 404) { c.d = null; c.zeit = Date.now(); try { c.fehler = String((await r.json()).error || '').slice(0, 200); } catch { c.fehler = ''; } return; }
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const d = await r.json();
       if (!d || typeof d !== 'object' || (schluessel === '_alle' ? !Array.isArray(d.items) : !d.id)) throw new Error('keine gültigen Preis-Daten');
@@ -228,7 +228,7 @@ async function preise(req, res, url) {
   if (!demo) c = await preisHolen(id || '_alle', id ? `${PREISE_API}/${encodeURIComponent(id)}` : PREISE_API, id ? 60000 : 45000);
   if (c?.d) return json(req, res, 200, c.d, { 'Cache-Control': 'public, max-age=30' });
   // Bot kennt das Item (noch) nicht
-  if (id && preiseEcht && c?.status === 404) return json(req, res, 404, { error: 'Zu diesem Item gibt es noch keine Preise. Der Bot scannt jede Nacht um 0 Uhr.' });
+  if (id && preiseEcht && c?.status === 404) return json(req, res, 404, { error: c.fehler || 'Zu diesem Item gibt es noch keine Preise.' });
   const demoErlaubt = demo || (PREISE_DEMO === 'auto' && !preiseEcht);
   if (demoErlaubt) {
     const d = id ? preisDemo.item(id) : preisDemo.uebersicht();

@@ -1682,3 +1682,110 @@ a.zeile:hover .z-preis { transform: none !important; }
 .regeln li { color: var(--papier-2); }
 
 .sp-titel p { display: block !important; }
+
+/* ==========================================================
+   Hell / Dunkel, Karussell-Inhalte, Chips, Inventar-Ansicht
+   ========================================================== */
+.thema-knopf { flex: none; width: 42px; height: 42px; display: grid; place-items: center; border: 0; border-radius: 10px; background: none; color: var(--papier-2); cursor: pointer; transition: background .2s, color .2s; }
+.thema-knopf:hover { background: var(--obsidian-3); color: var(--papier); }
+.thema-knopf .sonne { display: none; }
+[data-theme="hell"] .thema-knopf .sonne { display: block; }
+[data-theme="hell"] .thema-knopf .mond { display: none; }
+
+/* helles Design */
+[data-theme="hell"] {
+  --obsidian: #f3f3f6;
+  --obsidian-2: #ffffff;
+  --obsidian-3: #ebebf0;
+  --obsidian-4: #d6d6de;
+  --papier: #17171c;
+  --papier-2: #5c5c68;
+  --flaeche: #ffffff;
+  --rand: #e2e2e8;
+  --gold: #b7770a;
+  --gold-hell: #9a6200;
+  --gold-tief: #c98a1a;
+  --gruen: #15803d;
+  --rot: #dc2626;
+  color-scheme: light;
+}
+[data-theme="hell"] body { background: var(--obsidian); color: var(--papier); }
+[data-theme="hell"] .leiste-oben { background: rgba(255, 255, 255, .92); }
+[data-theme="hell"] .seitenleiste { background: #fafafc; }
+[data-theme="hell"] .gs-treffer, [data-theme="hell"] .wiki-treffer { background: #fff; box-shadow: 0 24px 50px rgba(20, 20, 40, .14); }
+[data-theme="hell"] .toast, [data-theme="hell"] .seitenleiste a::after { background: #fff !important; color: var(--papier) !important; box-shadow: 0 12px 30px rgba(20, 20, 40, .15) !important; }
+[data-theme="hell"] a.zeile:hover, [data-theme="hell"] .t-teil:hover, [data-theme="hell"] .chip:hover { background: #f5f5f8; }
+[data-theme="hell"] .k-pfeil { background: rgba(255, 255, 255, .9); }
+[data-theme="hell"] .kachel-zahl { color: var(--papier); text-shadow: none; }
+[data-theme="hell"] .knopf { background: #f2b23b; color: #2a1700; }
+[data-theme="hell"] .knopf:hover { background: #ffc757; }
+[data-theme="hell"] .knopf.zweit { background: #fff; color: var(--papier); }
+[data-theme="hell"] code { background: #f0eadf; color: #8a5a00; }
+[data-theme="hell"] .alarm-dialog { background: #fff; }
+[data-theme="hell"] .rechner select, [data-theme="hell"] .menge, [data-theme="hell"] .budget-feld, [data-theme="hell"] .umschalter { background: #fff; }
+[data-theme="hell"] .umschalter input:checked + span { color: #2a1700; }
+[data-theme="hell"] .umschalter-zeiger { background: #f2b23b; }
+[data-theme="hell"] .preise th, [data-theme="hell"] .wiki-tabelle th { background: #f7f7fa; }
+[data-theme="hell"] .gs-feld:focus-within { background: #fff; }
+[data-theme="hell"] .warn-box { background: #fff4f4; }
+[data-theme="hell"] .zeile.erreicht { background: #eefbf2; }
+[data-theme="hell"] .profil-figur img { filter: drop-shadow(0 12px 16px rgba(0, 0, 0, .18)); }
+
+/* Karussell: echte Inhalte rechts statt großer Symbole */
+.k-inhalt { width: min(100%, 320px); align-self: center; }
+.k-inhalt-titel { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--papier-2); }
+.k-top, .k-markt-liste, .k-wiki-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.k-top a, .k-markt-liste a { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 8px 12px 8px 8px; border-radius: 10px; background: var(--obsidian-2); border: 1px solid var(--rand); color: var(--papier); text-decoration: none; transition: border-color .2s, background .2s; }
+.k-top a:hover, .k-markt-liste a:hover { border-color: var(--obsidian-4); }
+.k-top img { border-radius: 6px; image-rendering: pixelated; }
+.k-top span, .k-markt-liste span:not(.z-icon) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; font-size: 14.5px; }
+.k-top small { display: block; font-weight: 400; font-size: 12px; color: var(--papier-2); }
+.k-top b, .k-markt-liste b { color: var(--gruen); font-size: 14.5px; }
+.k-markt-liste .z-icon { width: 32px; height: 32px; }
+.k-markt-liste .z-icon img { width: 28px; height: 28px; }
+.k-lade { height: 50px; border-radius: 10px; background: linear-gradient(90deg, var(--obsidian-2) 0%, var(--obsidian-3) 50%, var(--obsidian-2) 100%); background-size: 200% 100%; animation: skelett 1.4s linear infinite; }
+.k-leer { color: var(--papier-2); font-size: 14px; }
+.k-wiki-liste a { display: block; padding: 10px 12px; border-radius: 10px; background: var(--obsidian-2); border: 1px solid var(--rand); color: var(--papier); text-decoration: none; transition: border-color .2s; }
+.k-wiki-liste a:hover { border-color: var(--obsidian-4); }
+.k-wiki-liste b { display: block; font-size: 14.5px; }
+.k-wiki-liste small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--papier-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.k-koepfe { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.k-koepfe a { display: block; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: var(--obsidian-3); transition: transform .2s; }
+.k-koepfe a:hover { transform: translateY(-2px); }
+.k-koepfe img { width: 100%; height: 100%; image-rendering: pixelated; display: block; }
+.k-koepfe .k-mehr { display: grid; place-items: center; color: var(--papier-2); font-weight: 700; text-decoration: none; font-size: 13px; }
+.k-check input { width: 100%; height: 46px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--obsidian-4); background: var(--obsidian-2); color: var(--papier); font: 500 15.5px/1 var(--text); outline: none; }
+.k-check input:focus { border-color: var(--gold); }
+.k-check-ergebnis { margin: 10px 2px 0; font-size: 14px; color: var(--papier-2); min-height: 3em; }
+.k-check-ergebnis.ja { color: var(--gruen); }
+.k-check-ergebnis.nein { color: var(--rot); }
+.k-check-ergebnis b { color: var(--papier); }
+.k-check-ergebnis a { color: inherit; font-weight: 600; }
+
+/* Spawner-Chips mit Kauf- und Verkaufspreis */
+.chip-zwei { height: 52px; }
+.chip-preise { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; margin-left: 4px; line-height: 1.1; }
+.chip-preise b { font-size: 13px; }
+.chip-stop { font-size: 11px; color: var(--papier-2); white-space: nowrap; }
+
+/* Profil: Liste oder wie im Spiel */
+.ansicht { margin-left: auto; display: flex; padding: 3px; border-radius: 9px; background: var(--obsidian-2); border: 1px solid var(--rand); }
+.ansicht button { height: 30px; padding: 0 12px; border: 0; border-radius: 7px; background: none; color: var(--papier-2); font: 600 13px/1 var(--text); cursor: pointer; }
+.ansicht button[aria-pressed="true"] { background: var(--obsidian-3); color: var(--papier); }
+.ah-spiel { position: relative; margin: 6px 0 4px; }
+.ah-spiel .mc-fenster { grid-template-columns: repeat(9, minmax(0, 48px)); }
+.ah-tip { position: absolute; z-index: 5; min-width: 200px; pointer-events: none; }
+.ah-tip > div { white-space: nowrap; }
+#tab-ah .paneel-kopf { flex-wrap: wrap; }
+#tab-ah .paneel-mehr { margin-left: 0; order: 3; width: 100%; }
+
+@media (max-width: 720px) {
+  .ah-spiel .mc-fenster { grid-template-columns: repeat(9, minmax(0, 1fr)); width: 100%; }
+  .ah-tip { left: 0 !important; right: 0; top: auto !important; bottom: calc(100% + 6px); }
+  .ansicht { margin-left: 0; }
+}
+
+/* Preisschild im Käfig bleibt dunkel, also helle Schrift auch im hellen Design */
+[data-theme="hell"] .kaefig-inhalt .k-name { color: #f1eadc; }
+[data-theme="hell"] .kaefig-inhalt .k-art { color: #b4abc3; }
+[data-theme="hell"] .kaefig-inhalt .k-preis { color: #f2b23b; }

@@ -14,6 +14,6 @@ Bevor du handeln kannst, verbindest du deinen Discord-Account mit deinem Minecra
 
 ## Warum das nötig ist
 
-So wissen wir, dass der Discord-Account wirklich zu deinem Minecraft-Namen gehört. Das schützt dich davor, dass sich jemand als du ausgibt – und uns davor, mit dem falschen Spieler zu handeln.
+So wissen wir, dass der Discord-Account zu deinem Minecraft-Namen gehört. Das schützt dich davor, dass sich jemand als du ausgibt – und uns davor, mit dem falschen Spieler zu handeln.
 
 Weiter geht's mit [Ticket öffnen](/wiki/ticket-oeffnen).

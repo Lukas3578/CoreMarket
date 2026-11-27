@@ -236,7 +236,7 @@
     const rang = $('#rang');
     if (rang && V.haendler?.length) {
       rang.hidden = false;
-      $('#rang-liste').innerHTML = V.haendler.map(h => `<li><span>${esc(h.name)}${h.clan ? ` <small>${esc(h.clan)}</small>` : ''}</span><span class="wert">${tausend(h.anzahl)} · Ø ${komma(h.schnitt)} <span class="sterne">★</span></span></li>`).join('');
+      $('#rang-liste').innerHTML = V.haendler.map(h => `<li><span>${esc(h.name)}${h.clan ? ` <small>${esc(h.clan)}</small>` : ''}</span><span class="wert">${tausend(h.anzahl)} Vouches, Ø ${komma(h.schnitt)} <span class="sterne">★</span></span></li>`).join('');
     }
   }
 
@@ -423,13 +423,13 @@
     if (V.anzahl) text('#vouch-schnitt-kurz', `Ø ${komma(V.schnitt)} ★ aus ${tausend(V.anzahl)} Bewertungen.`);
     const html = V.neueste.slice(0, 5).map(v => `<li class="zeile zeile-vouch">
       <img class="z-kopf" src="${kopf24(v.von)}" alt="" width="32" height="32" loading="lazy">
-      <span class="z-text"><b>${esc(v.von)}${v.haendler ? ` <span class="z-pfeil">→</span> ${nameLink(v.haendler)}` : ''}</b><small>„${esc(v.text)}“${v.was ? ` · ${esc(v.was)}` : ''}</small></span>
+      <span class="z-text"><b>${esc(v.von)}${v.haendler ? ` <span class="z-pfeil">über</span> ${nameLink(v.haendler)}` : ''}</b><small>„${esc(v.text)}“${v.was ? `, ${esc(v.was)}` : ''}</small></span>
       <span class="z-preis"><span class="sterne">${'★'.repeat(v.sterne)}<span class="aus">${'★'.repeat(5 - v.sterne)}</span></span><small>${v.at ? vor(v.at) : ''}</small></span></li>`).join('');
     if (ziel.dataset.stand !== html) { ziel.innerHTML = html; ziel.dataset.stand = html; }
     const hl = $('#haendler-leiste');
     if (hl && V.haendler?.length) {
       hl.hidden = false;
-      hl.innerHTML = `<p class="leiste-titel">Meiste Vouches</p>` + V.haendler.slice(0, 5).map((h, i) => `<a class="haendler-chip" href="/spieler/${encodeURIComponent(h.name)}"><span class="rang-nr">${i + 1}</span><img src="${kopf24(h.name)}" alt="" width="22" height="22" loading="lazy">${esc(h.name)}<small>${tausend(h.anzahl)} · ${komma(h.schnitt)} ★</small></a>`).join('');
+      hl.innerHTML = `<p class="leiste-titel">Meiste Vouches</p>` + V.haendler.slice(0, 5).map((h, i) => `<a class="haendler-chip" href="/spieler/${encodeURIComponent(h.name)}"><span class="rang-nr">${i + 1}</span><img src="${kopf24(h.name)}" alt="" width="22" height="22" loading="lazy">${esc(h.name)}<small>${tausend(h.anzahl)}, ${komma(h.schnitt)} ★</small></a>`).join('');
     }
   }
 
@@ -454,16 +454,17 @@
     if (!ziel) return;
     const d = await marktHolen();
     if (!d?.items?.length) { ziel.innerHTML = '<li class="zeile-leer">Die Marktpreise sind gerade nicht erreichbar.</li>'; return; }
-    if (d.demo) { const c = $('#markt-chip'); c.className = 'live-chip demo-chip'; c.textContent = 'Demo-Daten'; }
+    if (d.demo) { const c = $('#markt-chip'); if (c) c.hidden = false; }
     const beliebt = i => (i.ah?.anzahl || 0) + (i.order?.anzahl || 0) * 2;
     const liste = d.items.filter(i => !leer(i.ah?.min) || !leer(i.order?.max)).sort((a, b) => beliebt(b) - beliebt(a)).slice(0, 6);
     ziel.innerHTML = liste.map(i => {
       const t = i.trend?.tag;
       const trend = leer(t) ? '' : `<span class="trend ${t > 0 ? 'hoch' : t < 0 ? 'runter' : ''}">${t > 0 ? '▲' : t < 0 ? '▼' : '•'} ${komma(Math.abs(t).toFixed(1))} %</span>`;
-      return `<li><a class="zeile" href="/auction-orders?item=${encodeURIComponent(i.id)}">
+      const an = MERK.includes('item:' + i.id);
+      return `<li class="merk-zeile"><a class="zeile" href="/auction-orders?item=${encodeURIComponent(i.id)}">
         <span class="z-icon mc">${itemBild(i.id)}</span>
-        <span class="z-text"><b>${esc(i.name)}</b><small>${tausend(i.ah?.anzahl || 0)} im AH · ${tausend(i.order?.anzahl || 0)} Orders ${trend}</small></span>
-        <span class="z-preis gruen-text">${marktPreis(i.ah?.min)}<small>${leer(i.order?.max) ? 'keine Order' : `Order ${marktPreis(i.order.max)}`}</small></span></a></li>`;
+        <span class="z-text"><b>${esc(i.name)}</b><small>${tausend(i.ah?.anzahl || 0)} im AH, ${tausend(i.order?.anzahl || 0)} Orders ${trend}</small></span>
+        <span class="z-preis gruen-text">${marktPreis(i.ah?.min)}<small>${leer(i.order?.max) ? 'keine Order' : `Order ${marktPreis(i.order.max)}`}</small></span></a><button type="button" class="merk-knopf rund klein${an ? ' an' : ''}" data-merk="item:${esc(i.id)}" aria-pressed="${an}" aria-label="${esc(i.name)} merken" title="Merken"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg></button></li>`;
     }).join('');
   }
 
@@ -558,18 +559,18 @@
       if (!q) { gsTreffer.hidden = true; gs.setAttribute('aria-expanded', 'false'); return; }
       const gruppen = [];
       const sp = (DATEN?.preise?.spawner || []).filter(s => normal(s.name).includes(q) || mob(s.name).id.includes(q.replace(/ /g, '_')));
-      if (sp.length) gruppen.push(['Spawner', sp.slice(0, 5).map(s => `<a href="/spawner/${slug(s.name)}" role="option"><span class="gs-icon">${spawnerIcon(s.name)}</span><span>${hervor(s.name, q)} Spawner<small>${!leer(s.verkauf) ? `Kaufen ${preis(s.verkauf)}` : ''}${!leer(s.verkauf) && !leer(s.ankauf) ? ' · ' : ''}${!leer(s.ankauf) ? `Verkaufen ${preis(s.ankauf)}` : ''}</small></span></a>`)]);
+      if (sp.length) gruppen.push(['Spawner', sp.slice(0, 5).map(s => `<a href="/spawner/${slug(s.name)}" role="option"><span class="gs-icon">${spawnerIcon(s.name)}</span><span>${hervor(s.name, q)} Spawner<small>${!leer(s.verkauf) ? `Kaufen ${preis(s.verkauf)}` : ''}${!leer(s.verkauf) && !leer(s.ankauf) ? ', ' : ''}${!leer(s.ankauf) ? `Verkaufen ${preis(s.ankauf)}` : ''}</small></span></a>`)]);
       const leute = (DATEN?.clans || []).flatMap(c => c.mitglieder.map(m => [m.name, c.key])).filter(([n]) => normal(n).includes(q));
-      if (leute.length) gruppen.push(['Clan-Mitglieder', leute.slice(0, 5).map(([n, k]) => `<a href="/spieler/${encodeURIComponent(n)}" role="option"><img class="gs-icon" src="${kopf24(n)}" alt="" width="28" height="28" loading="lazy"><span>${hervor(n, q)}<small>${esc(k)} · gehört zu CoreMarket</small></span></a>`)]);
+      if (leute.length) gruppen.push(['Clan-Mitglieder', leute.slice(0, 5).map(([n, k]) => `<a href="/spieler/${encodeURIComponent(n)}" role="option"><img class="gs-icon" src="${kopf24(n)}" alt="" width="28" height="28" loading="lazy"><span>${hervor(n, q)}<small>${esc(k)}, gehört zu CoreMarket</small></span></a>`)]);
       if (/^[.*]?[A-Za-z0-9_]{2,16}$/.test(roh) && !leute.some(([n]) => n.toLowerCase() === roh.toLowerCase()))
         gruppen.push(['Spieler auf HugoSMP', [`<a href="/spieler/${encodeURIComponent(roh)}" role="option"><img class="gs-icon" src="${kopf24(roh)}" alt="" width="28" height="28" loading="lazy"><span>${esc(roh)} ansehen<small>Auktionshaus, Orders, Endertruhe …</small></span></a>`]]);
       const seiten = SEITEN_LISTE.filter(([n]) => normal(n).includes(q));
       const wiki = (await wikiLaden()).filter(a => normal(a.t).includes(q) || normal(a.b).includes(q));
-      if (seiten.length || wiki.length) gruppen.push(['Seiten & Wiki', [...seiten.map(([n, u]) => `<a href="${u}" role="option"><span class="gs-icon gs-seite">↗</span><span>${hervor(n, q)}<small>Seite</small></span></a>`), ...wiki.slice(0, 4).map(a => `<a href="/wiki/${esc(a.s)}" role="option"><span class="gs-icon gs-seite">W</span><span>${hervor(a.t, q)}<small>Wiki · ${esc(a.k)}</small></span></a>`)]]);
+      if (seiten.length || wiki.length) gruppen.push(['Seiten & Wiki', [...seiten.map(([n, u]) => `<a href="${u}" role="option"><span class="gs-icon gs-seite">S</span><span>${hervor(n, q)}<small>Seite</small></span></a>`), ...wiki.slice(0, 4).map(a => `<a href="/wiki/${esc(a.s)}" role="option"><span class="gs-icon gs-seite">W</span><span>${hervor(a.t, q)}<small>Wiki, ${esc(a.k)}</small></span></a>`)]]);
       if (q.length >= 2) {
         const markt = MARKT || await marktHolen();
         const items = (markt?.items || []).filter(i => normal(i.name).includes(q) || i.id.includes(q.replace(/ /g, '_'))).slice(0, 5);
-        if (items.length) gruppen.push([`Items${markt.demo ? ' (Demo-Preise)' : ''}`, items.map(i => `<a href="/auction-orders?item=${encodeURIComponent(i.id)}" role="option"><span class="gs-icon mc">${itemBild(i.id)}</span><span>${hervor(i.name, q)}<small>AH ab ${marktPreis(i.ah?.min)}${leer(i.order?.max) ? '' : ` · Order ${marktPreis(i.order.max)}`}</small></span></a>`)]);
+        if (items.length) gruppen.push([`Items${markt.demo ? ' (Demo-Preise)' : ''}`, items.map(i => `<a href="/auction-orders?item=${encodeURIComponent(i.id)}" role="option"><span class="gs-icon mc">${itemBild(i.id)}</span><span>${hervor(i.name, q)}<small>AH ab ${marktPreis(i.ah?.min)}${leer(i.order?.max) ? '' : `, Order ${marktPreis(i.order.max)}`}</small></span></a>`)]);
       }
       if (gs.value.trim() !== roh) return; // schon weitergetippt
       gsTreffer.innerHTML = gruppen.length
@@ -631,7 +632,8 @@
     MERK = an ? MERK.filter(x => x !== k) : [k, ...MERK];
     merkSpeichern(); merkKnoepfe();
     if (!an && !ruhig) { b.classList.remove('hops'); void b.offsetWidth; b.classList.add('hops'); }
-    const name = k.split(':')[0] === 'spieler' ? k.slice(8) : (DATEN?.preise?.spawner.find(s => slug(s.name) === k.slice(8))?.name || k.slice(8)) + ' Spawner';
+    const typ = k.split(':')[0], rest = k.slice(typ.length + 1);
+    const name = typ === 'spieler' ? rest : typ === 'item' ? (MARKT?.items?.find(x => x.id === rest)?.name || rest) : (DATEN?.preise?.spawner.find(s => slug(s.name) === rest)?.name || rest) + ' Spawner';
     toast(an ? `${name} von der Merkliste entfernt` : `${name} gemerkt`);
     if (DATEN) merkZeigen(DATEN);
   });
@@ -640,6 +642,7 @@
   function merkZeigen(d) {
     const sp = MERK.filter(k => k.startsWith('spawner:')).map(k => d.preise?.spawner.find(s => slug(s.name) === k.slice(8))).filter(Boolean);
     const leute = MERK.filter(k => k.startsWith('spieler:')).map(k => k.slice(8));
+    const itemZahl = MERK.filter(k => k.startsWith('item:')).length;
     // Startseite: kleine Chip-Reihe
     const block = $('#merk-block');
     if (block) {
@@ -649,12 +652,13 @@
     }
     // Merkliste-Seite
     if (!$('#merk-inhalt')) return;
-    $('#merk-leer').hidden = !!(sp.length || leute.length);
-    $('#merk-inhalt').hidden = !(sp.length || leute.length);
+    $('#merk-leer').hidden = !!(sp.length || leute.length || itemZahl);
+    $('#merk-inhalt').hidden = !(sp.length || leute.length || itemZahl);
+    merkItems();
     const loesch = k => `<button type="button" class="merk-knopf rund klein an" data-merk="${esc(k)}" aria-pressed="true" aria-label="Von der Merkliste entfernen" title="Entfernen"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg></button>`;
     $('#merk-spawner').innerHTML = sp.map(s => `<li class="merk-zeile"><a class="zeile" href="/spawner/${slug(s.name)}"><span class="z-icon">${spawnerIcon(s.name)}</span><span class="z-text"><b>${esc(s.name)} Spawner</b><small>${!leer(s.ankauf) ? `Wir kaufen für ${preis(s.ankauf)}` : 'Wir kaufen gerade nicht'}</small></span><span class="z-preis gold-text">${leer(s.verkauf) ? '<span class="stop">STOP</span>' : preis(s.verkauf)}<small>Kaufpreis</small></span></a>${loesch('spawner:' + slug(s.name))}</li>`).join('') || '<li class="zeile-leer">Keine Spawner gemerkt.</li>';
     const mitglied = n => (d.clans || []).find(c => c.mitglieder.some(m => m.name.toLowerCase() === n.toLowerCase()));
-    $('#merk-spieler').innerHTML = leute.map(n => { const c = mitglied(n); return `<li class="merk-zeile"><a class="zeile" href="/spieler/${encodeURIComponent(n)}"><img class="z-kopf" src="${kopf24(n)}" alt="" width="32" height="32" loading="lazy"><span class="z-text"><b>${esc(n)}</b><small>${c ? `${esc(c.key)} · gehört zu CoreMarket` : '<span class="rot-text">Nicht mehr im Clan</span>'}</small></span><span></span></a>${loesch('spieler:' + n)}</li>`; }).join('') || '<li class="zeile-leer">Keine Spieler gemerkt.</li>';
+    $('#merk-spieler').innerHTML = leute.map(n => { const c = mitglied(n); return `<li class="merk-zeile"><a class="zeile" href="/spieler/${encodeURIComponent(n)}"><img class="z-kopf" src="${kopf24(n)}" alt="" width="32" height="32" loading="lazy"><span class="z-text"><b>${esc(n)}</b><small>${c ? `${esc(c.key)}, gehört zu CoreMarket` : '<span class="rot-text">Nicht mehr im Clan</span>'}</small></span><span></span></a>${loesch('spieler:' + n)}</li>`; }).join('') || '<li class="zeile-leer">Keine Spieler gemerkt.</li>';
   }
 
   /* ==========================================================
@@ -695,15 +699,15 @@
     const e = ereignisse(d, MARKT).filter(x => feedFilter === 'alle' || x.art === feedFilter).slice(0, 60);
     const zeile = x => {
       if (x.art === 'vouch') return `<li class="zeile feed-zeile"><img class="z-kopf" src="${kopf24(x.v.von)}" alt="" width="32" height="32" loading="lazy">
-        <span class="z-text"><b>${esc(x.v.von)} <span class="z-pfeil">hat</span> ${x.v.haendler ? nameLink(x.v.haendler) : 'CoreMarket'} <span class="z-pfeil">bewertet</span></b><small>„${esc(x.v.text)}“${x.v.was ? ` · ${esc(x.v.was)}` : ''}</small></span>
+        <span class="z-text"><b>${esc(x.v.von)} <span class="z-pfeil">hat</span> ${x.v.haendler ? nameLink(x.v.haendler) : 'CoreMarket'} <span class="z-pfeil">bewertet</span></b><small>„${esc(x.v.text)}“${x.v.was ? `, ${esc(x.v.was)}` : ''}</small></span>
         <span class="z-preis">${sterneKurz(x.v.sterne)}<small>${vor(x.at)}</small></span></li>`;
       if (x.art === 'preis') return `<li><a class="zeile feed-zeile" href="/preise"><span class="z-icon feed-art">€</span><span class="z-text"><b>Spawner-Preise wurden geändert</b><small>Neue An- und Verkaufspreise in der Preisliste</small></span><span class="z-preis"><span class="feed-tag">Preise</span><small>${vor(x.at)}</small></span></a></li>`;
       const t = x.i.trend?.tag;
       return `<li><a class="zeile feed-zeile" href="/auction-orders?item=${encodeURIComponent(x.i.id)}"><span class="z-icon mc">${itemBild(x.i.id)}</span>
-        <span class="z-text"><b>${esc(x.i.name)} geprüft</b><small>${tausend(x.i.ah?.anzahl || 0)} Angebote im AH · ${tausend(x.i.order?.anzahl || 0)} Orders${leer(t) ? '' : ` · <span class="trend ${t > 0 ? 'hoch' : t < 0 ? 'runter' : ''}">${t > 0 ? '▲' : t < 0 ? '▼' : '•'} ${komma(Math.abs(t).toFixed(1))} %</span>`}</small></span>
+        <span class="z-text"><b>${esc(x.i.name)} geprüft</b><small>${tausend(x.i.ah?.anzahl || 0)} Angebote im AH, ${tausend(x.i.order?.anzahl || 0)} Orders${leer(t) ? '' : `, <span class="trend ${t > 0 ? 'hoch' : t < 0 ? 'runter' : ''}">${t > 0 ? '▲' : t < 0 ? '▼' : '•'} ${komma(Math.abs(t).toFixed(1))} %</span>`}</small></span>
         <span class="z-preis gruen-text">${marktPreis(x.i.ah?.min)}<small>${vor(x.at)}</small></span></a></li>`;
     };
-    const html = e.map(zeile).join('') || '<li class="zeile-leer">Gerade ist es ruhig. Schau gleich nochmal vorbei.</li>';
+    const html = e.map(zeile).join('') || '<li class="zeile-leer">Noch keine Einträge. Die Liste füllt sich, sobald Preise gescannt oder Bewertungen abgegeben werden.</li>';
     if (feed.dataset.stand !== html) { feed.innerHTML = html; feed.dataset.stand = html; }
     text('#live-stand', `Stand ${new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`);
   }
@@ -753,11 +757,11 @@
     const alsHaendler = (d.vouches?.neueste || []).filter(v => (v.haendler || '').toLowerCase() === name.toLowerCase());
     const alsKunde = (d.vouches?.neueste || []).filter(v => (v.von || '').toLowerCase() === name.toLowerCase());
     if (mitglied) {
-      text('#profil-clan', `${clan.key} · ${clan.name}`);
+      text('#profil-clan', `${clan.name} (${clan.key})`);
       $('#profil-haken').hidden = false;
       text('#profil-text', `Offizieller Händler von CoreMarket${mitglied.seit ? `, dabei seit ${new Date(mitglied.seit).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}` : ''}. Handel mit ${echt} nur über ein Ticket in unserem Discord.`);
       text('#pz-4-titel', 'Vouches');
-      text('#pz-4', h ? `${tausend(h.anzahl)} · ${komma(h.schnitt)}★` : '0');
+      text('#pz-4', h ? `${tausend(h.anzahl)} (Ø ${komma(h.schnitt)})` : '0');
       text('#profil-clan2', clan.name);
       const andere = clan.mitglieder.filter(m => m !== mitglied).slice(0, 24);
       $('#profil-andere').innerHTML = andere.map((m, i) => `<a class="chip" style="--i:${i}" href="/spieler/${encodeURIComponent(m.name)}"><img class="chip-kopf" src="${kopf24(m.name)}" alt="" width="28" height="28" loading="lazy"><span>${esc(m.name)}</span></a>`).join('');
@@ -768,7 +772,7 @@
       text('#pz-4-titel', 'Bewertet');
       text('#pz-4', alsKunde.length ? `${alsKunde.length}×` : '–');
     }
-    const vouchZeile = (v, wer) => `<li class="zeile zeile-vouch"><img class="z-kopf" src="${kopf24(wer)}" alt="" width="32" height="32" loading="lazy"><span class="z-text"><b>${nameLink(wer)}${v.haendler && wer === v.von ? ` <span class="z-pfeil">→</span> ${nameLink(v.haendler)}` : ''}</b><small>„${esc(v.text)}“${v.was ? ` · ${esc(v.was)}` : ''}</small></span><span class="z-preis">${sterneKurz(v.sterne)}<small>${v.at ? vor(v.at) : ''}</small></span></li>`;
+    const vouchZeile = (v, wer) => `<li class="zeile zeile-vouch"><img class="z-kopf" src="${kopf24(wer)}" alt="" width="32" height="32" loading="lazy"><span class="z-text"><b>${nameLink(wer)}${v.haendler && wer === v.von ? ` <span class="z-pfeil">über</span> ${nameLink(v.haendler)}` : ''}</b><small>„${esc(v.text)}“${v.was ? `, ${esc(v.was)}` : ''}</small></span><span class="z-preis">${sterneKurz(v.sterne)}<small>${v.at ? vor(v.at) : ''}</small></span></li>`;
     const vouches = [...alsHaendler.map(v => vouchZeile(v, v.von)), ...alsKunde.map(v => vouchZeile(v, v.von))];
     $('#profil-vouches').innerHTML = vouches.join('') || `<li class="zeile-leer">${mitglied ? `${esc(echt)} hat noch keine Bewertungen in der Liste der neuesten. Nach deinem Handel kannst du mit <code>/vouch</code> eine abgeben.` : `Keine Bewertungen mit ${esc(echt)} bei CoreMarket.`}</li>`;
     text('#tz-vouches', vouches.length ? String(vouches.length) : '');
@@ -794,7 +798,7 @@
       const i = d.index || {};
       text('#ah-stand', i.laeuft ? `Bot scannt gerade: ${tausend(i.gescannt)} von ${tausend(i.items)} Items` : i.runden ? `${tausend(i.items)} Items durchsucht` : '');
       const zeile = x => `<li><a class="zeile" href="/auction-orders?item=${encodeURIComponent(x.id)}"><span class="z-icon mc">${itemBild(x.id)}</span>
-        <span class="z-text"><b>${x.menge > 1 ? `${tausend(x.menge)}× ` : ''}${esc(x.item)}</b><small>${x.stapel > 1 ? `${x.stapel} Angebote · ` : ''}${marktPreis(x.proStueck)} pro Stück · gesehen ${vor(x.at)}</small></span>
+        <span class="z-text"><b>${x.menge > 1 ? `${tausend(x.menge)}× ` : ''}${esc(x.item)}</b><small>${x.stapel > 1 ? `${x.stapel} Angebote, ` : ''}${marktPreis(x.proStueck)} pro Stück, gesehen ${vor(x.at)}</small></span>
         <span class="z-preis gruen-text">${marktPreis(x.proStueck * x.menge)}<small>zusammen</small></span></a></li>`;
       const noch = !i.runden;
       $('#profil-ah').innerHTML = d.ah.map(zeile).join('') || `<li class="zeile-leer">${noch ? `Der Bot baut die Liste gerade auf (${tausend(i.gescannt || 0)} von ${tausend(i.items || 0)} Items) – schau in ein paar Minuten nochmal.` : `Im Moment sieht unser Bot keine Angebote von ${esc(d.name)} im Auktionshaus.`}</li>`;
@@ -832,7 +836,7 @@
         const i = d.index || {};
         if (!d.top.length) { ziel.innerHTML = `<li class="zeile-leer">${i.laeuft || !i.runden ? `Der Bot baut die Liste gerade auf (${tausend(i.gescannt || 0)} von ${tausend(i.items || 0)} Items). Schau in ein paar Minuten nochmal.` : 'Gerade keine Angebote gefunden.'}</li>`; return; }
         ziel.innerHTML = d.top.slice(0, 15).map((s, k) => `<li><a class="zeile" href="/spieler/${encodeURIComponent(s.name)}"><span class="rang-platz${k < 3 ? ' p' + (k + 1) : ''}">${k + 1}</span><img class="z-kopf" src="${kopf24(s.name)}" alt="" width="32" height="32" loading="lazy">
-          <span class="z-text"><b>${esc(s.name)}</b><small>${tausend(s.angebote)} Angebote · ${tausend(s.items)} verschiedene Items</small></span><span class="z-preis gruen-text">${marktPreis(s.wert)}<small>im AH</small></span></a></li>`).join('');
+          <span class="z-text"><b>${esc(s.name)}</b><small>${tausend(s.angebote)} Angebote, ${tausend(s.items)} verschiedene Items</small></span><span class="z-preis gruen-text">${marktPreis(s.wert)}<small>im AH</small></span></a></li>`).join('');
         if (i.laeuft) text('#top-info', `Spieler mit dem höchsten Gesamtwert an Angeboten im Auktionshaus. Der Bot scannt gerade (${tausend(i.gescannt)} von ${tausend(i.items)} Items).`);
       } catch { ziel.innerHTML = '<li class="zeile-leer">Gerade nicht erreichbar.</li>'; }
     })();
@@ -846,7 +850,7 @@
   function haendlerRaster(d) {
     const ziel = $('#haendler-raster'); if (!ziel) return;
     const alle = (d.clans || []).flatMap(c => c.mitglieder.map(m => [m.name, c.key]));
-    ziel.innerHTML = alle.map(([n, k]) => `<a class="kopf-kachel" href="/spieler/${encodeURIComponent(n)}" title="${esc(n)} · ${esc(k)}"><img src="${kopf24(n)}" alt="" width="40" height="40" loading="lazy"><span>${esc(n)}</span></a>`).join('');
+    ziel.innerHTML = alle.map(([n, k]) => `<a class="kopf-kachel" href="/spieler/${encodeURIComponent(n)}" title="${esc(n)} (${esc(k)})"><img src="${kopf24(n)}" alt="" width="40" height="40" loading="lazy"><span>${esc(n)}</span></a>`).join('');
   }
 
   /* ---------- Spawner-Bilder: Mob hinter dem echten Spawner-Käfig ---------- */
@@ -858,6 +862,162 @@
     const img = e.target;
     if (img instanceof HTMLImageElement && img.classList.contains('spi-tex')) img.remove();
   }, true);
+
+  /* ==========================================================
+     Preisalarme (im Browser gespeichert, geprüft solange ein Tab offen ist)
+     ========================================================== */
+  const ALARM_KEY = 'cm-alarme';
+  const FELDER = {
+    spawner: [['verkauf', 'Kaufpreis bei uns fällt auf oder unter', '<='], ['ankauf', 'Ankaufpreis von uns steigt auf oder über', '>=']],
+    item: [['ah', 'Billigstes Angebot im AH fällt auf oder unter', '<='], ['order', 'Beste Order steigt auf oder über', '>=']],
+  };
+  const alarmeLesen = () => { try { const l = JSON.parse(localStorage.getItem(ALARM_KEY) || '[]'); return Array.isArray(l) ? l.filter(a => a && a.ziel && a.feld && Number.isFinite(a.wert)).slice(0, 50) : []; } catch { return []; } };
+  let ALARME = alarmeLesen();
+  const alarmeSpeichern = () => { try { localStorage.setItem(ALARM_KEY, JSON.stringify(ALARME)); } catch { /* egal */ } };
+  const alarmText = a => `${(FELDER[a.art] || []).find(f => f[0] === a.feld)?.[1] || a.feld} ${preis(a.wert)}`;
+
+  function aktuellerWert(a) {
+    if (a.art === 'spawner') { const s = DATEN?.preise?.spawner.find(x => slug(x.name) === a.ziel); return s ? s[a.feld] : undefined; }
+    const i = MARKT?.items?.find(x => x.id === a.ziel);
+    if (!i) return undefined;
+    return a.feld === 'ah' ? i.ah?.min : i.order?.max;
+  }
+  function melden(titel, text) {
+    toast(`${titel}: ${text}`);
+    try { if ('Notification' in window && Notification.permission === 'granted') new Notification(titel, { body: text, icon: '/logo.png', tag: titel }); } catch { /* egal */ }
+  }
+  function alarmePruefen() {
+    let geaendert = false;
+    for (const a of ALARME) {
+      const v = aktuellerWert(a);
+      if (leer(v)) continue;
+      const erreicht = a.feld === 'verkauf' || a.feld === 'ah' ? v <= a.wert : v >= a.wert;
+      if (erreicht && !a.ausgeloest) {
+        a.ausgeloest = Date.now(); geaendert = true;
+        melden(`Preisalarm: ${a.name}`, `jetzt ${a.art === 'item' ? marktPreis(v) : preis(v)} (deine Grenze: ${preis(a.wert)})`);
+      } else if (!erreicht && a.ausgeloest) { a.ausgeloest = 0; geaendert = true; }
+    }
+    if (geaendert) { alarmeSpeichern(); alarmListe(); }
+  }
+  function alarmListe() {
+    const ziel = $('#alarm-liste');
+    if (!ziel) return;
+    ziel.innerHTML = ALARME.map((a, k) => {
+      const v = aktuellerWert(a);
+      const icon = a.art === 'spawner' ? `<span class="z-icon">${spawnerIcon(a.name)}</span>` : `<span class="z-icon mc">${itemBild(a.ziel)}</span>`;
+      return `<li class="merk-zeile"><div class="zeile${a.ausgeloest ? ' erreicht' : ''}">${icon}<span class="z-text"><b>${esc(a.name)}</b><small>${esc(alarmText(a))}</small></span>
+        <span class="z-preis">${leer(v) ? '–' : a.art === 'item' ? marktPreis(v) : preis(v)}<small>${a.ausgeloest ? 'erreicht' : 'jetzt'}</small></span></div>
+        <button type="button" class="merk-knopf rund klein" data-alarm-weg="${k}" aria-label="Alarm löschen" title="Löschen"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></li>`;
+    }).join('') || '<li class="zeile-leer">Noch keine Preisalarme. Leg unten einen an oder drück auf einer Spawner-Seite auf die Glocke.</li>';
+    const e = $('#alarm-erlauben');
+    if (e) e.hidden = !('Notification' in window) || Notification.permission !== 'default' || !ALARME.length;
+  }
+  function alarmAnlegen(a) {
+    ALARME = [a, ...ALARME.filter(x => !(x.art === a.art && x.ziel === a.ziel && x.feld === a.feld))].slice(0, 50);
+    alarmeSpeichern(); alarmListe(); alarmePruefen();
+    toast(`Alarm gesetzt: ${a.name}`);
+    if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission().then(alarmListe).catch(() => {});
+    if (a.art === 'item') marktHolen();
+  }
+  document.addEventListener('click', e => {
+    const w = e.target.closest('[data-alarm-weg]');
+    if (w) { ALARME.splice(+w.dataset.alarmWeg, 1); alarmeSpeichern(); alarmListe(); toast('Alarm gelöscht'); }
+  });
+  $('#alarm-erlauben')?.addEventListener('click', () => Notification.requestPermission().then(alarmListe));
+  addEventListener('storage', e => { if (e.key === ALARM_KEY) { ALARME = alarmeLesen(); alarmListe(); } });
+
+  // Dialog auf der Spawner-Seite
+  const dlg = $('#alarm-dialog');
+  $('[data-alarm]')?.addEventListener('click', () => {
+    const s = DATEN?.preise?.spawner.find(x => slug(x.name) === SP?.dataset.slug);
+    if (!s || !dlg) return;
+    text('#alarm-titel', `${s.name} Spawner`);
+    $('#alarm-feld').innerHTML = FELDER.spawner.map(([f, t]) => `<option value="${f}">${t}</option>`).join('');
+    const setz = () => { const f = $('#alarm-feld').value, v = s[f]; $('#alarm-wert').value = leer(v) ? '' : v; text('#alarm-jetzt', leer(v) ? 'Gerade ist dieser Preis auf STOP.' : `Gerade: ${preis(v)}`); };
+    $('#alarm-feld').onchange = setz; setz();
+    dlg.showModal();
+  });
+  $('#alarm-abbrechen')?.addEventListener('click', () => dlg.close());
+  $('#alarm-form')?.addEventListener('submit', e => {
+    const s = DATEN?.preise?.spawner.find(x => slug(x.name) === SP?.dataset.slug);
+    const w = parseFloat(String($('#alarm-wert').value).replace(',', '.'));
+    if (!s || !Number.isFinite(w)) { e.preventDefault(); return; }
+    alarmAnlegen({ art: 'spawner', ziel: slug(s.name), name: `${s.name} Spawner`, feld: $('#alarm-feld').value, wert: w, an: Date.now() });
+  });
+
+  // Formular auf der Merkliste
+  const anForm = $('#alarm-neu');
+  if (anForm) {
+    const artWahl = () => {
+      const art = $('#an-art').value;
+      $('.an-spawner').hidden = art !== 'spawner'; $('.an-item').hidden = art !== 'item';
+      $('#an-feld').innerHTML = FELDER[art].map(([f, t]) => `<option value="${f}">${t}</option>`).join('');
+      if (art === 'item') marktHolen().then(d => { $('#an-items').innerHTML = (d?.items || []).slice(0, 900).map(i => `<option value="${esc(i.name)}"></option>`).join(''); });
+    };
+    $('#an-art').addEventListener('change', artWahl); artWahl();
+    anForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const art = $('#an-art').value, w = parseFloat(String($('#an-wert').value).replace(',', '.'));
+      if (!Number.isFinite(w)) return;
+      if (art === 'spawner') {
+        const s = DATEN?.preise?.spawner[+$('#an-spawner').value]; if (!s) return;
+        alarmAnlegen({ art, ziel: slug(s.name), name: `${s.name} Spawner`, feld: $('#an-feld').value, wert: w, an: Date.now() });
+      } else {
+        const d = await marktHolen(), n = $('#an-item').value.trim().toLowerCase();
+        const i = d?.items?.find(x => x.name.toLowerCase() === n) || d?.items?.find(x => x.name.toLowerCase().includes(n));
+        if (!i) { toast('Dieses Item kennt unser Bot nicht'); return; }
+        alarmAnlegen({ art, ziel: i.id, name: i.name, feld: $('#an-feld').value, wert: w, an: Date.now() });
+      }
+      anForm.reset(); artWahl();
+    });
+  }
+  // Items mit Alarm regelmäßig prüfen, auf jeder Seite
+  if (ALARME.some(a => a.art === 'item')) {
+    marktHolen().then(alarmePruefen);
+    setInterval(() => { if (!document.hidden) { marktLaeuft = null; marktHolen().then(alarmePruefen); } }, 120000);
+  }
+
+  /* ---------- Budget: Wie viele Spawner bekomme ich für X? ---------- */
+  $$('[data-budget]').forEach(box => {
+    const ein = box.querySelector('input'), aus = box.querySelector('.budget-ergebnis');
+    const rechne = () => {
+      const s = SPAWNER[+$('#r-spawner').value], b = parseFloat(String(ein.value).replace(',', '.'));
+      if (!s || !Number.isFinite(b) || b <= 0) { aus.textContent = ''; return; }
+      if (leer(s.verkauf)) { aus.textContent = `${s.name} verkaufen wir gerade nicht.`; return; }
+      let n = Math.floor(b / s.verkauf), stueck = s.verkauf;
+      if (s.verkaufAb && !leer(s.verkaufStaffel)) { const m = Math.floor(b / s.verkaufStaffel); if (m >= s.verkaufAb) { n = m; stueck = s.verkaufStaffel; } }
+      const rest = Math.round((b - n * stueck) * 100) / 100;
+      aus.innerHTML = n
+        ? `Für ${preis(b)} bekommst du <b>${tausend(n)} ${esc(s.name)} Spawner</b> zu je ${preis(stueck)}${stueck !== s.verkauf ? ' (Mengenpreis)' : ''}. Es bleiben ${rest > 0 ? preis(rest) : 'nichts'} übrig.`
+        : `Für einen ${esc(s.name)} Spawner brauchst du mindestens ${preis(s.verkauf)}.`;
+    };
+    ein.addEventListener('input', rechne);
+    $('#r-spawner')?.addEventListener('change', rechne);
+  });
+
+  /* ---------- Teilen ---------- */
+  document.addEventListener('click', async e => {
+    const b = e.target.closest('[data-teilen]');
+    if (!b) return;
+    const url = location.href.replace(/#.*$/, ''), titel = document.title;
+    try {
+      if (navigator.share && matchMedia('(pointer: coarse)').matches) await navigator.share({ title: titel, url });
+      else { await navigator.clipboard.writeText(url); toast('Link kopiert'); }
+    } catch { /* abgebrochen */ }
+  });
+
+  /* ---------- Gemerkte Items ---------- */
+  async function merkItems() {
+    const ziel = $('#merk-items');
+    if (!ziel) return;
+    const ids = MERK.filter(k => k.startsWith('item:')).map(k => k.slice(5));
+    if (!ids.length) { ziel.innerHTML = '<li class="zeile-leer">Keine Items gemerkt. Drück auf der Startseite bei „Auktionshaus und Orders“ auf den Stern.</li>'; return; }
+    const d = await marktHolen();
+    ziel.innerHTML = ids.map(id => {
+      const i = d?.items?.find(x => x.id === id);
+      return `<li class="merk-zeile"><a class="zeile" href="/auction-orders?item=${encodeURIComponent(id)}"><span class="z-icon mc">${itemBild(id)}</span><span class="z-text"><b>${esc(i?.name || id)}</b><small>${i ? `${tausend(i.ah?.anzahl || 0)} im AH${leer(i.order?.max) ? '' : `, Order ${marktPreis(i.order.max)}`}` : 'Gerade keine Daten'}</small></span><span class="z-preis gruen-text">${marktPreis(i?.ah?.min)}<small>im AH</small></span></a>${`<button type="button" class="merk-knopf rund klein an" data-merk="item:${esc(id)}" aria-pressed="true" aria-label="Von der Merkliste entfernen" title="Entfernen"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg></button>`}</li>`;
+    }).join('');
+  }
 
   /* ---------- Daten anwenden ---------- */
   let erstesMal = true;
@@ -880,6 +1040,9 @@
     if (erstesMal) marktPaneel();
     merkZeigen(d); merkKnoepfe();
     tickerZeigen(d); feedZeigen(d); profilZeigen(d); haendlerRaster(d);
+    alarmePruefen(); alarmListe(); merkItems();
+    const anSp = $('#an-spawner');
+    if (anSp && d.preise && anSp.options.length !== d.preise.spawner.length) anSp.innerHTML = d.preise.spawner.map((x, k) => `<option value="${k}">${esc(x.name)}</option>`).join('');
     CLANS = d.clans || [];
     clansZeigen(suche ? suche.value : '');
     vouchesZeigen(d.vouches);
@@ -955,7 +1118,7 @@
 
   /* ---------- Überschrift Wort für Wort ---------- */
   const h1 = $('.held h1, .seitenkopf h1');
-  if (h1 && !ruhig) {
+  if (h1 && false) { // abgeschaltet: keine Einblend-Animationen mehr
     let w = 0;
     const wort = (txt, klasse) => {
       const aussen = document.createElement('span'); aussen.className = 'wort';

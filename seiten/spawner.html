@@ -4,8 +4,10 @@
     <span class="sp-icon" id="sp-icon"></span>
     <div class="sp-titel">
       <h1><span id="sp-name">{{SPAWNER}}</span> Spawner</h1>
-      <p><span class="punkt an"></span><span id="sp-haendler">Händler aus CM0 und CM1</span><span class="sp-unterzeile">Kauf und Verkauf über ein Ticket in unserem Discord.</span></p>
+      <p><span id="sp-haendler">Händler aus CM0 und CM1</span> handeln diesen Spawner über ein Ticket in unserem Discord.</p>
     </div>
+    <button type="button" class="merk-knopf rund" data-teilen aria-label="Seite teilen" title="Teilen"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
+    <button type="button" class="merk-knopf rund" data-alarm="spawner:{{SLUG}}" aria-label="Preisalarm setzen" title="Preisalarm"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
     <button type="button" class="merk-knopf rund" data-merk="spawner:{{SLUG}}" aria-pressed="false" aria-label="Spawner merken" title="Merken"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg></button>
     <a class="sp-weiter" id="sp-weiter" href="/preise" hidden><span class="sp-icon klein" id="sp-weiter-icon"></span><span><small>Weiter zu</small><b id="sp-weiter-name"></b></span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
   </header>
@@ -24,7 +26,7 @@
     <div class="sp-markt" id="sp-markt" hidden>
       <p class="sp-label">Zum Vergleich im Auktionshaus</p>
       <div class="sp-markt-werte" id="sp-markt-werte"></div>
-      <a class="paneel-mehr" id="sp-markt-link" href="/auction-orders">Preisverlauf ansehen <span aria-hidden="true">›</span></a>
+      <a class="paneel-mehr" id="sp-markt-link" href="/auction-orders">Preisverlauf ansehen</a>
     </div>
   </section>
 
@@ -43,9 +45,15 @@
         </label>
         <output id="r-ergebnis" for="r-menge" aria-live="polite"><span class="r-summe">–</span><small></small></output>
       </form>
+        <div class="budget" data-budget>
+          <label class="feld"><span>Oder andersrum: Wie viele bekomme ich für</span>
+            <span class="budget-feld"><input type="number" inputmode="decimal" min="0" step="0.5" placeholder="z. B. 100" aria-label="Budget in Millionen"><b>M</b></span>
+          </label>
+          <p class="budget-ergebnis" aria-live="polite"></p>
+        </div>
       <div class="sp-aktion">
         <a class="knopf discord-link" href="{{DISCORD}}" target="_blank" rel="noopener">Ticket im Discord öffnen</a>
-        <a class="paneel-mehr" href="/wiki/ticket-oeffnen">Wie geht das? <span aria-hidden="true">›</span></a>
+        <a class="paneel-mehr" href="/wiki/ticket-oeffnen">Wie geht das?</a>
       </div>
     </div>
 
@@ -62,7 +70,18 @@
   </section>
 
   <section class="dash-block auftritt" style="--i:4">
-    <div class="dash-kopf"><h2>Andere Spawner</h2><div class="dash-links"><a href="/preise">Alle Preise <span aria-hidden="true">›</span></a></div></div>
+    <div class="dash-kopf"><h2>Andere Spawner</h2><div class="dash-links"><a href="/preise">Alle Preise</a></div></div>
     <div class="chips" id="spawner-chips"></div>
   </section>
 </div>
+
+<dialog class="alarm-dialog" id="alarm-dialog">
+  <form method="dialog" id="alarm-form">
+    <h2>Preisalarm für <span id="alarm-titel"></span></h2>
+    <p class="hinweis-text">Wir sagen dir Bescheid, sobald der Preis erreicht ist – solange CoreMarket in einem Tab offen ist. Gespeichert wird der Alarm nur in diesem Browser.</p>
+    <label class="feld"><span>Wenn</span><select id="alarm-feld"></select></label>
+    <label class="feld"><span>Grenze in Millionen</span><span class="budget-feld"><input id="alarm-wert" type="number" inputmode="decimal" min="0" step="0.1" required><b>M</b></span></label>
+    <p class="hinweis" id="alarm-jetzt"></p>
+    <div class="dialog-knoepfe"><button type="button" class="knopf zweit" value="abbrechen" id="alarm-abbrechen">Abbrechen</button><button class="knopf" value="ok">Alarm setzen</button></div>
+  </form>
+</dialog>

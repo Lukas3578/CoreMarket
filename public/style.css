@@ -1534,3 +1534,151 @@ a.zeile:hover .z-preis { transform: translateX(-10px); }
 .k-suche input { flex: 1; min-width: 0; height: 46px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--obsidian-4); background: rgba(18, 18, 21, .8); color: var(--papier); font: 500 15.5px/1 var(--text); outline: none; transition: border-color .2s, box-shadow .2s; }
 .k-suche input:focus { border-color: rgba(242, 178, 59, .7); box-shadow: 0 0 0 4px rgba(242, 178, 59, .12); }
 .k-suche .knopf { height: 46px; padding: 0 18px; }
+
+/* ==========================================================
+   Preisalarm, Budget-Rechner, Teilen, gemerkte Items
+   ========================================================== */
+.budget { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--rand); }
+.budget .feld > span:first-child { color: var(--papier-2); }
+.budget-feld { display: flex; align-items: center; height: 46px; max-width: 220px; border-radius: 9px; border: 2px solid var(--obsidian-3); background: var(--obsidian); overflow: hidden; }
+.budget-feld:focus-within { border-color: var(--gold); }
+.budget-feld input { flex: 1; min-width: 0; height: 100%; padding: 0 12px; border: 0; background: none; color: var(--papier); font: 500 16px/1 var(--text); outline: none; -moz-appearance: textfield; }
+.budget-feld input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.budget-feld b { padding: 0 14px; color: var(--papier-2); font-weight: 600; }
+.budget-ergebnis { margin: 10px 0 0; color: var(--papier-2); min-height: 1.4em; }
+.budget-ergebnis b { color: var(--gold); }
+.rechner-karte .budget { grid-column: 1 / -1; }
+
+.alarm-dialog { width: min(460px, calc(100vw - 32px)); padding: 0; border-radius: 16px; border: 1px solid var(--obsidian-4); background: #1d1d22; color: var(--papier); box-shadow: 0 40px 80px rgba(0, 0, 0, .6); }
+.alarm-dialog::backdrop { background: rgba(0, 0, 0, .6); }
+.alarm-dialog form { display: flex; flex-direction: column; gap: 14px; padding: 24px; }
+.alarm-dialog h2 { margin: 0; font: 700 20px/1.2 var(--text); }
+.alarm-dialog .hinweis-text { margin: 0; color: var(--papier-2); font-size: 14px; }
+.alarm-dialog select, .alarme select, .alarme input:not([type]) , .alarme .feld input[list] { height: 46px; padding: 0 12px; border-radius: 9px; border: 2px solid var(--obsidian-3); background: var(--obsidian); color: var(--papier); font: 500 15px/1 var(--text); }
+.alarm-dialog .feld, .alarme .feld { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--papier-2); }
+.alarm-dialog .budget-feld { max-width: none; }
+.dialog-knoepfe { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
+
+.alarme { margin-bottom: 18px; }
+.alarm-neu { display: grid; grid-template-columns: 170px 1fr 1.4fr 150px auto; gap: 12px; align-items: end; margin-top: 14px; padding-top: 16px; border-top: 1px solid var(--rand); }
+.alarm-neu .budget-feld { max-width: none; }
+.alarm-neu .knopf { height: 46px; }
+.zeile.erreicht { background: rgba(74, 222, 128, .07); }
+.zeile.erreicht .z-preis small { color: var(--gruen); font-weight: 600; }
+.merk-unterkopf { margin-top: 18px; }
+.zeilen .merk-zeile + .merk-zeile { border-top: 1px solid var(--rand); }
+.sp-kopf .merk-knopf { margin-left: 0; }
+.sp-kopf .merk-knopf:first-of-type { margin-left: auto; }
+
+@media (max-width: 1000px) { .alarm-neu { grid-template-columns: 1fr 1fr; } .alarm-neu .knopf { grid-column: 1 / -1; } }
+@media (max-width: 720px) { .alarm-neu { grid-template-columns: 1fr; } .sp-kopf .merk-knopf:first-of-type { margin-left: 0; } }
+
+/* ==========================================================
+   Aufräumen: typische KI-Design-Muster raus
+   ========================================================== */
+
+/* 20 – keine Körnung / kein Dithering */
+body::after { display: none !important; }
+
+/* 19 – nichts blendet beim Scrollen oder Laden ein */
+.js .zeigen, .js .zeigen.sichtbar { opacity: 1 !important; translate: none !important; transform: none; transition: transform .25s ease, border-color .2s, background .2s; }
+.auftritt, .paneel, .kachel, .chip, .karussell, .sp-karte, .sp-markt, .feed-zeile, .warn-box, .tab-inhalt,
+.spieler li, .preise tbody tr.neu, .k-folie.aktiv .k-text > *, .kopf-kachel, .zitat, .wiki-treffer, .gs-treffer { animation: none !important; }
+.zitat.sichtbar .sterne span { animation: none !important; }
+
+/* 11 – keine weichgezeichneten Leuchtflächen */
+.k-folie::before, .sp-karte::after, .kaefig::before, .schluss-in::before, .seitenkopf::after { display: none !important; }
+.profil-kopf { background: var(--flaeche) !important; }
+.kaefig { box-shadow: inset 0 0 0 4px #23272f, 0 18px 40px rgba(0, 0, 0, .45) !important; background: #1d1611 !important; }
+.kaefig-kern img { animation: drehen 6s linear infinite !important; filter: none !important; }
+.k-preis { text-shadow: 0 3px 0 #3d2400 !important; }
+.k-symbol svg, .k-wiki .k-symbol svg, .k-markt .k-symbol svg, .k-sicher .k-symbol svg, .k-spieler .k-symbol svg { filter: none !important; animation: none !important; opacity: .9; }
+.sp-icon { filter: none !important; }
+.knopf { box-shadow: 0 3px 0 var(--gold-tief) !important; }
+.knopf:hover { box-shadow: 0 4px 0 var(--gold-tief) !important; }
+.knopf:active { box-shadow: 0 0 0 var(--gold-tief) !important; }
+.knopf.zweit, .knopf.zweit:hover { box-shadow: inset 0 0 0 1px var(--obsidian-4) !important; }
+.knopf::after { display: none !important; }
+.merk-leer-icon svg, .abo-symbol svg { animation: none !important; }
+
+/* 13 – keine farbigen Ränder links */
+.kachel::before, .seitenleiste a.aktiv::before { display: none !important; }
+.box { border-left-width: 1px !important; }
+.preise tbody tr:not(.lade):hover td:first-child { box-shadow: none !important; }
+
+/* 10 – keine pulsierenden grünen Punkte */
+.punkt.an { animation: none !important; box-shadow: none !important; }
+.live-puls { display: none !important; }
+.live-chip:not(.demo-chip) { display: none !important; }
+
+/* 3 – keine Augenbrauen über Überschriften: Labels normal geschrieben */
+.marker, .vorzeile { display: none !important; }
+.leiste-titel, .gs-gruppe, .wiki-kat, .fuss-titel, .profil-clan, .sp-label, .box .box-titel, .rang h3, .preise th, .wiki-tabelle th {
+  font-family: var(--text) !important; text-transform: none !important; letter-spacing: 0 !important; font-weight: 600 !important;
+}
+.leiste-titel { font-size: 12.5px !important; color: #77777f !important; margin: 4px 12px 6px !important; }
+.gs-gruppe { font-size: 12.5px !important; }
+.wiki-kat { font-size: 13px !important; }
+.profil-clan { font-size: 14px !important; color: var(--papier-2) !important; margin-bottom: 4px !important; }
+.sp-label { font-size: 14px !important; color: var(--papier-2) !important; }
+.box .box-titel { font-size: 14px !important; }
+.rang h3 { font-size: 16px !important; color: var(--papier) !important; }
+.preise th, .wiki-tabelle th { font-size: 13px !important; }
+
+/* 9 – keine großen Nummern über Abschnitten */
+.nr { display: none !important; }
+.sp-schritte li { padding-left: 0 !important; }
+.sp-schritte li::before, .sp-schritte li::after { display: none !important; }
+.sp-schritte li + li { border-top: 1px solid var(--rand); padding-top: 12px; }
+.wiki-schritte { list-style: decimal !important; padding-left: 22px !important; }
+.wiki-schritte li { padding: 0 0 8px 4px !important; }
+.wiki-schritte li::before, .wiki-schritte li::after { display: none !important; }
+.wiki-schritte li::marker { color: var(--papier-2); font-weight: 600; }
+
+/* 1 – keine Pfeile an jedem Link */
+a.zeile::after { display: none !important; }
+a.zeile:hover .z-preis { transform: none !important; }
+.weg-pfeil, .wiki-karte .weg-pfeil { display: none !important; }
+.wiki-karte { padding-bottom: 24px !important; }
+.wiki-blaettern .zurueck small::before, .wiki-blaettern .weiter-link small::after { content: none !important; }
+.mehr span, .paneel-mehr span, .dash-links a span { display: none !important; }
+
+/* 5 – kein einzelnes hervorgehobenes Wort */
+.gold { background: none !important; color: inherit !important; -webkit-text-fill-color: currentColor; animation: none !important; }
+
+/* 7 – nicht alles in Karten */
+.kacheln { gap: 0 !important; border-radius: 16px; border: 1px solid var(--rand); background: var(--flaeche); overflow: hidden; }
+.kachel { border: 0 !important; border-radius: 0 !important; background: none !important; }
+.kachel + .kachel { border-top: 1px solid var(--rand) !important; }
+.kachel::after { display: none !important; }
+.regeln li { background: none !important; border: 0 !important; border-top: 1px solid var(--rand) !important; border-radius: 0 !important; padding: 14px 0 !important; }
+.regeln li::before { display: none !important; }
+.regeln li:hover { transform: none !important; }
+.schritte { gap: 0 32px !important; }
+.schritt { background: none !important; border: 0 !important; border-top: 1px solid var(--obsidian-4) !important; border-radius: 0 !important; padding: 18px 0 0 !important; }
+.schritt::before { display: none !important; }
+.schritt:hover { transform: none !important; box-shadow: none !important; }
+.zitate { gap: 0 32px !important; }
+.zitat { background: none !important; border: 0 !important; border-top: 1px solid var(--rand) !important; border-radius: 0 !important; padding: 18px 0 !important; }
+.zitat:hover { transform: none !important; }
+.wiki-karten { gap: 0 28px !important; }
+.wiki-karte { background: none !important; border: 0 !important; border-top: 1px solid var(--rand) !important; border-radius: 0 !important; padding: 16px 0 18px !important; }
+.wiki-karte:hover { transform: none !important; box-shadow: none !important; }
+.wiki-karte:hover h3 { color: var(--gold); }
+
+/* sonstige Glanz- und Wackel-Effekte */
+.tabs button[aria-selected="true"] { box-shadow: none !important; }
+.ticker-label { background: none !important; font: 600 13px/1 var(--text) !important; color: var(--papier-2) !important; }
+
+@media (max-width: 1199px) { .kacheln { grid-template-columns: repeat(3, 1fr); } .kachel + .kachel { border-top: 0 !important; border-left: 1px solid var(--rand) !important; } }
+@media (max-width: 720px) {
+  .kacheln { grid-template-columns: 1fr 1fr; }
+  .kachel:first-child { grid-column: 1 / -1; border-bottom: 1px solid var(--rand) !important; }
+  .kachel:nth-child(2) { border-left: 0 !important; }
+}
+
+/* ruhigere Überschriften in Abschnitten */
+.abschnitt h2 { font-size: clamp(24px, 2.6vw, 30px) !important; }
+.regeln li { color: var(--papier-2); }
+
+.sp-titel p { display: block !important; }

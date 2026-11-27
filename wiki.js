@@ -157,13 +157,13 @@ function uebersicht(artikel) {
   let n = 0;
   for (const [kat, liste] of gruppiert(artikel)) {
     karten.push(`<section class="wiki-gruppe zeigen"><h2>${esc(kat)}</h2><div class="wiki-karten">${liste.map(a =>
-      `<a class="wiki-karte" href="/wiki/${a.slug}" style="--i:${n++ % 4}"><h3>${esc(a.titel)}</h3><p>${esc(a.beschreibung)}</p><span class="weg-pfeil" aria-hidden="true">→</span></a>`).join('')}</div></section>`);
+      `<a class="wiki-karte" href="/wiki/${a.slug}" style="--i:${n++ % 4}"><h3>${esc(a.titel)}</h3><p>${esc(a.beschreibung)}</p></a>`).join('')}</div></section>`);
   }
   return `
   <section class="seitenkopf">
     <div class="breite">
       <nav class="brotkrumen auftritt" aria-label="Pfad"><a href="/">Start</a><span>Wiki</span></nav>
-      <h1 class="auftritt" style="--i:1">CoreMarket <span class="gold">Wiki</span></h1>
+      <h1 class="auftritt" style="--i:1">CoreMarket Wiki</h1>
       <p class="einleitung auftritt" style="--i:2">Anleitungen, Erklärungen und alles zum Nachschlagen – vom ersten Ticket bis zum Clan-Beitritt.</p>
       <div class="wiki-suche auftritt" style="--i:3">
         <label class="suche suche-gross"><span class="sr">Wiki durchsuchen</span><input type="search" id="wiki-suche" placeholder="Wiki durchsuchen … z. B. Vouch, STOP, verifizieren" autocomplete="off" spellcheck="false"></label>
@@ -185,7 +185,6 @@ function artikelSeite(artikel, a) {
   <section class="seitenkopf wiki-kopf">
     <div class="breite">
       <nav class="brotkrumen auftritt" aria-label="Pfad"><a href="/">Start</a><a href="/wiki">Wiki</a><span>${esc(a.titel)}</span></nav>
-      <p class="marker auftritt" style="--i:1">${esc(a.kategorie)}</p>
       <h1 class="auftritt" style="--i:1">${esc(a.titel)}</h1>
       ${a.beschreibung ? `<p class="einleitung auftritt" style="--i:2">${esc(a.beschreibung)}</p>` : ''}
     </div>

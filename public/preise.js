@@ -92,7 +92,7 @@
     if (s.topMin) teile.push(`Top-Items alle ${s.topMin} Min.`);
     if (s.runde) teile.push(`alle anderen etwa alle ${dauer(s.runde * 60000)}`);
     if (s.letzter) teile.push(`zuletzt ${vor(s.letzter)}`);
-    $('#ao-status').innerHTML = `<span class="ao-status-text"><span class="punkt${laeuft ? ' an' : ''}"></span>${esc(teile.join(' · ').replace(/\.?$/, '.'))} ${tausend(ITEMS.length)} Items mit Preisen.</span>`;
+    $('#ao-status').innerHTML = `<span class="ao-status-text"><span class="punkt${laeuft ? ' an' : ''}"></span>${esc(teile.join(', ').replace(/\.?$/, '.'))} ${tausend(ITEMS.length)} Items mit Preisen.</span>`;
   }
   function chipsMalen() {
     const top = ITEMS.slice().sort((a, b) => beliebtheit(b) - beliebtheit(a)).slice(0, 6);
@@ -202,7 +202,7 @@
     $('#ao-item').innerHTML = `
       <div class="ao-item-kopf">
         ${icon(d.id, d.name, true)}
-        <div class="ao-item-titel"><h2>${esc(d.name)}</h2><p class="hinweis">${d.id.startsWith('spawner_') ? 'Spawner' : `minecraft:${esc(d.id)}`} · Stand ${esc(vor(d.at))}${a.live ? ' <span class="ao-live">live</span>' : ''}${d.wartet ? ' · wird gerade neu geprüft' : d.taktMin ? ` · wird etwa alle ${esc(dauer(d.taktMin * 60000))} geprüft` : ''}</p></div>
+        <div class="ao-item-titel"><h2>${esc(d.name)}</h2><p class="hinweis">${d.id.startsWith('spawner_') ? 'Spawner' : `minecraft:${esc(d.id)}`}, Stand ${esc(vor(d.at))}${a.live ? ' <span class="ao-live">live</span>' : ''}${d.wartet ? ', wird gerade neu geprüft' : d.taktMin ? `, wird etwa alle ${esc(dauer(d.taktMin * 60000))} geprüft` : ''}</p></div>
         <div class="ao-trends">${trendChip(d.trend?.tag, '24 Std.')}${trendChip(d.trend?.woche, '7 Tage')}</div>
         <button type="button" class="ao-teilen knopf zweit klein" title="Link kopieren">Link kopieren</button>
         <button type="button" class="ao-zu" aria-label="Schließen">×</button>
@@ -211,12 +211,12 @@
         <div class="ao-preis ah">
           <p class="ao-p-titel">Auktionshaus <small>billigster pro Stück</small></p>
           <p class="ao-p-wert">${preis(a.min)}</p>
-          <p class="hinweis">Ø erste Seite <b>${preis(a.schnitt)}</b> · ${tausend(a.anzahl)} Angebot${a.anzahl === 1 ? '' : 'e'}</p>
+          <p class="hinweis">Ø erste Seite <b>${preis(a.schnitt)}</b>, ${tausend(a.anzahl)} Angebot${a.anzahl === 1 ? '' : 'e'}</p>
         </div>
         <div class="ao-preis order">
           <p class="ao-p-titel">Orders <small>beste Order pro Stück</small></p>
           <p class="ao-p-wert">${preis(o.max)}</p>
-          <p class="hinweis">${o.anzahl ? `Ø <b>${preis(o.schnitt)}</b> · ${tausend(o.anzahl)} Order${o.anzahl === 1 ? '' : 's'}` : 'Gerade sucht niemand dieses Item.'}</p>
+          <p class="hinweis">${o.anzahl ? `Ø <b>${preis(o.schnitt)}</b>, ${tausend(o.anzahl)} Order${o.anzahl === 1 ? '' : 's'}` : 'Gerade sucht niemand dieses Item.'}</p>
         </div>
         <div class="ao-preis spanne${flip ? ' flip' : ''}">
           <p class="ao-p-titel">${flip ? 'Flip-Chance' : 'Spanne'} <small>${flip ? 'Order zahlt mehr als das AH' : 'AH minus Order'}</small></p>

@@ -2,10 +2,24 @@
   <header class="app-kopf auftritt">
     <div class="app-kopf-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z"/></svg></div>
     <div>
-      <h1>Deine Merkliste</h1>
-      <p>Spawner und Spieler, die du dir mit dem Stern gemerkt hast – mit den aktuellen Preisen. Die Liste bleibt nur in diesem Browser gespeichert.</p>
+      <h1>Merkliste und Preisalarme</h1>
+      <p>Spawner, Items und Spieler, die du dir mit dem Stern gemerkt hast, und deine Preisalarme. Alles bleibt nur in diesem Browser gespeichert.</p>
     </div>
   </header>
+
+  <section class="paneel alarme" id="alarme">
+    <div class="paneel-kopf"><h2>Preisalarme</h2><button type="button" class="knopf zweit klein" id="alarm-erlauben" hidden>Benachrichtigungen erlauben</button></div>
+    <p class="paneel-info">Du bekommst eine Meldung, sobald ein Preis deine Grenze erreicht, solange CoreMarket in einem Tab offen ist.</p>
+    <ul class="zeilen" id="alarm-liste"></ul>
+    <form class="alarm-neu" id="alarm-neu">
+      <label class="feld"><span>Was</span><select id="an-art"><option value="spawner">Spawner</option><option value="item">Item im Auktionshaus</option></select></label>
+      <label class="feld an-spawner"><span>Spawner</span><select id="an-spawner"></select></label>
+      <label class="feld an-item" hidden><span>Item</span><input id="an-item" list="an-items" placeholder="z. B. Ancient Debris" autocomplete="off"><datalist id="an-items"></datalist></label>
+      <label class="feld"><span>Wenn</span><select id="an-feld"></select></label>
+      <label class="feld"><span>Grenze</span><span class="budget-feld"><input id="an-wert" type="number" inputmode="decimal" min="0" step="0.1" required><b>M</b></span></label>
+      <button class="knopf">Alarm anlegen</button>
+    </form>
+  </section>
 
   <div class="merk-leer paneel auftritt" id="merk-leer" style="--i:1" hidden>
     <div class="merk-leer-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9z"/></svg></div>
@@ -16,11 +30,13 @@
 
   <section class="dash-paar" id="merk-inhalt" hidden>
     <div class="paneel auftritt" style="--i:1">
-      <div class="paneel-kopf"><h2>Spawner</h2><span class="live-chip"><span class="punkt an"></span>Live-Preise</span></div>
+      <div class="paneel-kopf"><h2>Spawner</h2></div>
       <ul class="zeilen" id="merk-spawner"></ul>
     </div>
     <div class="paneel auftritt" style="--i:2">
-      <div class="paneel-kopf"><h2>Spieler</h2></div>
+      <div class="paneel-kopf"><h2>Items</h2></div>
+      <ul class="zeilen" id="merk-items"></ul>
+      <div class="paneel-kopf merk-unterkopf"><h2>Spieler</h2></div>
       <ul class="zeilen" id="merk-spieler"></ul>
     </div>
   </section>

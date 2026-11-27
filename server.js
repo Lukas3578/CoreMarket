@@ -93,7 +93,7 @@ const SEITEN = [
   { pfad: '/ablauf', datei: 'ablauf', name: "So läuft's", icon: 'ablauf', gruppe: 'Hilfe', titel: 'So läuft ein Handel – CoreMarket',
     beschreibung: 'In vier Schritten zum Spawner: Discord beitreten, Minecraft verbinden, Ticket öffnen, Übergabe im Spiel.' },
   { pfad: '/clan', datei: 'clan', name: 'Clan', icon: 'clan', gruppe: 'Community', titel: 'Unser Clan – CoreMarket',
-    beschreibung: 'Alle Mitglieder von CoreMarket (CM0) und CoreMarket1 (CM1). Prüf hier, ob ein Händler wirklich zu uns gehört.' },
+    beschreibung: 'Alle Mitglieder von CoreMarket (CM0) und CoreMarket1 (CM1). Prüf hier, ob ein Händler zu uns gehört.' },
   { pfad: '/spieler', datei: 'spielersuche', name: 'Spieler', icon: 'spieler', gruppe: 'Community', titel: 'Spieler nachschlagen – CoreMarket',
     beschreibung: 'Jeden Spieler auf HugoSMP nachschlagen: was er gerade im Auktionshaus verkauft, Orders, Skin und mehr.' },
   { pfad: '/bewertungen', datei: 'bewertungen', name: 'Bewertungen', icon: 'stern', gruppe: 'Community', titel: 'Bewertungen – CoreMarket',
@@ -150,7 +150,7 @@ const icon = name => `<svg class="ico" viewBox="0 0 24 24" width="20" height="20
 // Seitenleiste: Gruppen mit Icons, der aktive Punkt ist markiert
 function seitenleiste(s) {
   const aktiv = s.aktiv || s.pfad;
-  const link = (pfad, name, ico, extra = '') => `<a href="${pfad}"${pfad === aktiv ? ` class="aktiv"${pfad === s.pfad ? ' aria-current="page"' : ''}` : ''}${extra} data-tip="${escAttr(name)}">${icon(ico)}<span>${escAttr(name)}</span>${ico === 'live' ? '<i class="live-puls" aria-hidden="true"></i>' : ''}${ico === 'merken' ? '<b class="merk-zahl" hidden></b>' : ''}</a>`;
+  const link = (pfad, name, ico, extra = '') => `<a href="${pfad}"${pfad === aktiv ? ` class="aktiv"${pfad === s.pfad ? ' aria-current="page"' : ''}` : ''}${extra} data-tip="${escAttr(name)}">${icon(ico)}<span>${escAttr(name)}</span>${ico === 'merken' ? '<b class="merk-zahl" hidden></b>' : ''}</a>`;
   const gruppen = ['Handel', 'Community', 'Hilfe'];
   const teile = gruppen.map(g => {
     const punkte = SEITEN.filter(x => x.gruppe === g && x.menue !== false).map(x => link(x.pfad, x.name, x.icon));

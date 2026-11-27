@@ -37,9 +37,10 @@
   </div>
 
   <section class="paneel tab-inhalt" id="tab-ah" role="tabpanel">
-    <div class="paneel-kopf"><h2>Im Auktionshaus</h2><span class="paneel-mehr" id="ah-stand"></span></div>
+    <div class="paneel-kopf"><h2>Im Auktionshaus</h2><div class="ansicht" role="group" aria-label="Ansicht"><button type="button" data-ansicht="liste" aria-pressed="true">Liste</button><button type="button" data-ansicht="spiel" aria-pressed="false">Wie im Spiel</button></div><span class="paneel-mehr" id="ah-stand"></span></div>
     <p class="paneel-info">Was <b class="pn">{{SPIELER}}</b> gerade im <code>/ah</code> anbietet – soweit unser Bot es beim Scannen gesehen hat.</p>
     <ul class="zeilen ah-liste" id="profil-ah"><li class="zeile lade"></li><li class="zeile lade"></li><li class="zeile lade"></li></ul>
+    <div class="ah-spiel" id="ah-spiel" hidden><ol class="mc-fenster" id="ah-fenster"></ol><div class="mc-tooltip ah-tip" id="ah-tip" hidden></div></div>
     <p class="hinweis klein-hinweis" id="ah-hinweis">Der Bot geht alle Items reihum durch und sieht pro Item nur die günstigsten Angebote. Teure Angebote oder seltene Items können fehlen – das vollständige Angebot siehst du im Spiel mit <code>/ah {{SPIELER}}</code>.</p>
   </section>
 

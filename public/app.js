@@ -1,6 +1,7 @@
 'use strict';
 (() => {
   document.documentElement.classList.add('js');
+  try { if (localStorage.getItem('cm-thema') === 'hell') document.documentElement.dataset.theme = 'hell'; } catch { /* egal */ }
   const $ = s => document.querySelector(s);
   const $$ = s => document.querySelectorAll(s);
   const ruhig = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -373,8 +374,9 @@
     const fest = $('#sp')?.dataset.slug;
     const liste = P.spawner.filter(s => slug(s.name) !== fest);
     const html = liste.map((s, i) => {
-      const p = !leer(s.verkauf) ? `<b class="gold-text">${preis(s.verkauf)}</b>` : !leer(s.ankauf) ? `<b class="gruen-text">${preis(s.ankauf)}</b>` : '<b class="stop">STOP</b>';
-      return `<a class="chip" style="--i:${i}" href="/spawner/${slug(s.name)}">${spawnerIcon(s.name)}<span>${esc(s.name)}</span>${p}</a>`;
+      const k = leer(s.verkauf) ? '<span class="chip-stop">kein Verkauf</span>' : `<b class="gold-text" title="Du kaufst bei uns">${preis(s.verkauf)}</b>`;
+      const v = leer(s.ankauf) ? '<span class="chip-stop">kein Ankauf</span>' : `<b class="gruen-text" title="Du verkaufst an uns">${preis(s.ankauf)}</b>`;
+      return `<a class="chip chip-zwei" style="--i:${i}" href="/spawner/${slug(s.name)}">${spawnerIcon(s.name)}<span>${esc(s.name)}</span><span class="chip-preise">${k}${v}</span></a>`;
     }).join('') || '<p class="leer">Gerade keine Preise eingetragen.</p>';
     if (ziel.dataset.stand !== html) { ziel.innerHTML = html; ziel.dataset.stand = html; }
   }
@@ -802,6 +804,7 @@
         <span class="z-preis gruen-text">${marktPreis(x.proStueck * x.menge)}<small>zusammen</small></span></a></li>`;
       const noch = !i.runden;
       $('#profil-ah').innerHTML = d.ah.map(zeile).join('') || `<li class="zeile-leer">${noch ? `Der Bot baut die Liste gerade auf (${tausend(i.gescannt || 0)} von ${tausend(i.items || 0)} Items) – schau in ein paar Minuten nochmal.` : `Im Moment sieht unser Bot keine Angebote von ${esc(d.name)} im Auktionshaus.`}</li>`;
+      ahFenster(d);
       $('#profil-orders').innerHTML = d.orders.map(zeile).join('') || `<li class="zeile-leer">Keine Orders von ${esc(d.name)} gefunden.</li>`;
       if (DATEN) profilZeigen(DATEN);
     } catch (e) {
@@ -1019,6 +1022,116 @@
     }).join('');
   }
 
+  /* ==========================================================
+     Hell / Dunkel
+     ========================================================== */
+  const themaKnopf = $('#thema-knopf');
+  const themaSetzen = (t, merken = true) => {
+    document.documentElement.dataset.theme = t;
+    themaKnopf?.setAttribute('aria-label', t === 'hell' ? 'Dunkles Design einschalten' : 'Helles Design einschalten');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', t === 'hell' ? '#f4f4f6' : '#14101c');
+    if (merken) { try { localStorage.setItem('cm-thema', t); } catch { /* egal */ } }
+  };
+  themaSetzen(document.documentElement.dataset.theme === 'hell' ? 'hell' : 'dunkel', false);
+  themaKnopf?.addEventListener('click', () => themaSetzen(document.documentElement.dataset.theme === 'hell' ? 'dunkel' : 'hell'));
+
+  /* ==========================================================
+     Karussell mit echten Inhalten
+     ========================================================== */
+  let karussellGefuellt = false;
+  async function karussellFuellen(d) {
+    if (!$('#karussell')) return;
+    // Clan-Köpfe
+    const alle = (d.clans || []).flatMap(c => c.mitglieder.map(m => m.name));
+    const koepfe = $('#k-koepfe');
+    if (koepfe && alle.length) {
+      text('#k-clan-titel', `${tausend(alle.length)} Händler in CM0 und CM1`);
+      koepfe.innerHTML = alle.slice(0, 18).map(n => `<a href="/spieler/${encodeURIComponent(n)}" title="${esc(n)}"><img src="${kopf24(n)}" alt="${esc(n)}" width="36" height="36" loading="lazy"></a>`).join('') + (alle.length > 18 ? `<a class="k-mehr" href="/clan">+${alle.length - 18}</a>` : '');
+    }
+    if (karussellGefuellt) return;
+    karussellGefuellt = true;
+    // Markt
+    marktHolen().then(m => {
+      const l = $('#k-markt-liste'); if (!l || !m?.items) return;
+      const beliebt = i => (i.ah?.anzahl || 0) + (i.order?.anzahl || 0) * 2;
+      l.innerHTML = m.items.filter(i => !leer(i.ah?.min)).sort((a, b) => beliebt(b) - beliebt(a)).slice(0, 4)
+        .map(i => `<li><a href="/auction-orders?item=${encodeURIComponent(i.id)}"><span class="z-icon mc">${itemBild(i.id)}</span><span>${esc(i.name)}</span><b>${marktPreis(i.ah.min)}</b></a></li>`).join('');
+    });
+    // Top-Verkäufer
+    fetch('/api/spieler').then(r => r.json()).then(t => {
+      const l = $('#k-top'); if (!l) return;
+      l.innerHTML = (t.top || []).slice(0, 3).map(s => `<li><a href="/spieler/${encodeURIComponent(s.name)}"><img src="${kopf24(s.name)}" alt="" width="32" height="32" loading="lazy"><span>${esc(s.name)}<small>${tausend(s.angebote)} Angebote</small></span><b>${marktPreis(s.wert)}</b></a></li>`).join('')
+        || '<li class="k-leer">Der Bot sammelt gerade die Angebote ein.</li>';
+    }).catch(() => {});
+    // Wiki
+    fetch('/api/wiki').then(r => r.json()).then(w => {
+      const l = $('#k-wiki-liste'); if (!l) return;
+      const wahl = ['verifizieren', 'ticket-oeffnen', 'preisliste-lesen', 'scammer-erkennen'];
+      const liste = wahl.map(s => w.find(a => a.s === s)).filter(Boolean).concat(w).filter((a, i, l2) => l2.indexOf(a) === i).slice(0, 4);
+      l.innerHTML = liste.map(a => `<li><a href="/wiki/${esc(a.s)}"><b>${esc(a.t)}</b><small>${esc(a.b)}</small></a></li>`).join('');
+    }).catch(() => {});
+  }
+  // Sofort prüfen, ob ein Name zum Clan gehört
+  const kCheck = $('#k-check');
+  if (kCheck) {
+    const ein = kCheck.querySelector('input'), aus = $('#k-check-ergebnis');
+    const pruefen = () => {
+      const n = ein.value.trim();
+      aus.className = 'k-check-ergebnis';
+      if (!n) { aus.textContent = 'Tipp einen Namen ein, wir prüfen ihn sofort gegen unsere Mitgliederliste.'; return; }
+      let treffer = null;
+      for (const c of DATEN?.clans || []) { const m = c.mitglieder.find(x => x.name.toLowerCase() === n.toLowerCase()); if (m) { treffer = [m, c]; break; } }
+      if (treffer) { aus.classList.add('ja'); aus.innerHTML = `<b>${esc(treffer[0].name)}</b> gehört zu ${esc(treffer[1].name)} (${esc(treffer[1].key)}). <a href="/spieler/${encodeURIComponent(treffer[0].name)}">Profil ansehen</a>`; }
+      else { aus.classList.add('nein'); aus.innerHTML = `<b>${esc(n)}</b> steht nicht in unserer Liste und handelt nicht für CoreMarket.`; }
+    };
+    ein.addEventListener('input', pruefen);
+    kCheck.addEventListener('submit', e => e.preventDefault());
+  }
+
+  /* ==========================================================
+     Profil: Auktionshaus „wie im Spiel“
+     ========================================================== */
+  let ahAnsicht = 'liste';
+  try { ahAnsicht = localStorage.getItem('cm-ah-ansicht') === 'spiel' ? 'spiel' : 'liste'; } catch { /* egal */ }
+  function ansichtSetzen(a) {
+    ahAnsicht = a;
+    $$('[data-ansicht]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.ansicht === a)));
+    const liste = $('#profil-ah'), spiel = $('#ah-spiel');
+    if (liste) liste.hidden = a !== 'liste';
+    if (spiel) spiel.hidden = a !== 'spiel';
+    try { localStorage.setItem('cm-ah-ansicht', a); } catch { /* egal */ }
+  }
+  $$('[data-ansicht]').forEach(b => b.addEventListener('click', () => ansichtSetzen(b.dataset.ansicht)));
+  if ($('#ah-spiel')) ansichtSetzen(ahAnsicht);
+  const kurzZahl = n => n >= 10000 ? `${Math.round(n / 1000)}k` : n >= 1000 ? `${(n / 1000).toFixed(1).replace('.', ',')}k` : String(n);
+  function ahFenster(d) {
+    const ziel = $('#ah-fenster'); if (!ziel) return;
+    const l = d.ah;
+    const n = Math.max(27, Math.ceil(l.length / 9) * 9);
+    ziel.innerHTML = Array.from({ length: n }, (_, k) => {
+      const x = l[k];
+      if (!x) return '<li class="slot"></li>';
+      return `<li class="slot voll"><button type="button" data-ah="${k}" aria-label="${esc(`${x.menge}× ${x.item} für ${marktPreis(x.proStueck * x.menge)}`)}"><span class="mc-icon">${itemBild(x.id)}</span>${x.menge > 1 ? `<span class="anzahl">${kurzZahl(x.menge)}</span>` : ''}</button></li>`;
+    }).join('');
+    const tip = $('#ah-tip');
+    const zeigen = (b, fest) => {
+      const x = l[+b.dataset.ah]; if (!x) return;
+      tip.innerHTML = `<div class="tt-name" style="color:#FFFF55">${esc(x.item)}</div><div style="color:#AAAAAA">${tausend(x.menge)} Stück${x.stapel > 1 ? ` in ${x.stapel} Angeboten` : ''}</div><div style="color:#55FF55">Preis: ${marktPreis(x.proStueck * x.menge)}</div><div style="color:#AAAAAA">${marktPreis(x.proStueck)} pro Stück</div><div style="color:#555555">gesehen ${esc(vor(x.at))}</div>`;
+      tip.hidden = false;
+      const r = b.getBoundingClientRect(), box = $('#ah-spiel').getBoundingClientRect();
+      tip.style.left = `${Math.min(r.right - box.left + 8, box.width - tip.offsetWidth)}px`;
+      tip.style.top = `${r.top - box.top}px`;
+      ziel.querySelectorAll('.slot.an').forEach(s => s.classList.remove('an'));
+      if (fest) b.parentElement.classList.add('an');
+    };
+    ziel.querySelectorAll('[data-ah]').forEach(b => {
+      b.addEventListener('mouseenter', () => zeigen(b));
+      b.addEventListener('focus', () => zeigen(b));
+      b.addEventListener('click', () => zeigen(b, true));
+    });
+    ziel.addEventListener('mouseleave', () => { if (!ziel.querySelector('.slot.an')) tip.hidden = true; });
+  }
+
   /* ---------- Daten anwenden ---------- */
   let erstesMal = true;
   function anwenden(d) {
@@ -1040,7 +1153,7 @@
     if (erstesMal) marktPaneel();
     merkZeigen(d); merkKnoepfe();
     tickerZeigen(d); feedZeigen(d); profilZeigen(d); haendlerRaster(d);
-    alarmePruefen(); alarmListe(); merkItems();
+    alarmePruefen(); alarmListe(); merkItems(); karussellFuellen(d);
     const anSp = $('#an-spawner');
     if (anSp && d.preise && anSp.options.length !== d.preise.spawner.length) anSp.innerHTML = d.preise.spawner.map((x, k) => `<option value="${k}">${esc(x.name)}</option>`).join('');
     CLANS = d.clans || [];

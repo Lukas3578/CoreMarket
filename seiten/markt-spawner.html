@@ -1,0 +1,34 @@
+<div class="app-seite markt" id="markt" data-seite-art="spawner" data-slug="{{SLUG}}">
+  <header class="sp-kopf">
+    <a class="sp-zurueck" href="/markt" aria-label="Zurück zum Marktplatz"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></a>
+    <span class="sp-icon" id="mk-icon"></span>
+    <div class="sp-titel">
+      <h1>{{SPAWNER}} Spawner</h1>
+      <p id="mk-unterzeile">Angebote und Gesuche von Spielern. Gehandelt wird im Spiel, danach bewertet ihr euch.</p>
+    </div>
+  </header>
+
+  <div class="markt-konto" id="markt-konto"></div>
+  <p class="haftung">CoreMarket vermittelt hier nur und haftet nicht für Geschäfte zwischen Spielern. Schau dir den Ruf an, bevor du handelst.</p>
+  <p class="warn-box markt-test" id="markt-test" hidden>Testbetrieb: Auf diesem Server werden Angebote und Deals noch nicht dauerhaft gespeichert und können bei einem Neustart verschwinden.</p>
+
+  <div class="mk-vergleich" id="mk-vergleich" hidden></div>
+
+  <section class="dash-paar">
+    <div class="paneel">
+      <div class="paneel-kopf"><h2>Wird verkauft</h2><button type="button" class="knopf zweit klein" data-neues-angebot="verkauf">Ich verkaufe</button></div>
+      <p class="paneel-info">Spieler, die diesen Spawner abgeben. Günstigste zuerst.</p>
+      <ul class="zeilen mk-liste" id="mk-verkauf"><li class="zeile lade"></li><li class="zeile lade"></li></ul>
+    </div>
+    <div class="paneel">
+      <div class="paneel-kopf"><h2>Wird gesucht</h2><button type="button" class="knopf zweit klein" data-neues-angebot="ankauf">Ich suche</button></div>
+      <p class="paneel-info">Spieler, die diesen Spawner kaufen wollen. Beste Preise zuerst.</p>
+      <ul class="zeilen mk-liste" id="mk-ankauf"><li class="zeile lade"></li><li class="zeile lade"></li></ul>
+    </div>
+  </section>
+
+  <section class="paneel">
+    <div class="paneel-kopf"><h2>Zuletzt gehandelt</h2></div>
+    <ul class="zeilen" id="mk-letzte"></ul>
+  </section>
+</div>

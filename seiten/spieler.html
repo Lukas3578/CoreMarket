@@ -33,6 +33,7 @@
     <button type="button" role="tab" aria-selected="false" aria-controls="tab-orders" data-tab="orders">Orders <b class="tab-zahl" id="tz-orders"></b></button>
     <button type="button" role="tab" aria-selected="false" aria-controls="tab-ec" data-tab="ec">Endertruhe</button>
     <button type="button" role="tab" aria-selected="false" aria-controls="tab-inv" data-tab="inv">Inventar</button>
+    <button type="button" role="tab" aria-selected="false" aria-controls="tab-markt" data-tab="markt">Marktplatz <b class="tab-zahl" id="tz-markt"></b></button>
     <button type="button" role="tab" aria-selected="false" aria-controls="tab-vouches" data-tab="vouches">Bewertungen <b class="tab-zahl" id="tz-vouches"></b></button>
   </div>
 
@@ -70,6 +71,13 @@
         <a class="knopf" href="/abo?art=inv&amp;ziel={{SLUG}}">Inventar ansehen</a>
       </div>
     </div>
+  </section>
+
+  <section class="paneel tab-inhalt" id="tab-markt" role="tabpanel" hidden>
+    <div class="paneel-kopf"><h2>Auf dem Marktplatz</h2><a class="paneel-mehr" href="/markt">Zum Marktplatz</a></div>
+    <p class="paneel-info" id="pm-ruf">Bewertungen aus abgeschlossenen Deals auf dem CoreMarket-Marktplatz.</p>
+    <ul class="zeilen" id="pm-angebote"></ul>
+    <ul class="zeilen" id="pm-bewertungen"></ul>
   </section>
 
   <section class="paneel tab-inhalt" id="tab-vouches" role="tabpanel" hidden>

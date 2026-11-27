@@ -527,7 +527,16 @@
       text('#sp-weiter-name', n.name); $('#sp-weiter-icon').innerHTML = spawnerIcon(n.name);
     }
     document.title = `${s.name} Spawner – Preis bei CoreMarket`;
-    if (!spMarktGeholt) { spMarktGeholt = true; spawnerMarkt(s); }
+    if (!spMarktGeholt) { spMarktGeholt = true; spawnerMarkt(s); spielerMarkt(s); }
+  }
+  async function spielerMarkt(s) {
+    try {
+      const d = await (await fetch(`/api/markt/spawner/${slug(s.name)}`)).json();
+      const el = $('#sp-spielermarkt'); if (!el || !d.verkauf) return;
+      const v = d.verkauf.length, k = d.ankauf.length;
+      el.innerHTML = v || k ? `Auf dem Marktplatz: ${v ? `${v} Angebot${v === 1 ? '' : 'e'} ab <b class="gold-text">${preis(d.verkauf[0].preis)}</b>` : ''}${v && k ? ', ' : ''}${k ? `${k} Gesuch${k === 1 ? '' : 'e'} bis <b class="gruen-text">${preis(d.ankauf[0].preis)}</b>` : ''} von anderen Spielern.` : 'Auf dem Marktplatz kannst du diesen Spawner auch direkt mit anderen Spielern handeln.';
+      el.hidden = false;
+    } catch { /* egal */ }
   }
   async function spawnerMarkt(s) {
     const id = 'spawner_' + mob(s.name).id;
@@ -743,7 +752,7 @@
     $$('.tabs [data-tab]').forEach(x => { const an = x === b; x.setAttribute('aria-selected', String(an)); $('#tab-' + x.dataset.tab).hidden = !an; });
     history.replaceState(null, '', '#' + b.dataset.tab);
   }));
-  if (PROFIL && /^#(ah|orders|ec|inv|vouches)$/.test(location.hash)) $(`.tabs [data-tab="${location.hash.slice(1)}"]`)?.click();
+  if (PROFIL && /^#(ah|orders|ec|inv|vouches|markt)$/.test(location.hash)) $(`.tabs [data-tab="${location.hash.slice(1)}"]`)?.click();
 
   function profilZeigen(d) {
     if (!PROFIL) return;
@@ -811,7 +820,18 @@
       $('#profil-ah').innerHTML = `<li class="zeile-leer">${esc(e.message || 'Die Daten sind gerade nicht erreichbar.')}</li>`;
     }
   }
-  if (PROFIL) { profilAhLaden(); setInterval(() => { if (!document.hidden) profilAhLaden(); }, 90000); }
+  if (PROFIL) { profilAhLaden(); setInterval(() => { if (!document.hidden) profilAhLaden(); }, 90000); profilMarkt(); }
+  async function profilMarkt() {
+    try {
+      const d = await (await fetch(`/api/markt/spieler/${encodeURIComponent(PROFIL.dataset.name)}`)).json();
+      const r = d.ruf;
+      text('#pm-ruf', r.trust + r.neutral + r.scam ? `${tausend(r.trust)} Trust, ${tausend(r.neutral)} Neutral und ${tausend(r.scam)} Scam aus ${tausend(r.deals)} abgeschlossenen Deals.` : 'Noch keine Bewertungen auf dem Marktplatz.');
+      text('#tz-markt', d.angebote.length ? String(d.angebote.length) : '');
+      $('#pm-angebote').innerHTML = d.angebote.map(a => `<li><a class="zeile" href="/markt/${esc(a.spawner)}"><span class="z-icon">${spawnerIcon(a.name)}</span><span class="z-text"><b>${a.art === 'verkauf' ? 'Verkauft' : 'Sucht'} ${tausend(a.menge)}× ${esc(a.name)} Spawner</b><small>${esc(vor(a.at))}</small></span><span class="z-preis ${a.art === 'verkauf' ? 'gold-text' : 'gruen-text'}">${preis(a.preis)}<small>pro Stück</small></span></a></li>`).join('');
+      const W = { trust: ['Trust', 'gruen-text'], neutral: ['Neutral', ''], scam: ['Scam', 'rot-text'] };
+      $('#pm-bewertungen').innerHTML = d.bewertungen.map(b => `<li class="zeile"><img class="z-kopf" src="${kopf24(b.von)}" alt="" width="32" height="32" loading="lazy"><span class="z-text"><b>${nameLink(b.von)}</b><small>${tausend(b.menge)}× ${esc(b.name)}${b.text ? `, „${esc(b.text)}“` : ''}</small></span><span class="z-preis ${W[b.wert][1]}">${W[b.wert][0]}<small>${esc(vor(b.at))}</small></span></li>`).join('');
+    } catch { /* Marktplatz gerade nicht da */ }
+  }
 
   $('#profil-kopieren')?.addEventListener('click', async () => {
     const n = $('#profil-name').textContent;
@@ -1328,4 +1348,6 @@
     });
     buehne.addEventListener('pointerleave', () => { kaefig.style.transform = ''; });
   }
+  /* ---------- für andere Skripte (Marktplatz) ---------- */
+  window.CM = { spawnerIcon, toast, preis, esc, kopf24, vor, slug, tausend, komma, leer, daten: () => DATEN, MC_NAME };
 })();

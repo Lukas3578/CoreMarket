@@ -107,6 +107,32 @@ Die Seite ist jetzt ein **Web Service**, keine Static Site mehr.
 3. Die alte Static Site auf Render danach löschen. Soll die Adresse `coremarket.onrender.com` bleiben, die alte Seite zuerst löschen und dann den neuen Dienst mit dem Namen `coremarket` anlegen.
 4. Optional: Settings → Custom Domain, z. B. `coremarket.vortexpvp.eu`.
 
+## Marktplatz
+
+Unter `/markt` handeln Spieler Spawner untereinander (auch Spieler außerhalb des Clans):
+
+1. Anmelden mit dem Bot-Login (Code per `/msg` an den Bank-Account, wie beim Abo, ein Abo braucht man nicht).
+2. Angebot einstellen: „Ich verkaufe“ oder „Ich suche“, Spawner, Menge, Preis pro Stück, optional VB und Notiz.
+3. Ein anderer Spieler drückt „Kaufen“ oder „Verkaufen“ und wählt die Menge. Die Menge ist dann reserviert.
+4. Übergabe im Spiel. Danach bewertet **jeder einmal** den anderen mit **Trust, Neutral oder Scam**. Erst wenn beide bewertet haben, ist der Deal abgeschlossen. Vor der ersten Bewertung kann jeder abbrechen.
+5. Aus den Bewertungen entsteht der Ruf jedes Spielers (`Trust/Neutral/Scam`), sichtbar bei jedem Angebot und im Profil.
+
+CoreMarket vermittelt nur und haftet nicht. Das steht auf jeder Marktplatz-Seite.
+
+**Speicher:** alles in `daten/markt.json` (oder Pfad aus `MARKT_DATEI`). Auf Render Free geht die Datei bei jedem Neustart verloren, dort zeigt die Seite einen Hinweis „Testbetrieb“. Dauerhaft läuft es auf dem Code-Server:
+
+```bash
+cd /app && git clone https://github.com/Lukas3578/CoreMarket.git coremarket-web
+```
+```bash
+cd /app/coremarket-web && PORT=3100 MARKT_DATEI=/app/coremarket-daten/markt.json pm2 start server.js --name coremarket-web
+```
+```bash
+pm2 save
+```
+
+Updates holen: `cd /app/coremarket-web && git pull && pm2 restart coremarket-web`. Den Ordner `/app/coremarket-daten` nie löschen, darin liegen alle Angebote, Deals und Bewertungen. Die Website ist dann auf Port 3100 erreichbar und braucht noch eine Domain bzw. einen Tunnel (z. B. wie beim Bot-Panel).
+
 ## Keep-Alive
 
 Render (Free) schickt einen Web Service nach etwa 15 Minuten ohne Aufrufe schlafen. Der nächste Besucher wartet dann bis zu einer Minute. `keepalive/keepalive.sh` ruft alle 4 Minuten `/health` auf, damit das nicht passiert. Es braucht nur `bash` und `curl` und läuft auf jedem Linux-Server.

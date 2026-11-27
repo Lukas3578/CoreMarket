@@ -88,6 +88,10 @@ const SEITEN = [
     beschreibung: 'CoreMarket ist der Spawner-Trading-Clan auf HugoSMP: faire Preise für Blaze, Iron Golem, Creeper und mehr – sicher über Discord-Tickets mit verifizierten Händlern.' },
   { pfad: '/live', datei: 'live', name: 'Live-Feed', icon: 'live', gruppe: 'Handel', titel: 'Live-Feed – CoreMarket',
     beschreibung: 'Was gerade bei CoreMarket passiert: neue Bewertungen, geänderte Preise und frisch gescannte Items aus dem Auktionshaus.' },
+  { pfad: '/markt', datei: 'markt', name: 'Marktplatz', icon: 'laden', gruppe: 'Handel', js: 'markt-seite.js', titel: 'Marktplatz: Spawner von Spielern kaufen und verkaufen – CoreMarket',
+    beschreibung: 'Spieler handeln Spawner untereinander: Angebote einstellen, Deals abschließen und mit Trust, Neutral oder Scam bewerten.' },
+  { pfad: '/markt/meine', datei: 'markt-meine', menue: false, aktiv: '/markt', js: 'markt-seite.js', titel: 'Meine Angebote und Deals – CoreMarket Marktplatz',
+    beschreibung: 'Deine Angebote und Deals auf dem CoreMarket-Marktplatz.' },
   { pfad: '/preise', datei: 'preise', name: 'Spawner', icon: 'spawner', gruppe: 'Handel', titel: 'Spawner-Preise & Rechner – CoreMarket',
     beschreibung: 'Aktuelle An- und Verkaufspreise für Spawner auf HugoSMP, mit Mengenrabatten und Preisrechner.' },
   { pfad: '/ablauf', datei: 'ablauf', name: "So läuft's", icon: 'ablauf', gruppe: 'Hilfe', titel: 'So läuft ein Handel – CoreMarket',
@@ -109,6 +113,8 @@ const SEITEN = [
   // Ein Profil pro Clan-Mitglied: /spieler/<name>
   { pfad: '/spieler/{{SLUG}}', datei: 'spieler', menue: false, aktiv: '/spieler', dynamisch: true, titel: '{{SPIELER}} auf HugoSMP – CoreMarket',
     beschreibung: '{{SPIELER}} auf HugoSMP: was er gerade im Auktionshaus verkauft, Orders, Skin und Bewertungen.' },
+  { pfad: '/markt/{{SLUG}}', datei: 'markt-spawner', menue: false, aktiv: '/markt', dynamisch: true, js: 'markt-seite.js', titel: '{{SPAWNER}} Spawner auf dem Marktplatz – CoreMarket',
+    beschreibung: '{{SPAWNER}} Spawner von anderen Spielern kaufen oder an sie verkaufen: alle Angebote und Gesuche auf dem CoreMarket-Marktplatz.' },
   // Eine Seite pro Spawner: /spawner/<name>. {{SPAWNER}} und {{SLUG}} setzt der Server beim Aufruf ein.
   { pfad: '/spawner/{{SLUG}}', datei: 'spawner', menue: false, aktiv: '/preise', dynamisch: true, titel: '{{SPAWNER}} Spawner – Preis bei CoreMarket',
     beschreibung: '{{SPAWNER}} Spawner auf HugoSMP kaufen oder verkaufen: aktueller Preis, Mengenpreis und Rechner – sicher über ein Ticket bei CoreMarket.' },
@@ -142,6 +148,7 @@ const ICONS = {
   abo: '<path d="m3 8 4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
   discord: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',
   live: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+  laden: '<path d="M3 9 4.5 4h15L21 9"/><path d="M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M5 13v7h14v-7M10 20v-4h4v4"/>',
   spieler: '<circle cx="11" cy="8" r="4"/><path d="M4 21a7 7 0 0 1 11-5.7"/><circle cx="18" cy="17" r="3"/><path d="m22 21-1.8-1.8"/>',
   merken: '<path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z"/>',
 };
@@ -265,6 +272,47 @@ async function preisHolen(schluessel, url, maxAlterMs) {
   if (!c.d) await c.laeuft; // ohne alte Daten warten, sonst alte sofort liefern
   return c;
 }
+/* ---------- Marktplatz (siehe markt.js) ---------- */
+// Wer ist angemeldet? Die Website fragt den Bot, zu welchem Minecraft-Namen ein Login gehört.
+const kundenCache = new Map(); // token-hash -> { mc, bis }
+async function holeKunde(req) {
+  const m = String(req.headers.authorization || '').match(/^Bearer\s+([A-Za-z0-9_-]{20,100})$/);
+  if (!m) return null;
+  const h = crypto.createHash('sha256').update(m[1]).digest('hex');
+  const c = kundenCache.get(h);
+  if (c && c.bis > Date.now()) return c.mc ? { mc: c.mc } : null;
+  const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const r = await fetch(`${BOT}/api/kunde/ich`, { signal: ctrl.signal, headers: { authorization: `Bearer ${m[1]}`, 'user-agent': 'CoreMarket-Website' } });
+    if (r.status === 401) { kundenCache.set(h, { mc: null, bis: Date.now() + 60000 }); return null; }
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    kundenCache.set(h, { mc: d.mc, bis: Date.now() + 5 * 60000 });
+    if (kundenCache.size > 5000) kundenCache.delete(kundenCache.keys().next().value);
+    return d.mc ? { mc: d.mc } : null;
+  } catch (e) {
+    if (c?.mc) return { mc: c.mc }; // Bot kurz weg: letzten bekannten Login weiter gelten lassen
+    throw Object.assign(new Error('Der Login kann gerade nicht geprüft werden, weil der Bot nicht erreichbar ist. Versuch es gleich nochmal.'), { status: 503 });
+  } finally { clearTimeout(t); }
+}
+const MARKT_DATEI = process.env.MARKT_DATEI || path.join(__dirname, 'daten', 'markt.json');
+const MARKT = require('./markt')({
+  datei: MARKT_DATEI,
+  holeKunde,
+  spawnerNamen: () => (cache.daten?.preise?.spawner || []).map(x => x.name),
+  // Render (Free) löscht Dateien bei jedem Neustart. Mit MARKT_DATEI auf einer festen Platte ist es dauerhaft.
+  dauerhaft: !process.env.RENDER || Boolean(process.env.MARKT_DATEI),
+});
+async function marktHttp(req, res, url) {
+  let body = {};
+  if (req.method === 'POST') {
+    const roh = await new Promise((ok, nein) => { let b = ''; req.on('data', c => { b += c; if (b.length > 4000) { nein(new Error('zu groß')); req.destroy(); } }); req.on('end', () => ok(b)); req.on('error', nein); }).catch(() => null);
+    if (roh === null) return json(req, res, 413, { error: 'Anfrage zu groß.' });
+    try { body = roh ? JSON.parse(roh) : {}; } catch { return json(req, res, 400, { error: 'Ungültige Anfrage.' }); }
+  }
+  return MARKT.http(req, res, url, body, (status, obj) => json(req, res, status, obj));
+}
+
 /* ---------- Spieler-Index: wer verkauft was im AH (siehe spieler.js) ---------- */
 const SPIELER = require('./spieler')({
   holeUebersicht: async () => (await preisHolen('_alle', PREISE_API, 45000))?.d,
@@ -351,6 +399,7 @@ const server = http.createServer(async (req, res) => {
   try {
     const url = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     if (url.startsWith('/api/konto/') && (req.method === 'GET' || req.method === 'POST')) return await konto(req, res, url);
+    if ((url === '/api/markt' || url.startsWith('/api/markt/')) && (req.method === 'GET' || req.method === 'POST')) return await marktHttp(req, res, url);
     if (req.method !== 'GET' && req.method !== 'HEAD') return senden(req, res, 405, 'Methode nicht erlaubt', { Allow: 'GET, HEAD', 'Content-Type': TYPEN['.txt'] });
     if (url.includes('..') || url.includes('\0')) return nichtGefunden(req, res);
 
@@ -388,6 +437,12 @@ const server = http.createServer(async (req, res) => {
       if (richtig !== sm[1]) return umleiten(req, res, `/spieler/${richtig}`);
       const vorlage = SEITEN_HTML.get('/spieler/{{SLUG}}').replaceAll('{{SLUG}}', richtig).replaceAll('{{SPIELER}}', escAttr(richtig));
       return await seite(req, res, vorlage);
+    }
+    const mk = url.match(/^\/markt\/([a-z0-9-]{1,40})$/);
+    if (mk) {
+      const name = MARKT.spawnerName(mk[1]);
+      if (!name) return nichtGefunden(req, res);
+      return await seite(req, res, SEITEN_HTML.get('/markt/{{SLUG}}').replaceAll('{{SLUG}}', mk[1]).replaceAll('{{SPAWNER}}', escAttr(name)));
     }
     const sp = url.match(/^\/spawner\/([a-z0-9-]{1,40})$/);
     if (sp) {

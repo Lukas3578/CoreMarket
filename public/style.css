@@ -1789,3 +1789,92 @@ a.zeile:hover .z-preis { transform: none !important; }
 [data-theme="hell"] .kaefig-inhalt .k-name { color: #f1eadc; }
 [data-theme="hell"] .kaefig-inhalt .k-art { color: #b4abc3; }
 [data-theme="hell"] .kaefig-inhalt .k-preis { color: #f2b23b; }
+
+/* ==========================================================
+   Marktplatz
+   ========================================================== */
+.markt-konto { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; padding: 12px 16px; border-radius: 14px; background: var(--flaeche); border: 1px solid var(--rand); }
+.markt-konto img { width: 36px; height: 36px; border-radius: 8px; image-rendering: pixelated; }
+.mk-konto-text { flex: 1; min-width: 200px; color: var(--papier-2); }
+.mk-konto-text b { color: var(--papier); }
+.mk-konto-text small { display: block; font-size: 13px; }
+.markt-konto .tab-zahl { margin-left: 6px; }
+.haftung { margin: 0 0 18px; font-size: 13.5px; color: var(--papier-2); }
+.markt-test { margin-bottom: 18px; }
+.markt-zahlen { grid-template-columns: repeat(4, 1fr) !important; margin-bottom: 18px; }
+.markt-zahlen .kachel + .kachel { border-top: 0 !important; border-left: 1px solid var(--rand) !important; }
+.markt-zahlen .kachel-zahl { font-size: 20px; }
+.markt-tabelle-rahmen { margin-top: 12px; }
+.markt-tabelle td { vertical-align: middle; }
+.markt-tabelle .betrag { font-size: 19px; }
+.markt-tabelle .staffel { font-size: 13px; }
+
+/* Ruf wie 12/1/0 */
+.ruf { display: inline-flex; align-items: center; gap: 1px; margin-left: 6px; padding: 1px 7px; border-radius: 6px; background: var(--obsidian-3); font: 700 11.5px/1.6 var(--text); vertical-align: 1px; }
+.ruf i { font-style: normal; color: var(--papier-2); font-weight: 400; margin: 0 1px; }
+.r-t { color: var(--gruen); }
+.r-n { color: var(--papier-2); }
+.r-s { color: var(--rot); }
+
+/* Angebots-Zeilen mit Knopf */
+.mk-zeile { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 10px 10px; }
+.zeilen .mk-zeile + .mk-zeile { border-top: 1px solid var(--rand); }
+.mk-zeile .knopf { height: 36px; padding: 0 16px; }
+.mk-zeile .z-text a { color: inherit; }
+.mk-eigen { font-size: 12.5px; color: var(--papier-2); }
+.vb { display: inline-block; padding: 0 5px; border-radius: 4px; border: 1px solid currentColor; font-size: 10.5px; vertical-align: 2px; }
+.mk-aktionen { display: flex; gap: 10px; }
+.mk-aktionen .text-knopf { font-size: 13px; }
+.mk-vergleich { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-bottom: 18px; padding: 12px 16px; border-radius: 14px; background: var(--flaeche); border: 1px solid var(--rand); color: var(--papier-2); font-size: 14.5px; }
+.mk-cm { display: inline-flex; align-items: center; gap: 8px; color: var(--papier); }
+.mk-cm .spi { width: 26px; height: 26px; }
+.mk-vergleich .paneel-mehr { margin-left: auto; color: var(--gold); }
+
+/* Deals */
+.deal { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 14px 10px; }
+.deal-liste .deal + .deal { border-top: 1px solid var(--rand); }
+.deal-text b { display: block; font-weight: 600; }
+.deal-text small { display: block; margin-top: 3px; color: var(--papier-2); font-size: 13.5px; }
+.deal-knoepfe { display: flex; align-items: center; gap: 12px; }
+
+/* Dialoge */
+.markt-dialog .umschalter { margin-bottom: 2px; }
+.dialog-zeile { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.markt-dialog input:not([type="radio"]):not([type="checkbox"]) { height: 46px; padding: 0 12px; border-radius: 9px; border: 2px solid var(--obsidian-3); background: var(--obsidian); color: var(--papier); font: 500 15px/1 var(--text); }
+.markt-dialog .budget-feld input { border: 0; height: 100%; }
+.markt-dialog input:focus { border-color: var(--gold); outline: none; }
+.check { display: flex; align-items: center; gap: 10px; font-size: 14.5px; color: var(--papier-2); cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--gold); }
+.d-partner { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; background: var(--obsidian-2); border: 1px solid var(--rand); }
+.d-partner img { border-radius: 8px; image-rendering: pixelated; }
+.d-partner small { display: block; margin-top: 2px; color: var(--papier-2); font-size: 13.5px; }
+.d-summe { margin: 0; font-size: 16px; color: var(--papier-2); }
+.d-summe b { color: var(--gold); font-size: 20px; }
+.bewertung-wahl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.bewertung-wahl label { cursor: pointer; }
+.bewertung-wahl input { position: absolute; opacity: 0; pointer-events: none; }
+.bewertung-wahl span { display: flex; flex-direction: column; gap: 2px; height: 100%; padding: 12px; border-radius: 10px; border: 2px solid var(--rand); background: var(--obsidian-2); transition: border-color .15s, background .15s; }
+.bewertung-wahl small { color: var(--papier-2); font-size: 12px; }
+.bw-t input:checked + span { border-color: var(--gruen); background: rgba(74, 222, 128, .08); }
+.bw-n input:checked + span { border-color: var(--papier-2); background: var(--obsidian-3); }
+.bw-s input:checked + span { border-color: var(--rot); background: rgba(248, 113, 113, .08); }
+.bw-t b { color: var(--gruen); }
+.bw-s b { color: var(--rot); }
+.bewertung-wahl input:focus-visible + span { outline: 3px solid var(--gold); outline-offset: 2px; }
+.markt-dialog .befehl-box { margin: 0; }
+
+@media (max-width: 900px) { .markt-zahlen { grid-template-columns: 1fr 1fr !important; } .markt-zahlen .kachel:nth-child(3) { border-left: 0 !important; } .markt-zahlen .kachel:nth-child(n+3) { border-top: 1px solid var(--rand) !important; } }
+@media (max-width: 720px) {
+  .mk-zeile { grid-template-columns: 34px minmax(0, 1fr) auto; }
+  .mk-zeile > .knopf, .mk-zeile > .mk-eigen, .mk-zeile > .mk-aktionen { grid-column: 2 / -1; justify-self: start; }
+  .deal { grid-template-columns: 34px minmax(0, 1fr); }
+  .deal-knoepfe { grid-column: 2; }
+  .bewertung-wahl { grid-template-columns: 1fr; }
+  .markt-tabelle th:nth-child(4), .markt-tabelle td:nth-child(4) { display: none; }
+  .mk-vergleich .paneel-mehr { margin-left: 0; }
+}
+
+.markt-zahlen { grid-template-rows: none !important; }
+.sp-spielermarkt { grid-column: 1 / -1; display: block; padding: 14px 18px; border-radius: 14px; background: var(--flaeche); border: 1px solid var(--rand); color: var(--papier-2); text-decoration: none; transition: border-color .2s; }
+.sp-spielermarkt:hover { border-color: var(--obsidian-4); color: var(--papier); }
+#pm-angebote:not(:empty) + #pm-bewertungen:not(:empty) { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--rand); }

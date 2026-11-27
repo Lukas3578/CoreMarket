@@ -1,0 +1,41 @@
+<div class="app-seite markt" id="markt" data-seite-art="uebersicht">
+  <header class="app-kopf">
+    <div class="app-kopf-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9 4.5 4h15L21 9"/><path d="M3 9h18v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/><path d="M5 13v7h14v-7M10 20v-4h4v4"/></svg></div>
+    <div>
+      <h1>Marktplatz</h1>
+      <p>Hier handeln Spieler Spawner untereinander, auch ohne CoreMarket. Stell ein Angebot ein oder nimm eins an. Nach der Übergabe im Spiel bewertet ihr euch gegenseitig mit Trust, Neutral oder Scam.</p>
+    </div>
+  </header>
+
+  <div class="markt-konto" id="markt-konto"></div>
+  <p class="haftung" id="haftung">CoreMarket vermittelt hier nur. Für Geschäfte zwischen Spielern übernehmen wir keine Haftung, der Handel läuft allein zwischen euch. Prüf den Ruf deines Gegenübers und übergib große Mengen in Teilen.</p>
+  <p class="warn-box markt-test" id="markt-test" hidden>Testbetrieb: Auf diesem Server werden Angebote und Deals noch nicht dauerhaft gespeichert und können bei einem Neustart verschwinden.</p>
+
+  <div class="kacheln markt-zahlen" id="markt-zahlen">
+    <div class="kachel"><p class="kachel-titel">Offene Angebote</p><p class="kachel-zahl" id="mz-angebote">–</p></div>
+    <div class="kachel"><p class="kachel-titel">Händler</p><p class="kachel-zahl" id="mz-haendler">–</p></div>
+    <div class="kachel"><p class="kachel-titel">Abgeschlossene Deals</p><p class="kachel-zahl" id="mz-deals">–</p></div>
+    <div class="kachel"><p class="kachel-titel">Gehandelt</p><p class="kachel-zahl" id="mz-volumen">–</p></div>
+  </div>
+
+  <section class="paneel">
+    <div class="paneel-kopf"><h2>Spawner</h2><button type="button" class="knopf klein" data-neues-angebot>Angebot einstellen</button></div>
+    <div class="tabelle-rahmen markt-tabelle-rahmen">
+      <table class="preise markt-tabelle">
+        <thead><tr><th scope="col">Spawner</th><th scope="col">Günstigstes Angebot</th><th scope="col">Bestes Gesuch</th><th scope="col">CoreMarket</th></tr></thead>
+        <tbody id="markt-spawner"><tr class="lade"><td><i></i></td><td><i></i></td><td><i></i></td><td><i></i></td></tr><tr class="lade"><td><i></i></td><td><i></i></td><td><i></i></td><td><i></i></td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="dash-paar">
+    <div class="paneel">
+      <div class="paneel-kopf"><h2>Neue Angebote</h2></div>
+      <ul class="zeilen" id="markt-neu"><li class="zeile lade"></li><li class="zeile lade"></li></ul>
+    </div>
+    <div class="paneel">
+      <div class="paneel-kopf"><h2>Zuletzt abgeschlossen</h2></div>
+      <ul class="zeilen" id="markt-fertig"><li class="zeile lade"></li></ul>
+    </div>
+  </section>
+</div>
